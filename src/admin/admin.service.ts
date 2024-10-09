@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClienteDto } from './dto/createCliente.dto';
-import { CreateMascotaDto, CreatePersonalDto } from './dto';
+import { CreateMascotaDto, CreatePersonalDto, GetPersonalDto } from './dto';
 import * as argon from 'argon2';
 import { usuario_Rol } from '@prisma/client';
 
@@ -160,15 +160,7 @@ export class AdminService {
         });
     }
 
-    async getPersonal(cargoID?: number) {
-        if (cargoID) {
-            return await this.prisma.personal.findMany({
-                where: {
-                    CargoID: cargoID
-                }
-            });
-        } else {
-            return await this.prisma.personal.findMany();
-        }
+    async getPersonal() {
+        return await this.prisma.personal.findMany();
     }
 }

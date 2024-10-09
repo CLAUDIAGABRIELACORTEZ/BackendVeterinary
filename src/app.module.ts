@@ -9,6 +9,7 @@ import { AuthController } from './auth/auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ExampleModule } from './example/example.module';
 import { AdminModule } from './admin/admin.module';
+import { ClientModule } from './client/client.module';
 
 
 
@@ -19,7 +20,8 @@ import { AdminModule } from './admin/admin.module';
               AuthModule,
               JwtModule,
               ExampleModule,
-              AdminModule],
+              AdminModule,
+              ClientModule],
     controllers: [AppController, AuthController],
     providers: [AppService, AuthService],
 })
