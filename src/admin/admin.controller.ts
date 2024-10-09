@@ -36,33 +36,21 @@ export class AdminController {
     @HttpCode(HttpStatus.OK)
     @Get('clientes/:id')    // {{local}}/admin/clientes
     @Roles(Role.ADMIN, Role.VETDOC)
-    getOneClient(@Param('id') id: string) {
-        return this.admService.getOneCliente(+id); // devuelve al cliente con el id indicado
+    getOneClient(@Param('id') id: string) { // devuelve al cliente con el id indicado, junto con sus mascotas
+        return this.admService.getOneCliente(+id);
     }
     
     @HttpCode(HttpStatus.OK)
     @Get('mascotas')    // {{local}}/admin/mascotas
     @Roles(Role.ADMIN, Role.VETDOC)
-    getMascotas() {
-        return this.admService.getMascotas();   // devuelve las mascotas con sus dueños
+    getMascotas() { // devuelve todas las mascotas, junto con sus dueños
+        return this.admService.getMascotas();
     }
 
-    // @Get('vetdoc')
-    // @Roles(Role.VETDOC)
-    // getVetDocRoute() {
-    //     return 'Esta ruta es sólo para el veterinario';
-    // }
-
-    // @Get('cliente')
-    // @Roles(Role.CLIENT)
-    // getInternRoute() {
-    //     return 'Esta ruta es sólo para clientes';
-    // }
-
-    // @Get('adm-cliente')
-    // @Roles(Role.ADMIN, Role.CLIENT)
-    // getVetDocInternRoute() {
-    //     return 'Esta ruta es para administrador y clientes';
-    // }
-
+    @HttpCode(HttpStatus.OK)
+    @Get('personal')    // {{local}}/admin/mascotas
+    @Roles(Role.ADMIN)
+    getPersonal(@Body() cargoID?: number) { // devuelve la lista del personal
+        return this.admService.getPersonal(cargoID);
+    }
 }

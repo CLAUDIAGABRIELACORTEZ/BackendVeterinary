@@ -24,11 +24,17 @@ export class AuthController {
         return this.authService.logout(req);
     }
 
+    // @HttpCode(HttpStatus.OK)
+    // @UseGuards(JwtGuard, RolesGuard)
+    // @Roles(Role.ADMIN, Role.CLIENT, Role.VETDOC)
+    // @Patch('updateHash')
+    // async updateHash(@Body() dto: UpdateHashDto) {
+    //     return await this.authService.updateHash(dto);
+    // }
+
     @HttpCode(HttpStatus.OK)
-    @UseGuards(JwtGuard, RolesGuard)
-    @Roles(Role.ADMIN, Role.CLIENT, Role.VETDOC)
     @Patch('updateHash')
     async updateHash(@Body() dto: UpdateHashDto) {
-        return await this.authService.updateHash(dto);
+        return await this.authService.updateHashV2(dto);
     }
 }

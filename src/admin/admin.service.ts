@@ -159,4 +159,16 @@ export class AdminService {
             }
         });
     }
+
+    async getPersonal(cargoID?: number) {
+        if (cargoID) {
+            return await this.prisma.personal.findMany({
+                where: {
+                    CargoID: cargoID
+                }
+            });
+        } else {
+            return await this.prisma.personal.findMany();
+        }
+    }
 }
