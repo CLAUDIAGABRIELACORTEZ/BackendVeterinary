@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { Role, Roles } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
@@ -34,17 +34,17 @@ export class AdminController {
     }
     
     @HttpCode(HttpStatus.OK)
-    @Get('clientes')    // {{local}}/admin/clientes
+    @Get('clientes/:id')    // {{local}}/admin/clientes
     @Roles(Role.ADMIN, Role.VETDOC)
-    getClientes() {
-        return 'Lista de los clientes';
+    getOneClient(@Param('id') id: string) {
+        return this.admService.getOneCliente(+id); // devuelve al cliente con el id indicado
     }
     
     @HttpCode(HttpStatus.OK)
     @Get('mascotas')    // {{local}}/admin/mascotas
     @Roles(Role.ADMIN, Role.VETDOC)
     getMascotas() {
-        return 'Lista de los clientes con sus mascotas'
+        return this.admService.getMascotas();   // devuelve las mascotas con sus dueños
     }
 
     // @Get('vetdoc')

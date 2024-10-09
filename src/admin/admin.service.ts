@@ -136,4 +136,27 @@ export class AdminService {
             throw new Error('No se pudo registrar la mascota. Las quejas con Rodrigo.');
         }
     }
+
+    async getClientes() {
+        return this.prisma.cliente.findMany({})
+    }
+
+    async getOneCliente(id: number) {
+        return this.prisma.cliente.findUnique({
+            where: {
+                ClienteID: id
+            },
+            include: {
+                mascotas: true
+            }
+        });
+    }
+
+    async getMascotas() {
+        return await this.prisma.mascota.findMany({
+            include: {
+                cliente: true
+            }
+        });
+    }
 }

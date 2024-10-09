@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Request, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { AuthLoginInDto } from "./dto";
+import { AuthLoginInDto, UpdateHashDto } from "./dto";
 import { JwtGuard, RolesGuard } from "./guard";
 import { Role, Roles } from "./decorator";
 
@@ -22,5 +22,13 @@ export class AuthController {
     @Post('logout')  // {{local}}/auth/logout
     logout(@Request() req) {
         return this.authService.logout(req);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtGuard, RolesGuard)
+    @Roles(Role.ADMIN, Role.CLIENT, Role.VETDOC)
+    @Patch('updateHash')
+    async updateHash(@Body() dto: UpdateHashDto) {
+        return await this.authService.updateHash(dto);
     }
 }

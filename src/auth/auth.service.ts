@@ -1,8 +1,8 @@
-import { ForbiddenException, Injectable, Request } from "@nestjs/common";
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Request } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
-import { AuthLoginInDto } from "./dto";
+import { AuthLoginInDto, UpdateHashDto } from "./dto";
 import * as argon from 'argon2';
 
 
@@ -72,6 +72,47 @@ export class AuthService {
         return { message: 'Logout exitoso',
             UsuarioID: decodedToken.sub
         };
+    }
+
+    async updateHash(dto: UpdateHashDto) {
+        try {
+            const decodedToken = this.jwt.decode(dto.JWT);
+            const usuario = await this.prisma.usuario.findUnique({
+                where: {
+                    UsuarioID: decodedToken.sub
+                }
+            });
+          
+            if (!usuario) {
+                throw new NotFoundException('Usuario no encontrado');
+            }
+          
+            const hashMatch = await argon.verify(usuario.PasswrdHash, dto.hashActual);
+            if (!hashMatch) {
+                throw new ForbiddenException('Contraseña actual incorrecta');
+            }
+          
+            const nuevoHash = await argon.hash(dto.hashNuevo);
+            await this.prisma.usuario.update({
+                where: {
+                    UsuarioID: decodedToken.sub
+                },
+                data: {
+                    PasswrdHash: nuevoHash
+                }
+            });
+          
+            return {
+                message: "Contraseña actualizada correctamente",
+                usuarioID: decodedToken.sub
+            };
+        } catch (error) {
+            console.error('Error en updateHash:', error);
+            if (error instanceof ForbiddenException || error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Error al actualizar la contraseña');
+        }
     }
 
     async signToken(usuarioId: number, rol: string): Promise<{access_token: string, rol: string}> {

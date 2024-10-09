@@ -27,10 +27,11 @@ model analisisclinico {
 }
 
 model bitacora {
-  BitacoraID           Int       @id @default(autoincrement())
-  FechaHora            DateTime? @default(now()) @db.Timestamp(0)
-  UsuarioID            Int       @db.SmallInt
-  TipoAccionBitacoraID Int       @db.SmallInt
+  BitacoraID            Int       @id @default(autoincrement())
+  FechaHora             DateTime? @default(now()) @db.Timestamp(0)
+  UsuarioID             Int       @db.SmallInt
+  TipoAccionBitacoraID  Int       @db.SmallInt
+  tipoAccion             tipoaccionbitacora  @relation(fields: [TipoAccionBitacoraID], references: [TipoAccionBitacoraID])
 
   @@index([TipoAccionBitacoraID], map: "TipoAccionBitacoraID")
   @@index([UsuarioID], map: "bitacora_UsuarioID")
@@ -57,6 +58,8 @@ model cliente {
   Telefono       String  @db.VarChar(30)
   Direccion      String? @db.VarChar(100)
   Email          String  @unique(map: "UniqueClienteEmail") @db.VarChar(50)
+  mascotas       mascota[] // Relación uno a muchos con mascota
+  usuario        usuario?
 }
 
 model consultamedica {
@@ -85,6 +88,7 @@ model detallerecibo {
 model especie {
   EspecieID     Int    @id @default(autoincrement()) @db.SmallInt
   NombreEspecie String @unique(map: "NombreEspecie") @db.VarChar(20)
+  razas         raza[] // Relación uno a muchos con raza
 }
 
 model internacion {
@@ -103,13 +107,15 @@ model internacion {
 }
 
 model mascota {
-  MascotaID       Int      @id @default(autoincrement()) @db.SmallInt
-  Nombre          String   @db.VarChar(50)
-  Sexo            String   @db.Char(1)
-  FechaNacimiento DateTime @db.Date
-  Observaciones   String?  @db.VarChar(100)
-  ClienteID       Int      @db.SmallInt
-  RazaID          Int      @db.SmallInt
+  MascotaID           Int      @id @default(autoincrement()) @db.SmallInt
+  Nombre              String   @db.VarChar(50)
+  Sexo                String   @db.Char(1)
+  FechaNacimiento     DateTime @db.Date
+  Observaciones       String?  @db.VarChar(100)
+  ClienteID           Int      @db.SmallInt
+  cliente             cliente  @relation(fields: [ClienteID], references: [ClienteID]) // Relación con cliente
+  RazaID              Int      @db.SmallInt
+  registroDeVacunas   registrodevacunas[]
 
   @@index([ClienteID], map: "mascota_ClienteID")
   @@index([RazaID], map: "RazaID")
@@ -134,6 +140,8 @@ model personal {
   Email             String   @unique(map: "UniquePersonalEmail") @db.VarChar(50)
   CargoID           Int      @db.SmallInt
   ProfesionID       Int      @db.SmallInt
+  servicios         servicio[] // Relación uno a muchos con servicio
+  usuario           usuario?
 
   @@index([CargoID], map: "CargoID")
   @@index([ProfesionID], map: "ProfesionID")
@@ -148,6 +156,7 @@ model raza {
   RazaID     Int    @id @default(autoincrement()) @db.SmallInt
   NombreRaza String @db.VarChar(50)
   EspecieID  Int    @db.SmallInt
+  especie    especie @relation(fields: [EspecieID], references: [EspecieID])
 
   @@index([EspecieID], map: "EspecieID")
 }
@@ -176,6 +185,8 @@ model registrodevacunas {
   ProximaFecha    DateTime @db.Date
   VacunaID        Int      @db.SmallInt
   MascotaID       Int      @db.SmallInt
+  vacuna          vacuna   @relation(fields: [VacunaID], references: [VacunaID])
+  mascota         mascota  @relation(fields: [MascotaID], references: [MascotaID])
 
   @@index([MascotaID], map: "registrodevacunas_MascotaID")
   @@index([VacunaID], map: "VacunaID")
@@ -199,6 +210,7 @@ model servicio {
   ReservacionID   Int?
   MascotaID       Int                   @db.SmallInt
   PersonalID      Int                   @db.SmallInt
+  personal        personal              @relation(fields: [PersonalID], references: [PersonalID])
 
   @@index([MascotaID], map: "MascotaID")
   @@index([PersonalID], map: "servicio_PersonalID")
@@ -206,8 +218,9 @@ model servicio {
 }
 
 model tipoaccionbitacora {
-  TipoAccionBitacoraID Int                       @id @default(autoincrement()) @db.SmallInt
-  Accion               tipoaccionbitacora_Accion
+  TipoAccionBitacoraID  Int                       @id @default(autoincrement()) @db.SmallInt
+  Accion                  tipoaccionbitacora_Accion
+  bitacoras               bitacora[]
 }
 
 model usuario {
@@ -217,20 +230,23 @@ model usuario {
   PasswrdHash String         @db.VarChar(256)
   CreatedAt   DateTime?      @default(now()) @db.Timestamp(0)
   UpdatedAt   DateTime?      @default(now()) @db.Timestamp(0)
-  PersonalID  Int?           @db.SmallInt
-  ClienteID   Int?           @db.SmallInt
+  PersonalID  Int?           @db.SmallInt @unique
+  personal    personal?      @relation(fields: [PersonalID], references: [PersonalID])
+  ClienteID   Int?           @db.SmallInt @unique
+  cliente     cliente?       @relation(fields: [ClienteID], references: [ClienteID])
 
   @@index([ClienteID], map: "ClienteID")
   @@index([PersonalID], map: "PersonalID")
 }
 
 model vacuna {
-  VacunaID     Int          @id @default(autoincrement()) @db.SmallInt
-  NombreVacuna String       @db.VarChar(50)
-  Descripcion  String       @db.VarChar(50)
-  Laboratorio  String       @db.VarChar(50)
-  Tipo         vacuna_Tipo? @default(Canina)
-  EdadMinima   Int          @db.SmallInt
+  VacunaID            Int          @id @default(autoincrement()) @db.SmallInt
+  NombreVacuna        String       @db.VarChar(50)
+  Descripcion         String       @db.VarChar(50)
+  Laboratorio         String       @db.VarChar(50)
+  Tipo                vacuna_Tipo? @default(Canina)
+  EdadMinima          Int          @db.SmallInt
+  registroDeVacunas   registrodevacunas[]
 }
 
 enum cargo_Cargo {
