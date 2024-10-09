@@ -117,47 +117,52 @@ export class AuthService {
 
     async updateHashV2(dto: UpdateHashDto) {
         try {
-            const cliente = await this.prisma.cliente.findUnique({
-                where: { Email: dto.email }
-            });
-            const personal = await this.prisma.personal.findUnique({
-                where: { Email: dto.email }
-            });
-    
-            let usuario;
-            if (cliente) {
-                usuario = await this.prisma.usuario.findFirst({
-                    where: { ClienteID: cliente.ClienteID }
+            const result = await this.prisma.$transaction(async (prisma) => {
+                const cliente = await prisma.cliente.findUnique({
+                    where: { Email: dto.email }
                 });
-            } else if (personal) {
-                usuario = await this.prisma.usuario.findFirst({
-                    where: { PersonalID: personal.PersonalID }
+                const personal = await prisma.personal.findUnique({
+                    where: { Email: dto.email }
                 });
-            }
     
-            if (!usuario) {
-                throw new ForbiddenException('El correo ingresado no tiene un usuario asociado.');
-            }
-          
-            const hashMatch = await argon.verify(usuario.PasswrdHash, dto.hashActual);
-            if (!hashMatch) {
-                throw new ForbiddenException('Contraseña actual incorrecta');
-            }
-          
-            const nuevoHash = await argon.hash(dto.hashNuevo);
-            await this.prisma.usuario.update({
-                where: {
-                    UsuarioID: usuario.UsuarioID
-                },
-                data: {
-                    PasswrdHash: nuevoHash
+                let usuario;
+                if (cliente) {
+                    usuario = await prisma.usuario.findFirst({
+                        where: { ClienteID: cliente.ClienteID }
+                    });
+                } else if (personal) {
+                    usuario = await prisma.usuario.findFirst({
+                        where: { PersonalID: personal.PersonalID }
+                    });
                 }
+    
+                if (!usuario) {
+                    throw new ForbiddenException('El correo ingresado no tiene un usuario asociado.');
+                }
+    
+                const hashMatch = await argon.verify(usuario.PasswrdHash, dto.hashActual);
+                if (!hashMatch) {
+                    throw new ForbiddenException('Contraseña actual incorrecta');
+                }
+    
+                const nuevoHash = await argon.hash(dto.hashNuevo);
+    
+                await prisma.usuario.update({
+                    where: {
+                        UsuarioID: usuario.UsuarioID
+                    },
+                    data: {
+                        PasswrdHash: nuevoHash
+                    }
+                });
+    
+                return {
+                    message: "Contraseña actualizada correctamente",
+                    usuarioID: usuario.UsuarioID
+                };
             });
-          
-            return {
-                message: "Contraseña actualizada correctamente",
-                usuarioID: usuario.UsuarioID
-            };
+    
+            return result;
         } catch (error) {
             console.error('Error en updateHash:', error);
             if (error instanceof ForbiddenException || error instanceof NotFoundException) {
@@ -166,7 +171,7 @@ export class AuthService {
             throw new InternalServerErrorException('Error al actualizar la contraseña');
         }
     }
-
+    
     async signToken(usuarioId: number, rol: string): Promise<{access_token: string, rol: string}> {
         const payload = {
             sub: usuarioId,
