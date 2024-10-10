@@ -4,8 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClienteDto } from './dto/createCliente.dto';
 import { CreateMascotaDto, CreatePersonalDto, GetPersonalDto } from './dto';
-import * as argon from 'argon2';
 import { usuario_Rol } from '@prisma/client';
+import * as argon from 'argon2';
 
 
 
@@ -137,10 +137,6 @@ export class AdminService {
         }
     }
 
-    async getClientes() {
-        return this.prisma.cliente.findMany({})
-    }
-
     async getOneCliente(id: number) {
         return this.prisma.cliente.findUnique({
             where: {
@@ -150,6 +146,14 @@ export class AdminService {
                 mascotas: true
             }
         });
+    }
+
+    async getClientes() {
+        return this.prisma.cliente.findMany({
+            include: {
+                mascotas: true
+            }
+        })
     }
 
     async getMascotas() {

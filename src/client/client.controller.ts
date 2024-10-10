@@ -8,12 +8,12 @@ import { GetMascotasDto } from './dto';
 
 @Controller('client')
 @UseGuards(JwtGuard, RolesGuard)
-@Roles(Role.CLIENT)
 export class ClientController {
     constructor(private readonly clientService: ClientService) {}
-
+    
     @HttpCode(HttpStatus.OK)
     @Get('mascotas')    // {{local}}/client/mascotas
+    @Roles(Role.CLIENT)
     getMascotas(@Body() dto: GetMascotasDto) { // devuelve todas las mascotas del cliente
         return this.clientService.getMascotas(dto);
     }
