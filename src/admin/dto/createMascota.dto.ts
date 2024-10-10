@@ -4,10 +4,6 @@ import { Transform } from "class-transformer";
 
 
 export class CreateMascotaDto {
-    @IsNumber()
-    @IsNotEmpty()
-    mascotaID: number;
-    
     @IsString()
     @IsNotEmpty()
     Nombre: string;
@@ -32,4 +28,8 @@ export class CreateMascotaDto {
     @IsNotEmpty()
     @IsNumber()
     RazaID: number;
+
+    @IsNotEmpty()
+    @IsString()
+    JWT: string;
 }

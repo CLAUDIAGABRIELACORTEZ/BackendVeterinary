@@ -9,21 +9,21 @@ export class UpdatePersonalDto {
     personalID: number;
     
     @IsString()
-    NombreCompleto: string;
+    nombreCompleto: string;
 
     @IsString()
-    Telefono: string;
+    telefono: string;
 
     @IsString()
-    Direccion: string;
+    direccion: string;
 
-    @IsDate()
-    @Transform(({ value }) => new Date(value))
-    FechaContratacion: Date;
+    @IsNumber()
+    cargoID: number;
     
     @IsNumber()
-    CargoID: number;
-    
-    @IsNumber()
-    ProfesionID: number;
+    profesionID: number;
+
+    @IsNotEmpty()
+    @IsString()
+    JWT: string;
 }

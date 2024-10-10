@@ -250,8 +250,8 @@ model vacuna {
 }
 
 enum cargo_Cargo {
-  Recepcionista
-  Interno
+  Administrador
+  Medico
   Laboratorista
   Enfermero
   Peluquero
@@ -268,7 +268,15 @@ enum servicio_TipoServicio {
 enum tipoaccionbitacora_Accion {
   Login
   Logout
-  Consulta
+  RegistroPersonal
+  RegistroCliente
+  RegistroMascota
+  UpdatePersonal
+  UpdateCliente
+  UpdateMascota
+  ListarPersonal
+  ListarCliente
+  ListarMascota
   Reservacion
 }
 

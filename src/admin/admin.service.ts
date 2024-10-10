@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClienteDto } from './dto/createCliente.dto';
-import { CreateMascotaDto, CreatePersonalDto, GetPersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
+import { CreateMascotaDto, CreatePersonalDto, GetPersonalDto, GetQueryDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
 import { usuario_Rol } from '@prisma/client';
 import * as argon from 'argon2';
 import { UpdatePersonalDto } from './dto/updatePersonal.dto';
@@ -42,6 +42,17 @@ export class AdminService {
                 PersonalID: null
             }
         });
+
+        const decodedToken = this.jwt.decode(dto.JWT);
+
+        await this.prisma.bitacora.create({
+            data: {
+                UsuarioID: decodedToken.sub,
+                TipoAccionBitacoraID: 4,
+                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+            }
+        });
+
         return {
             "message": "Cliente registrado con éxito",
             "ClienteID": cliente.ClienteID,
@@ -81,6 +92,15 @@ export class AdminService {
                     ClienteID: null
                 }
             });
+            const decodedToken = this.jwt.decode(dto.JWT);
+
+            await this.prisma.bitacora.create({
+                data: {
+                    UsuarioID: decodedToken.sub,
+                    TipoAccionBitacoraID: 4,
+                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                }
+            });
             return {
                 "message": "Personal registrado con éxito",
                 "PersonalID": personal.PersonalID,
@@ -98,6 +118,15 @@ export class AdminService {
                     FechaContratacion: dto.FechaContratacion,
                     CargoID: dto.CargoID,
                     ProfesionID: dto.ProfesionID
+                }
+            });
+            const decodedToken = this.jwt.decode(dto.JWT);
+
+            await this.prisma.bitacora.create({
+                data: {
+                    UsuarioID: decodedToken.sub,
+                    TipoAccionBitacoraID: 4,
+                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
                 }
             });
             return {
@@ -123,7 +152,15 @@ export class AdminService {
       
                 // Aquí se puede agregar más lógica para validaciones y registros en el futuro
                 // Es problema del futuro yo
-      
+                const decodedToken = this.jwt.decode(dto.JWT);
+
+                await this.prisma.bitacora.create({
+                    data: {
+                        UsuarioID: decodedToken.sub,
+                        TipoAccionBitacoraID: 4,
+                        FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                    }
+                });
                 return {
                     message: "Mascota registrada correctamente",
                     mascotaID: mascota.MascotaID,
@@ -149,24 +186,40 @@ export class AdminService {
         });
     }
 
-    async getClientes() {
-        return this.prisma.cliente.findMany({
-            include: {
-                mascotas: true
-            }
-        })
-    }
-
-    async getMascotas() {
-        return await this.prisma.mascota.findMany({
-            include: {
-                cliente: true
+    async getClientes(dto: GetQueryDto) {
+        const decodedToken = this.jwt.decode(dto.JWT);
+        await this.prisma.bitacora.create({
+            data: {
+                UsuarioID: decodedToken.sub,
+                TipoAccionBitacoraID: 4,
+                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
+        return await this.prisma.cliente.findMany({});
     }
 
-    async getPersonal() {
-        return await this.prisma.personal.findMany();
+    async getPersonal(dto: GetQueryDto) {
+        const decodedToken = this.jwt.decode(dto.JWT);
+        await this.prisma.bitacora.create({
+            data: {
+                UsuarioID: decodedToken.sub,
+                TipoAccionBitacoraID: 4,
+                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+            }
+        });
+        return await this.prisma.personal.findMany({});
+    }
+
+    async getMascotas(dto: GetQueryDto) {
+        const decodedToken = this.jwt.decode(dto.JWT);
+        await this.prisma.bitacora.create({
+            data: {
+                UsuarioID: decodedToken.sub,
+                TipoAccionBitacoraID: 4,
+                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+            }
+        });
+        return await this.prisma.mascota.findMany({});
     }
 
     async updateCliente(dto: UpdateClienteDto) {
@@ -178,6 +231,14 @@ export class AdminService {
                 NombreCompleto: dto.NombreCompleto,
                 Direccion: dto.Direccion,
                 Telefono: dto.Telefono
+            }
+        });
+        const decodedToken = this.jwt.decode(dto.JWT);
+        await this.prisma.bitacora.create({
+            data: {
+                UsuarioID: decodedToken.sub,
+                TipoAccionBitacoraID: 4,
+                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
         return {
@@ -198,6 +259,14 @@ export class AdminService {
                 Observaciones: dto.Observaciones,
             }
         });
+        const decodedToken = this.jwt.decode(dto.JWT);
+        await this.prisma.bitacora.create({
+            data: {
+                UsuarioID: decodedToken.sub,
+                TipoAccionBitacoraID: 4,
+                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+            }
+        });
         return {
             "message": "Mascota actualizada con éxito",
             "MascotaID": mascota.MascotaID,
@@ -205,20 +274,20 @@ export class AdminService {
     }
 
     async updatePersonal(dto: UpdatePersonalDto) {
-        if (dto.CargoID == 2) {
+        if (dto.cargoID == 2) {
             const personal =  await this.prisma.personal.update({
                 where: {
                     PersonalID: dto.personalID
                 },
                 data: {
-                    NombreCompleto: dto.NombreCompleto,
-                    ProfesionID: dto.ProfesionID,
-                    CargoID: dto.CargoID,
-                    Direccion: dto.Direccion,
-                    Telefono: dto.Telefono,
-                    FechaContratacion: dto.FechaContratacion
+                    NombreCompleto: dto.nombreCompleto,
+                    ProfesionID: dto.profesionID,
+                    CargoID: dto.cargoID,
+                    Direccion: dto.direccion,
+                    Telefono: dto.telefono,
                 }
             });
+            
             const hashPersonal = await argon.hash('personalnuevo');
             const usuario = await this.prisma.usuario.create({
                 data: {
@@ -226,6 +295,14 @@ export class AdminService {
                     PasswrdHash: hashPersonal,
                     PersonalID: personal.PersonalID,
                     ClienteID: null
+                }
+            });
+            const decodedToken = this.jwt.decode(dto.JWT);
+            await this.prisma.bitacora.create({
+                data: {
+                    UsuarioID: decodedToken.sub,
+                    TipoAccionBitacoraID: 4,
+                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
                 }
             });
             return {
@@ -239,12 +316,11 @@ export class AdminService {
                     PersonalID: dto.personalID
                 },
                 data: {
-                    NombreCompleto: dto.NombreCompleto,
-                    ProfesionID: dto.ProfesionID,
-                    CargoID: dto.CargoID,
-                    Direccion: dto.Direccion,
-                    Telefono: dto.Telefono,
-                    FechaContratacion: dto.FechaContratacion
+                    NombreCompleto: dto.nombreCompleto,
+                    ProfesionID: dto.profesionID,
+                    CargoID: dto.cargoID,
+                    Direccion: dto.direccion,
+                    Telefono: dto.telefono,
                 }
             });
             return {
