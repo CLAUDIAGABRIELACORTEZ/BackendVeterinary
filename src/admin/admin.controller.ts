@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } f
 import { Role, Roles } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { CreateClienteDto, CreateMascotaDto, CreatePersonalDto, GetPersonalDto } from './dto';
+import { CreateClienteDto, CreateMascotaDto, CreatePersonalDto } from './dto';
 import { AdminService } from './admin.service';
 
 
@@ -44,7 +44,7 @@ export class AdminController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Get('personal')    // {{local}}/admin/mascotas
+    @Get('personal')    // {{local}}/admin/personal
     getPersonal() { // devuelve la lista del personal
         return this.admService.getPersonal();
     }
