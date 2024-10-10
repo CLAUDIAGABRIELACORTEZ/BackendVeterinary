@@ -3,9 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClienteDto } from './dto/createCliente.dto';
-import { CreateMascotaDto, CreatePersonalDto, GetPersonalDto } from './dto';
+import { CreateMascotaDto, CreatePersonalDto, GetPersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
 import { usuario_Rol } from '@prisma/client';
 import * as argon from 'argon2';
+import { UpdatePersonalDto } from './dto/updatePersonal.dto';
 
 
 
@@ -166,5 +167,91 @@ export class AdminService {
 
     async getPersonal() {
         return await this.prisma.personal.findMany();
+    }
+
+    async updatePersonal(dto: UpdatePersonalDto) {
+        if (dto.CargoID == 2) {
+            const personal =  await this.prisma.personal.update({
+                where: {
+                    PersonalID: dto.personalID
+                },
+                data: {
+                    NombreCompleto: dto.NombreCompleto,
+                    ProfesionID: dto.ProfesionID,
+                    CargoID: dto.CargoID,
+                    Direccion: dto.Direccion,
+                    Telefono: dto.Telefono,
+                    FechaContratacion: dto.FechaContratacion
+                }
+            });
+            const hashPersonal = await argon.hash('personalnuevo');
+            const usuario = await this.prisma.usuario.create({
+                data: {
+                    Rol: 'Veterinario',
+                    PasswrdHash: hashPersonal,
+                    PersonalID: personal.PersonalID,
+                    ClienteID: null
+                }
+            });
+            return {
+                "message": "Personal actualizado con éxito",
+                "PersonalID": personal.PersonalID,
+                "UsuarioID": usuario.UsuarioID,
+            }
+        } else {
+            const personal = await this.prisma.personal.update({
+                where: {
+                    PersonalID: dto.personalID
+                },
+                data: {
+                    NombreCompleto: dto.NombreCompleto,
+                    ProfesionID: dto.ProfesionID,
+                    CargoID: dto.CargoID,
+                    Direccion: dto.Direccion,
+                    Telefono: dto.Telefono,
+                    FechaContratacion: dto.FechaContratacion
+                }
+            });
+            return {
+                "message": "Personal actualizado con éxito",
+                "PersonalID": personal.PersonalID,
+            }
+        }
+    }
+
+    async updateCliente(dto: UpdateClienteDto) {
+        const cliente = await this.prisma.cliente.update({
+            where: {
+                ClienteID: dto.clienteID
+            },
+            data: {
+                NombreCompleto: dto.NombreCompleto,
+                Direccion: dto.Direccion,
+                Telefono: dto.Telefono
+            }
+        });
+        return {
+            "message": "Cliente actualizado con éxito",
+            "ClienteID": cliente.ClienteID,
+        }
+    }
+
+    async updateMascota(dto: UpdateMascotaDto) {
+        const mascota = await this.prisma.mascota.update({
+            where: {
+                MascotaID: dto.mascotaID
+            },
+            data: {
+                Nombre: dto.Nombre,
+                Observaciones: dto.Observaciones,
+                FechaNacimiento: dto.FechaDeNacimiento,
+                RazaID: dto.RazaID,
+                Sexo: dto.Sexo
+            }
+        });
+        return {
+            "message": "Mascota actualizada con éxito",
+            "MascotaID": mascota.ClienteID,
+        }
     }
 }

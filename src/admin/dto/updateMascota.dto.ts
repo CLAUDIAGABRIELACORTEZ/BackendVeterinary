@@ -3,33 +3,27 @@ import { Transform } from "class-transformer";
 
 
 
-export class CreateMascotaDto {
+export class UpdateMascotaDto {
     @IsNumber()
     @IsNotEmpty()
     mascotaID: number;
     
     @IsString()
-    @IsNotEmpty()
     Nombre: string;
     
     @IsString()
-    @IsNotEmpty()
     Sexo: string;
 
-    @IsNotEmpty()
     @IsDate()
     @Transform(({ value }) => new Date(value))
     FechaDeNacimiento: Date
 
     @IsString()
-    @IsNotEmpty()
     Observaciones: string;
 
-    @IsNotEmpty()
     @IsNumber()
     ClienteID: number;
 
-    @IsNotEmpty()
     @IsNumber()
     RazaID: number;
 }

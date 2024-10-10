@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGua
 import { Role, Roles } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { CreateClienteDto, CreateMascotaDto, CreatePersonalDto } from './dto';
+import { CreateClienteDto, CreateMascotaDto, CreatePersonalDto, UpdateClienteDto, UpdateMascotaDto, UpdatePersonalDto } from './dto';
 import { AdminService } from './admin.service';
 
 
@@ -60,21 +60,25 @@ export class AdminController {
         return this.admService.getPersonal();
     }
     
-    @Patch('cliente')
+    @HttpCode(HttpStatus.OK)
+    @Patch('cliente')   // {{local}}/admin/cliente
     @Roles(Role.ADMIN)
-    updateCliente() {
-        
+    updateCliente(dto: UpdateClienteDto) {
+        return this.admService.updateCliente(dto);
     }
     
-    @Patch('mascota')
+    @HttpCode(HttpStatus.OK)
+    @Patch('mascota')   // {{local}}/admin/mascota
     @Roles(Role.ADMIN)
-    updateMascota() {
-        
+    updateMascota(dto: UpdateMascotaDto) {
+        return this.admService.updateMascota(dto);
     }
     
-    @Patch('usuario')
+    @HttpCode(HttpStatus.OK)
+    @Patch('personal')  // {{local}}/admin/personal
     @Roles(Role.ADMIN)
-    updateUsuario() {
-        
+    updatePersonal(dto: UpdatePersonalDto) {
+        return this.admService.updatePersonal(dto);
     }
+
 }
