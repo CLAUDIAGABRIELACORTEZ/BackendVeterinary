@@ -64,7 +64,6 @@ export class AdminController {
     @Patch('personal')   // {{local}}/admin/personal
     @Roles(Role.ADMIN)
     async updatePersonal(@Body() dto: UpdatePersonalDto) {
-        console.log(dto);
         return await this.admService.updatePersonal(dto);
     }
     
@@ -72,7 +71,6 @@ export class AdminController {
     @Patch('cliente')   // {{local}}/admin/cliente
     @Roles(Role.ADMIN)
     async updateCliente(@Body() dto: UpdateClienteDto) {
-        console.log(dto);
         return await this.admService.updateCliente(dto);
     }
     
@@ -80,7 +78,6 @@ export class AdminController {
     @Patch('mascota')   // {{local}}/admin/mascota
     @Roles(Role.ADMIN)
     async updateMascota(@Body() dto: UpdateMascotaDto) {
-        console.log(dto);
         return await this.admService.updateMascota(dto);
     }
 }

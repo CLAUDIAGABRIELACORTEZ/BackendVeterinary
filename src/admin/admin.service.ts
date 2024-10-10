@@ -57,8 +57,6 @@ export class AdminService {
             "message": "Cliente registrado con éxito",
             "ClienteID": cliente.ClienteID,
             "UsuarioID": usuario.UsuarioID,
-            // "plainText": hashUsuario,
-            // "hash": usuario.PasswrdHash
         }
     }
 
@@ -105,8 +103,6 @@ export class AdminService {
                 "message": "Personal registrado con éxito",
                 "PersonalID": personal.PersonalID,
                 "UsuarioID": usuario.UsuarioID,
-                // "plainText": hashPersonal,
-                // "hash": usuario.PasswrdHash
             }
         } else { // no es veterinario, no se le crea un perfil
             const personal = await this.prisma.personal.create({
