@@ -20,10 +20,4 @@ export class UpdateMascotaDto {
 
     @IsString()
     Observaciones: string;
-
-    @IsNumber()
-    ClienteID: number;
-
-    @IsNumber()
-    RazaID: number;
 }

@@ -169,6 +169,41 @@ export class AdminService {
         return await this.prisma.personal.findMany();
     }
 
+    async updateCliente(dto: UpdateClienteDto) {
+        const cliente = await this.prisma.cliente.update({
+            where: {
+                ClienteID: dto.clienteID
+            },
+            data: {
+                NombreCompleto: dto.NombreCompleto,
+                Direccion: dto.Direccion,
+                Telefono: dto.Telefono
+            }
+        });
+        return {
+            "message": "Cliente actualizado con éxito",
+            "ClienteID": cliente.ClienteID,
+        }
+    }
+
+    async updateMascota(dto: UpdateMascotaDto) {
+        const mascota = await this.prisma.mascota.update({
+            where: {
+                MascotaID: dto.mascotaID
+            },
+            data: {
+                Nombre: dto.Nombre,
+                Sexo: dto.Sexo,
+                FechaNacimiento: dto.FechaDeNacimiento,
+                Observaciones: dto.Observaciones,
+            }
+        });
+        return {
+            "message": "Mascota actualizada con éxito",
+            "MascotaID": mascota.MascotaID,
+        };
+    }
+
     async updatePersonal(dto: UpdatePersonalDto) {
         if (dto.CargoID == 2) {
             const personal =  await this.prisma.personal.update({
@@ -216,42 +251,6 @@ export class AdminService {
                 "message": "Personal actualizado con éxito",
                 "PersonalID": personal.PersonalID,
             }
-        }
-    }
-
-    async updateCliente(dto: UpdateClienteDto) {
-        const cliente = await this.prisma.cliente.update({
-            where: {
-                ClienteID: dto.clienteID
-            },
-            data: {
-                NombreCompleto: dto.NombreCompleto,
-                Direccion: dto.Direccion,
-                Telefono: dto.Telefono
-            }
-        });
-        return {
-            "message": "Cliente actualizado con éxito",
-            "ClienteID": cliente.ClienteID,
-        }
-    }
-
-    async updateMascota(dto: UpdateMascotaDto) {
-        const mascota = await this.prisma.mascota.update({
-            where: {
-                MascotaID: dto.mascotaID
-            },
-            data: {
-                Nombre: dto.Nombre,
-                Observaciones: dto.Observaciones,
-                FechaNacimiento: dto.FechaDeNacimiento,
-                RazaID: dto.RazaID,
-                Sexo: dto.Sexo
-            }
-        });
-        return {
-            "message": "Mascota actualizada con éxito",
-            "MascotaID": mascota.ClienteID,
         }
     }
 }

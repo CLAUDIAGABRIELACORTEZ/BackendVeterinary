@@ -63,22 +63,23 @@ export class AdminController {
     @HttpCode(HttpStatus.OK)
     @Patch('cliente')   // {{local}}/admin/cliente
     @Roles(Role.ADMIN)
-    updateCliente(dto: UpdateClienteDto) {
-        return this.admService.updateCliente(dto);
+    async updateCliente(@Body() dto: UpdateClienteDto) {
+        console.log(dto);
+        return await this.admService.updateCliente(dto);
     }
     
     @HttpCode(HttpStatus.OK)
     @Patch('mascota')   // {{local}}/admin/mascota
     @Roles(Role.ADMIN)
-    updateMascota(dto: UpdateMascotaDto) {
-        return this.admService.updateMascota(dto);
+    async updateMascota(@Body() dto: UpdateMascotaDto) {
+        console.log(dto);
+        return await this.admService.updateMascota(dto);
     }
     
     @HttpCode(HttpStatus.OK)
     @Patch('personal')  // {{local}}/admin/personal
     @Roles(Role.ADMIN)
-    updatePersonal(dto: UpdatePersonalDto) {
-        return this.admService.updatePersonal(dto);
+    async updatePersonal(@Body() dto: UpdatePersonalDto) {
+        return await this.admService.updatePersonal(dto);
     }
-
 }
