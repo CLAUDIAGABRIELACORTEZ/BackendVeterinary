@@ -14,13 +14,13 @@ datasource db {
 }
 
 model analisisclinico {
-  AnalisisID     Int                        @id @default(autoincrement())
-  TipoAnalisis   String                     @db.VarChar(100)
-  FechaSolicitud DateTime                   @db.Date
-  FechaResultado DateTime?                  @db.Date
-  Resultado      analisisclinico_Resultado? @default(Normal)
-  InternacionID  Int?
-  ConsultaID     Int?
+  AnalisisID      Int                        @id @default(autoincrement())
+  TipoAnalisis    String                     @db.VarChar(100)
+  FechaSolicitud  DateTime                   @db.Date
+  FechaResultado  DateTime?                  @db.Date
+  Resultado       analisisclinico_Resultado? @default(Normal)
+  InternacionID   Int?
+  ConsultaID      Int?
 
   @@index([ConsultaID], map: "analisisclinico_ConsultaID")  
   @@index([InternacionID], map: "analisisclinico_InternacionID")
@@ -43,43 +43,43 @@ model cargo {
 }
 
 model cirugia {
-  CirugiaID        Int       @id @default(autoincrement())
-  TipoDeCirugia    String    @db.VarChar(50)
-  FechaHoraTermino DateTime? @db.Timestamp(0)
-  Notas            String?   @db.Text
-  ServicioID       Int
+  CirugiaID         Int       @id @default(autoincrement())
+  TipoDeCirugia     String    @db.VarChar(50)
+  FechaHoraTermino  DateTime? @db.Timestamp(0)
+  Notas             String?   @db.Text
+  ServicioID        Int
 
   @@index([ServicioID], map: "cirugia_ServicioID")
 }
 
 model cliente {
-  ClienteID      Int     @id @default(autoincrement()) @db.SmallInt
-  NombreCompleto String  @db.VarChar(60)
-  Telefono       String  @db.VarChar(30)
-  Direccion      String? @db.VarChar(100)
-  Email          String  @unique(map: "UniqueClienteEmail") @db.VarChar(50)
-  mascotas       mascota[] // Relación uno a muchos con mascota
-  usuario        usuario?
+  ClienteID       Int     @id @default(autoincrement()) @db.SmallInt
+  NombreCompleto  String  @db.VarChar(60)
+  Telefono        String  @db.VarChar(30)
+  Direccion       String? @db.VarChar(100)
+  Email           String  @unique(map: "UniqueClienteEmail") @db.VarChar(50)
+  mascotas        mascota[] // Relación uno a muchos con mascota
+  usuario         usuario?
 }
 
 model consultamedica {
-  ConsultaID  Int     @id @default(autoincrement())
-  Peso        Decimal @db.Decimal(6, 2)
-  Temperatura Decimal @db.Decimal(6, 2)
-  Diagnostico String  @db.Text
-  Tratamiento String? @db.Text
-  ServicioID  Int
+  ConsultaID    Int     @id @default(autoincrement())
+  Peso          Decimal @db.Decimal(6, 2)
+  Temperatura   Decimal @db.Decimal(6, 2)
+  Diagnostico   String  @db.Text
+  Tratamiento   String? @db.Text
+  ServicioID    Int
 
   @@index([ServicioID], map: "consultamedica_ServicioID")
 }
 
 model detallerecibo {
-  DetalleReciboID Int     @id @default(autoincrement())
-  ReciboID        Int
-  ServicioID      Int
-  Cantidad        Int     @default(1)
-  PrecioUnitario  Decimal @db.Decimal(6, 2)
-  Subtotal        Decimal @db.Decimal(8, 2)
+  DetalleReciboID   Int     @id @default(autoincrement())
+  ReciboID          Int
+  ServicioID        Int
+  Cantidad          Int     @default(1)
+  PrecioUnitario    Decimal @db.Decimal(6, 2)
+  Subtotal          Decimal @db.Decimal(8, 2)
 
   @@index([ReciboID], map: "ReciboID")
   @@index([ServicioID], map: "detallerecibo_ServicioID")
@@ -162,12 +162,12 @@ model raza {
 }
 
 model receta {
-  RecetaID      Int    @id @default(autoincrement())
-  Medicamento   String @db.VarChar(100)
-  Dosis         String @db.VarChar(50)
-  Indicaciones  String @db.VarChar(200)
-  InternacionID Int?
-  ConsultaID    Int?
+  RecetaID        Int    @id @default(autoincrement())
+  Medicamento     String @db.VarChar(100)
+  Dosis           String @db.VarChar(50)
+  Indicaciones    String @db.VarChar(200)
+  InternacionID   Int?
+  ConsultaID      Int?
 
   @@index([ConsultaID], map: "ConsultaID")
   @@index([InternacionID], map: "InternacionID")
@@ -218,7 +218,7 @@ model servicio {
 }
 
 model tipoaccionbitacora {
-  TipoAccionBitacoraID  Int                       @id @default(autoincrement()) @db.SmallInt
+  TipoAccionBitacoraID    Int                       @id @default(autoincrement()) @db.SmallInt
   Accion                  tipoaccionbitacora_Accion
   bitacoras               bitacora[]
 }

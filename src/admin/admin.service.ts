@@ -95,7 +95,7 @@ export class AdminService {
             await this.prisma.bitacora.create({
                 data: {
                     UsuarioID: decodedToken.sub,
-                    TipoAccionBitacoraID: 4,
+                    TipoAccionBitacoraID: 3,
                     FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
                 }
             });
@@ -153,7 +153,7 @@ export class AdminService {
                 await this.prisma.bitacora.create({
                     data: {
                         UsuarioID: decodedToken.sub,
-                        TipoAccionBitacoraID: 4,
+                        TipoAccionBitacoraID: 5,
                         FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
                     }
                 });
@@ -187,7 +187,7 @@ export class AdminService {
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: decodedToken.sub,
-                TipoAccionBitacoraID: 4,
+                TipoAccionBitacoraID: 10,
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
@@ -199,7 +199,7 @@ export class AdminService {
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: decodedToken.sub,
-                TipoAccionBitacoraID: 4,
+                TipoAccionBitacoraID: 9,
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
@@ -211,7 +211,7 @@ export class AdminService {
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: decodedToken.sub,
-                TipoAccionBitacoraID: 4,
+                TipoAccionBitacoraID: 11,
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
@@ -233,7 +233,7 @@ export class AdminService {
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: decodedToken.sub,
-                TipoAccionBitacoraID: 4,
+                TipoAccionBitacoraID: 7,
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
@@ -259,7 +259,7 @@ export class AdminService {
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: decodedToken.sub,
-                TipoAccionBitacoraID: 4,
+                TipoAccionBitacoraID: 8,
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
@@ -297,7 +297,7 @@ export class AdminService {
             await this.prisma.bitacora.create({
                 data: {
                     UsuarioID: decodedToken.sub,
-                    TipoAccionBitacoraID: 4,
+                    TipoAccionBitacoraID: 6,
                     FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
                 }
             });
@@ -317,6 +317,14 @@ export class AdminService {
                     CargoID: dto.cargoID,
                     Direccion: dto.direccion,
                     Telefono: dto.telefono,
+                }
+            });
+            const decodedToken = this.jwt.decode(dto.JWT);
+            await this.prisma.bitacora.create({
+                data: {
+                    UsuarioID: decodedToken.sub,
+                    TipoAccionBitacoraID: 6,
+                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
                 }
             });
             return {
