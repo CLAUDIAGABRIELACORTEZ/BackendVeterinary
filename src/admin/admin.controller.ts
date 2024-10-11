@@ -1,12 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, UseGuards, Headers } from '@nestjs/common';
 import { Role, Roles } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { CreateClienteDto, CreateMascotaDto, CreatePersonalDto, GetQueryDto, UpdateClienteDto, UpdateMascotaDto, UpdatePersonalDto } from './dto';
 import { AdminService } from './admin.service';
 
-// $argon2id$v=19$m=16,t=2,p=1$ZzVuTmNJM0FNejFPc3Rzcg$xpurD+2skNn2yfW5q8SQHQ - admclaveingreso
-// adm@stmateo.com.bo
+
 
 @Controller('admin')
 @UseGuards(JwtGuard, RolesGuard)
@@ -47,11 +46,20 @@ export class AdminController {
         return await this.admService.getPersonal(dto);
     }
     
+    // @HttpCode(HttpStatus.OK)
+    // @Get('clientes')    // {{local}}/admin/clientes
+    // @Roles(Role.ADMIN)
+    // async getClientes(@Body() dto: GetQueryDto) {
+    //     return await this.admService.getClientes(dto);
+    // }
+
     @HttpCode(HttpStatus.OK)
-    @Get('clientes')    // {{local}}/admin/clientes
+    @Get('clientes') // {{local}}/admin/clientes
     @Roles(Role.ADMIN)
-    async getClientes(@Body() dto: GetQueryDto) {
-        return await this.admService.getClientes(dto);
+    async getClientes(@Headers('authorization') authHeader: string) {
+        // Aquí recibes el token JWT desde el encabezado Authorization
+        const token = authHeader?.split(' ')[1]; // Extraes el token después de "Bearer "
+        return await this.admService.getClientes(token); // Envías solo el token al servicio
     }
     
     @HttpCode(HttpStatus.OK)

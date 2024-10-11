@@ -182,15 +182,29 @@ export class AdminService {
         });
     }
 
-    async getClientes(dto: GetQueryDto) {
-        const decodedToken = this.jwt.decode(dto.JWT);
+    // async getClientes(dto: GetQueryDto) {
+    //     const decodedToken = this.jwt.decode(dto.JWT);
+    //     await this.prisma.bitacora.create({
+    //         data: {
+    //             UsuarioID: decodedToken.sub,
+    //             TipoAccionBitacoraID: 10,
+    //             FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+    //         }
+    //     });
+    //     return await this.prisma.cliente.findMany({});
+    // }
+
+    async getClientes(token: string) {
+        const decodedToken = this.jwt.decode(token); // Decodificas el token recibido desde el header
         await this.prisma.bitacora.create({
             data: {
-                UsuarioID: decodedToken.sub,
-                TipoAccionBitacoraID: 10,
+                UsuarioID: decodedToken.sub, // Obtienes el ID del usuario del token
+                TipoAccionBitacoraID: 4, // Registra la acción en la bitácora
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
+    
+        // Devuelves los clientes
         return await this.prisma.cliente.findMany({});
     }
 
