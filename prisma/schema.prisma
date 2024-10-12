@@ -27,11 +27,12 @@ model analisisclinico {
 }
 
 model bitacora {
-  BitacoraID            Int       @id @default(autoincrement())
-  FechaHora             DateTime? @default(now()) @db.Timestamp(0)
-  UsuarioID             Int       @db.SmallInt
-  TipoAccionBitacoraID  Int       @db.SmallInt
-  tipoAccion             tipoaccionbitacora  @relation(fields: [TipoAccionBitacoraID], references: [TipoAccionBitacoraID])
+  BitacoraID                Int       @id @default(autoincrement())
+  FechaHora                 DateTime? @default(now()) @db.Timestamp(0)
+  UsuarioID                 Int       @db.SmallInt
+  usuario                   usuario @relation(fields: [UsuarioID], references: [UsuarioID])
+  TipoAccionBitacoraID      Int       @db.SmallInt
+  tipoAccion                tipoaccionbitacora  @relation(fields: [TipoAccionBitacoraID], references: [TipoAccionBitacoraID])
 
   @@index([TipoAccionBitacoraID], map: "TipoAccionBitacoraID")
   @@index([UsuarioID], map: "bitacora_UsuarioID")
@@ -224,16 +225,17 @@ model tipoaccionbitacora {
 }
 
 model usuario {
-  UsuarioID   Int            @id @default(autoincrement()) @db.SmallInt
-  Rol         usuario_Rol    @default(Veterinario)
-  Estado      usuario_Estado @default(Activo)
-  PasswrdHash String         @db.VarChar(256)
-  CreatedAt   DateTime?      @default(now()) @db.Timestamp(0)
-  UpdatedAt   DateTime?      @default(now()) @db.Timestamp(0)
-  PersonalID  Int?           @db.SmallInt @unique
-  personal    personal?      @relation(fields: [PersonalID], references: [PersonalID])
-  ClienteID   Int?           @db.SmallInt @unique
-  cliente     cliente?       @relation(fields: [ClienteID], references: [ClienteID])
+  UsuarioID           Int            @id @default(autoincrement()) @db.SmallInt
+  Rol                 usuario_Rol    @default(Veterinario)
+  Estado              usuario_Estado @default(Activo)
+  PasswrdHash         String         @db.VarChar(256)
+  CreatedAt           DateTime?      @default(now()) @db.Timestamp(0)
+  UpdatedAt           DateTime?      @default(now()) @db.Timestamp(0)
+  PersonalID          Int?           @db.SmallInt @unique
+  personal            personal?      @relation(fields: [PersonalID], references: [PersonalID])
+  ClienteID           Int?           @db.SmallInt @unique
+  cliente             cliente?       @relation(fields: [ClienteID], references: [ClienteID])
+  bitacoras           bitacora[]
 
   @@index([ClienteID], map: "ClienteID")
   @@index([PersonalID], map: "PersonalID")
