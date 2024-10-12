@@ -187,7 +187,7 @@ export class AdminService {
     //     await this.prisma.bitacora.create({
     //         data: {
     //             UsuarioID: decodedToken.sub,
-    //             TipoAccionBitacoraID: 10,
+    //             TipoAccionBitacoraID: 4,
     //             FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
     //         }
     //     });
@@ -199,7 +199,7 @@ export class AdminService {
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: decodedToken.sub, // Obtienes el ID del usuario del token
-                TipoAccionBitacoraID: 4, // Registra la acción en la bitácora
+                TipoAccionBitacoraID: 10, // Registra la acción en la bitácora
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
@@ -208,29 +208,54 @@ export class AdminService {
         return await this.prisma.cliente.findMany({});
     }
 
-    async getPersonal(dto: GetQueryDto) {
-        const decodedToken = this.jwt.decode(dto.JWT);
+    // async getPersonal(dto: GetQueryDto) {
+    //     const decodedToken = this.jwt.decode(dto.JWT);
+    //     await this.prisma.bitacora.create({
+    //         data: {
+    //             UsuarioID: decodedToken.sub,
+    //             TipoAccionBitacoraID: 4,
+    //             FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+    //         }
+    //     });
+    //     return await this.prisma.personal.findMany({});
+    // }
+    async getPersonal(token: string) {
+        const decodedToken = this.jwt.decode(token); // Decodificas el token recibido desde el header
         await this.prisma.bitacora.create({
             data: {
-                UsuarioID: decodedToken.sub,
-                TipoAccionBitacoraID: 9,
+                UsuarioID: decodedToken.sub, // Obtienes el ID del usuario del token
+                TipoAccionBitacoraID: 9, // Registra la acción en la bitácora
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
+    
+        // Devuelves los clientes
         return await this.prisma.personal.findMany({});
     }
-
-    async getMascotas(dto: GetQueryDto) {
-        const decodedToken = this.jwt.decode(dto.JWT);
+    async getMascotas(token: string) {
+        const decodedToken = this.jwt.decode(token); // Decodificas el token recibido desde el header
         await this.prisma.bitacora.create({
             data: {
-                UsuarioID: decodedToken.sub,
-                TipoAccionBitacoraID: 11,
+                UsuarioID: decodedToken.sub, // Obtienes el ID del usuario del token
+                TipoAccionBitacoraID: 11, // Registra la acción en la bitácora
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
+    
+        // Devuelves los clientes
         return await this.prisma.mascota.findMany({});
     }
+    // async getMascotas(dto: GetQueryDto) {
+    //     const decodedToken = this.jwt.decode(dto.JWT);
+    //     await this.prisma.bitacora.create({
+    //         data: {
+    //             UsuarioID: decodedToken.sub,
+    //             TipoAccionBitacoraID: 4,
+    //             FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+    //         }
+    //     });
+    //     return await this.prisma.mascota.findMany({});
+    // }
 
     async updateCliente(dto: UpdateClienteDto) {
         const cliente = await this.prisma.cliente.update({
@@ -331,6 +356,15 @@ export class AdminService {
                     CargoID: dto.cargoID,
                     Direccion: dto.direccion,
                     Telefono: dto.telefono,
+                }
+            });
+            const hashPersonal = await argon.hash('personalnuevo');
+            const usuario = await this.prisma.usuario.create({
+                data: {
+                    Rol: 'Veterinario',
+                    PasswrdHash: hashPersonal,
+                    PersonalID: personal.PersonalID,
+                    ClienteID: null
                 }
             });
             const decodedToken = this.jwt.decode(dto.JWT);
