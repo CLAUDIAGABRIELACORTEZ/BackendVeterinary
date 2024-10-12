@@ -4,8 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AuthLoginInDto, UpdateHashDto } from "./dto";
 import * as argon from 'argon2';
-import { format, parseISO } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
+import { registrarEnBitacora } from "src/utils/index.utils";
 
 
 
@@ -23,7 +22,6 @@ export class AuthService {
             const personal = await this.prisma.personal.findUnique({
                 where: { Email: dto.email }
             });
-    
             let usuario;
             if (cliente) {
                 usuario = await this.prisma.usuario.findFirst({
@@ -34,29 +32,14 @@ export class AuthService {
                     where: { PersonalID: personal.PersonalID }
                 });
             }
-    
             if (!usuario) {
                 throw new ForbiddenException('El correo ingresado no tiene un usuario asociado.');
             }
-
             const hashMatch = await argon.verify(usuario.PasswrdHash, dto.password);
             if (!hashMatch) {
                 throw new ForbiddenException('Contraseña incorrecta.');
             }
-            const now = new Date();
-            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-            const parsedDateTime = parseISO(formattedDateTime);
-            console.log({"login_now": now, "login_parsed": parsedDateTime});
-            await this.prisma.bitacora.create({
-                data: {
-                    TipoAccionBitacoraID: 1,
-                    UsuarioID: usuario.UsuarioID,
-                    FechaHora: parsedDateTime,
-                    IPDir: ipDir
-                }
-            });
-    
+            await registrarEnBitacora(this.prisma, usuario.UsuarioID, 1, ipDir);
             return this.signToken(usuario.UsuarioID, usuario.Rol);
         } catch (error) {
             console.error('Error en login:', error);
@@ -65,19 +48,7 @@ export class AuthService {
     }
 
     async logout(userId: number, ipDir: string) {
-        const now = new Date();
-        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-        const parsedDateTime = parseISO(formattedDateTime);
-        console.log({"logout_now": now, "logout_parsed": parsedDateTime});
-        await this.prisma.bitacora.create({
-            data: {
-                UsuarioID: userId,
-                TipoAccionBitacoraID: 2,
-                FechaHora: parsedDateTime,
-                IPDir: ipDir
-            }
-        });
+        await registrarEnBitacora(this.prisma, userId, 2, ipDir);
     
         return { message: 'Cierre de sesión exitoso',
             UsuarioID: userId

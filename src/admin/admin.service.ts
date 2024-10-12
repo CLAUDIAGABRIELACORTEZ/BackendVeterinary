@@ -5,8 +5,7 @@ import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto,
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
 import { usuario_Rol } from '@prisma/client';
 import * as argon from 'argon2';
-import { format, toZonedTime } from 'date-fns-tz';
-import { parseISO } from 'date-fns';
+import { registrarEnBitacora } from 'src/utils/index.utils';
 
 
 
@@ -45,18 +44,7 @@ export class AdminService {
                     ClienteID: null
                 }
             });
-            const now = new Date();
-            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-            const parsedDateTime = parseISO(formattedDateTime);
-            await this.prisma.bitacora.create({
-                data: {
-                    UsuarioID: userId,
-                    TipoAccionBitacoraID: 3,
-                    FechaHora: parsedDateTime,
-                    IPDir: ipDir
-                }
-            });
+            await registrarEnBitacora(this.prisma, userId, 3, ipDir);
             return {
                 "message": "Personal registrado con éxito",
                 "PersonalID": personal.PersonalID,
@@ -74,18 +62,7 @@ export class AdminService {
                     ProfesionID: dto.ProfesionID
                 }
             });
-            const now = new Date();
-            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-            const parsedDateTime = parseISO(formattedDateTime);
-            await this.prisma.bitacora.create({
-                data: {
-                    UsuarioID: userId,
-                    TipoAccionBitacoraID: 4,
-                    FechaHora: parsedDateTime,
-                    IPDir: ipDir
-                }
-            });
+            await registrarEnBitacora(this.prisma, userId, 3, ipDir);
             return {
                 "message": "Personal registrado con éxito",
                 "PersonalID": personal.PersonalID
@@ -119,18 +96,7 @@ export class AdminService {
                 PersonalID: null
             }
         });
-        const now = new Date();
-        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-        const parsedDateTime = parseISO(formattedDateTime);
-        await this.prisma.bitacora.create({
-            data: {
-                UsuarioID: userId,
-                TipoAccionBitacoraID: 4,
-                FechaHora: parsedDateTime,
-                IPDir: ipDir
-            }
-        });
+        await registrarEnBitacora(this.prisma, userId, 4, ipDir);
 
         return {
             "message": "Cliente registrado con éxito",
@@ -155,18 +121,7 @@ export class AdminService {
       
                 // Aquí se puede agregar más lógica para validaciones y registros en el futuro
                 // Es problema del futuro yo
-                const now = new Date();
-                const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-                const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-                const parsedDateTime = parseISO(formattedDateTime);
-                await this.prisma.bitacora.create({
-                    data: {
-                        UsuarioID: userId,
-                        TipoAccionBitacoraID: 5,
-                        FechaHora: parsedDateTime,
-                        IPDir: ipDir
-                    }
-                });
+                await registrarEnBitacora(this.prisma, userId, 5, ipDir);
                 return {
                     message: "Mascota registrada correctamente",
                     mascotaID: mascota.MascotaID,
@@ -182,7 +137,7 @@ export class AdminService {
     }
 
     async getOneCliente(id: number) {
-        return this.prisma.cliente.findUnique({
+        return await this.prisma.cliente.findUnique({
             where: {
                 ClienteID: id
             },
@@ -193,52 +148,17 @@ export class AdminService {
     }
 
     async getPersonal(userId: number, ipDir: string) {
-        const now = new Date();
-        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-        const parsedDateTime = parseISO(formattedDateTime);
-        await this.prisma.bitacora.create({
-            data: {
-                UsuarioID: userId,
-                TipoAccionBitacoraID: 9,
-                FechaHora: parsedDateTime,
-                IPDir: ipDir
-            }
-        });
-    
+        await registrarEnBitacora(this.prisma, userId, 6, ipDir);
         return await this.prisma.personal.findMany({});
     }
 
     async getClientes(userId: number, ipDir: string) {
-        const now = new Date();
-        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-        const parsedDateTime = parseISO(formattedDateTime);
-        await this.prisma.bitacora.create({
-            data: {
-                UsuarioID: userId,
-                TipoAccionBitacoraID: 10,
-                FechaHora: parsedDateTime,
-                IPDir: ipDir
-            }
-        });
-    
+        await registrarEnBitacora(this.prisma, userId, 7, ipDir);
         return await this.prisma.cliente.findMany({});
     }
 
     async getMascotas(userId: number, ipDir: string) {
-        const now = new Date();
-        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-        const parsedDateTime = parseISO(formattedDateTime);
-        await this.prisma.bitacora.create({
-            data: {
-                UsuarioID: userId,
-                TipoAccionBitacoraID: 11,
-                FechaHora: parsedDateTime,
-                IPDir: ipDir
-            }
-        });
+        await registrarEnBitacora(this.prisma, userId, 8, ipDir);
         return await this.prisma.mascota.findMany({});
     }
 
@@ -266,18 +186,7 @@ export class AdminService {
                     ClienteID: null
                 }
             });
-            const now = new Date();
-            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-            const parsedDateTime = parseISO(formattedDateTime);
-            await this.prisma.bitacora.create({
-                data: {
-                    UsuarioID: userId,
-                    TipoAccionBitacoraID: 6,
-                    FechaHora: parsedDateTime,
-                    IPDir: ipDir
-                }
-            });
+            await registrarEnBitacora(this.prisma, userId, 9, ipDir);
             return {
                 "message": "Personal actualizado con éxito",
                 "PersonalID": personal.PersonalID,
@@ -296,27 +205,7 @@ export class AdminService {
                     Telefono: dto.telefono,
                 }
             });
-            const hashPersonal = await argon.hash('personalnuevo');
-            const usuario = await this.prisma.usuario.create({
-                data: {
-                    Rol: 'Veterinario',
-                    PasswrdHash: hashPersonal,
-                    PersonalID: personal.PersonalID,
-                    ClienteID: null
-                }
-            });
-            const now = new Date();
-            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-            const parsedDateTime = parseISO(formattedDateTime);
-            await this.prisma.bitacora.create({
-                data: {
-                    UsuarioID: userId,
-                    TipoAccionBitacoraID: 6,
-                    FechaHora: parsedDateTime,
-                    IPDir: ipDir
-                }
-            });
+            await registrarEnBitacora(this.prisma, userId, 9, ipDir);
             return {
                 "message": "Personal actualizado con éxito",
                 "PersonalID": personal.PersonalID,
@@ -335,18 +224,7 @@ export class AdminService {
                 Telefono: dto.Telefono
             }
         });
-        const now = new Date();
-        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-        const parsedDateTime = parseISO(formattedDateTime);
-        await this.prisma.bitacora.create({
-            data: {
-                UsuarioID: userId,
-                TipoAccionBitacoraID: 7,
-                FechaHora: parsedDateTime,
-                IPDir: ipDir
-            }
-        });
+        await registrarEnBitacora(this.prisma, userId, 10, ipDir);
         return {
             "message": "Cliente actualizado con éxito",
             "ClienteID": cliente.ClienteID,
@@ -365,18 +243,7 @@ export class AdminService {
                 Observaciones: dto.Observaciones,
             }
         });
-        const now = new Date();
-        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
-        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
-        const parsedDateTime = parseISO(formattedDateTime);
-        await this.prisma.bitacora.create({
-            data: {
-                UsuarioID: userId,
-                TipoAccionBitacoraID: 8,
-                FechaHora: parsedDateTime,
-                IPDir: ipDir
-            }
-        });
+        await registrarEnBitacora(this.prisma, userId, 11, ipDir);
         return {
             "message": "Mascota actualizada con éxito",
             "MascotaID": mascota.MascotaID,
