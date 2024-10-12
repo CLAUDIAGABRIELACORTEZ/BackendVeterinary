@@ -18,8 +18,4 @@ export class CreateClienteDto {
     @IsEmail()
     @IsNotEmpty()
     Email: string;
-
-    @IsNotEmpty()
-    @IsString()
-    JWT: string;
 }

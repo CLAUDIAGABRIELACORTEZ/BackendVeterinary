@@ -20,8 +20,4 @@ export class UpdateMascotaDto {
 
     @IsString()
     Observaciones: string;
-
-    @IsNotEmpty()
-    @IsString()
-    JWT: string;
 }

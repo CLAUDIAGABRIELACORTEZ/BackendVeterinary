@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Request } from "@nestjs/common";
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -57,65 +57,21 @@ export class AuthService {
         }
     }
 
-    async logout(@Request() req) {
-        const token = req.headers.authorization.split(' ')[1];
-        const decodedToken = this.jwt.decode(token);
-        
+    async logout(userId: number) {
         await this.prisma.bitacora.create({
             data: {
-                UsuarioID: decodedToken.sub,
+                UsuarioID: userId,
                 TipoAccionBitacoraID: 2,
                 FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
             }
         });
     
-        return { message: 'Logout exitoso',
-            UsuarioID: decodedToken.sub
+        return { message: 'Cierre de sesión exitoso',
+            UsuarioID: userId
         };
     }
 
-    // async updateHash(dto: UpdateHashDto) {
-    //     try {
-    //         const decodedToken = this.jwt.decode(dto.JWT);
-    //         const usuario = await this.prisma.usuario.findUnique({
-    //             where: {
-    //                 UsuarioID: decodedToken.sub
-    //             }
-    //         });
-          
-    //         if (!usuario) {
-    //             throw new NotFoundException('Usuario no encontrado');
-    //         }
-          
-    //         const hashMatch = await argon.verify(usuario.PasswrdHash, dto.hashActual);
-    //         if (!hashMatch) {
-    //             throw new ForbiddenException('Contraseña actual incorrecta');
-    //         }
-          
-    //         const nuevoHash = await argon.hash(dto.hashNuevo);
-    //         await this.prisma.usuario.update({
-    //             where: {
-    //                 UsuarioID: decodedToken.sub
-    //             },
-    //             data: {
-    //                 PasswrdHash: nuevoHash
-    //             }
-    //         });
-          
-    //         return {
-    //             message: "Contraseña actualizada correctamente",
-    //             usuarioID: decodedToken.sub
-    //         };
-    //     } catch (error) {
-    //         console.error('Error en updateHash:', error);
-    //         if (error instanceof ForbiddenException || error instanceof NotFoundException) {
-    //             throw error;
-    //         }
-    //         throw new InternalServerErrorException('Error al actualizar la contraseña');
-    //     }
-    // }
-
-    async updateHashV2(dto: UpdateHashDto) {
+    async updateHash(dto: UpdateHashDto) {
         try {
             const result = await this.prisma.$transaction(async (prisma) => {
                 const cliente = await prisma.cliente.findUnique({
@@ -171,6 +127,47 @@ export class AuthService {
             throw new InternalServerErrorException('Error al actualizar la contraseña');
         }
     }
+
+    // async updateHash(dto: UpdateHashDto) {
+    //     try {
+    //         const decodedToken = this.jwt.decode(dto.JWT);
+    //         const usuario = await this.prisma.usuario.findUnique({
+    //             where: {
+    //                 UsuarioID: decodedToken.sub
+    //             }
+    //         });
+          
+    //         if (!usuario) {
+    //             throw new NotFoundException('Usuario no encontrado');
+    //         }
+          
+    //         const hashMatch = await argon.verify(usuario.PasswrdHash, dto.hashActual);
+    //         if (!hashMatch) {
+    //             throw new ForbiddenException('Contraseña actual incorrecta');
+    //         }
+          
+    //         const nuevoHash = await argon.hash(dto.hashNuevo);
+    //         await this.prisma.usuario.update({
+    //             where: {
+    //                 UsuarioID: decodedToken.sub
+    //             },
+    //             data: {
+    //                 PasswrdHash: nuevoHash
+    //             }
+    //         });
+          
+    //         return {
+    //             message: "Contraseña actualizada correctamente",
+    //             usuarioID: decodedToken.sub
+    //         };
+    //     } catch (error) {
+    //         console.error('Error en updateHash:', error);
+    //         if (error instanceof ForbiddenException || error instanceof NotFoundException) {
+    //             throw error;
+    //         }
+    //         throw new InternalServerErrorException('Error al actualizar la contraseña');
+    //     }
+    // }
     
     async signToken(usuarioId: number, rol: string): Promise<{access_token: string, rol: string}> {
         const payload = {

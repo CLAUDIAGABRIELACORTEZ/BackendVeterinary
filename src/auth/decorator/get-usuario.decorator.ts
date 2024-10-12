@@ -1,4 +1,5 @@
 import { createParamDecorator, ExecutionContext, SetMetadata } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
 
 
 
@@ -17,3 +18,15 @@ export enum Role {
 
 export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
 
+export const Usuario = createParamDecorator(
+    (data: unknown, ctx: ExecutionContext) => {
+        const request = ctx.switchToHttp().getRequest();
+        const token = request.headers.authorization?.split(' ')[1];
+        if (!token) {
+            throw new Error('No se encontró el token.');
+        }
+        const jwtService = new JwtService({ secret: process.env.JWT_SECRET });
+        const decoded = jwtService.verify(token);
+        return decoded.sub;
+    },
+);

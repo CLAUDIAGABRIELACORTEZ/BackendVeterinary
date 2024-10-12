@@ -32,8 +32,4 @@ export class CreatePersonalDto {
     @IsNotEmpty()
     @IsNumber()
     ProfesionID: number;
-
-    @IsNotEmpty()
-    @IsString()
-    JWT: string;
 }

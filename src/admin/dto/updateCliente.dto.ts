@@ -15,8 +15,4 @@ export class UpdateClienteDto {
 
     @IsString()
     Direccion: string;
-
-    @IsNotEmpty()
-    @IsString()
-    JWT: string;
 }

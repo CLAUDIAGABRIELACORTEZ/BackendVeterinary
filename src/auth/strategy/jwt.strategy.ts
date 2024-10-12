@@ -12,8 +12,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     constructor(config: ConfigService, private prisma: PrismaService) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: config.get('JWT_SECRET')
-        })
+            secretOrKey: config.get('JWT_SECRET'),
+            ignoreExpiration: false
+        });
     }
 
     async validate(payload: {sub: number, rol: string}) {
@@ -27,8 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         }
         return {
             id: usuario.UsuarioID,
-            // email: usuario.email,
-            rol: usuario.Rol // Asegúrate de incluir el rol
+            rol: usuario.Rol
         };
     }
 }

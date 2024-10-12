@@ -28,8 +28,4 @@ export class CreateMascotaDto {
     @IsNotEmpty()
     @IsNumber()
     RazaID: number;
-
-    @IsNotEmpty()
-    @IsString()
-    JWT: string;
 }

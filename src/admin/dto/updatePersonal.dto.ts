@@ -21,8 +21,4 @@ export class UpdatePersonalDto {
     
     @IsNumber()
     profesionID: number;
-
-    @IsNotEmpty()
-    @IsString()
-    JWT: string;
 }
