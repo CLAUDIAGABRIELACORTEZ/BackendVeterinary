@@ -28,10 +28,11 @@ model analisisclinico {
 
 model bitacora {
   BitacoraID                Int       @id @default(autoincrement())
-  FechaHora                 DateTime? @default(now()) @db.Timestamp(0)
   UsuarioID                 Int       @db.SmallInt
-  usuario                   usuario @relation(fields: [UsuarioID], references: [UsuarioID])
   TipoAccionBitacoraID      Int       @db.SmallInt
+  FechaHora                 DateTime  @db.Timestamp(0)
+  IPDir                     String    @db.Inet
+  usuario                   usuario   @relation(fields: [UsuarioID], references: [UsuarioID])
   tipoAccion                tipoaccionbitacora  @relation(fields: [TipoAccionBitacoraID], references: [TipoAccionBitacoraID])
 
   @@index([TipoAccionBitacoraID], map: "TipoAccionBitacoraID")
@@ -270,16 +271,17 @@ enum servicio_TipoServicio {
 enum tipoaccionbitacora_Accion {
   Login
   Logout
-  RegistroPersonal
-  RegistroCliente
-  RegistroMascota
+  CrearPersonal
+  CrearCliente
+  CrearMascota
+  LeerPersonal
+  LeerCliente
+  LeerMascota
   UpdatePersonal
   UpdateCliente
   UpdateMascota
-  ListarPersonal
-  ListarCliente
-  ListarMascota
-  Reservacion
+  CrearReservacion
+  LeerReservacion
 }
 
 enum usuario_Rol {

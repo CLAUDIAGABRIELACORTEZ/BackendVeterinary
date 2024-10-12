@@ -1,11 +1,12 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
 import { usuario_Rol } from '@prisma/client';
 import * as argon from 'argon2';
+import { format, toZonedTime } from 'date-fns-tz';
+import { parseISO } from 'date-fns';
 
 
 
@@ -14,7 +15,7 @@ export class AdminService {
     constructor(private prisma: PrismaService, 
                 private config: ConfigService) {}
 
-    async crearPersonal(dto: CreatePersonalDto, userId: number) {
+    async crearPersonal(dto: CreatePersonalDto, userId: number, ipDir: string) {
         const personalRepetido = await this.prisma.personal.findUnique({
             where: {
                 Email: dto.Email,
@@ -44,12 +45,16 @@ export class AdminService {
                     ClienteID: null
                 }
             });
-
+            const now = new Date();
+            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+            const parsedDateTime = parseISO(formattedDateTime);
             await this.prisma.bitacora.create({
                 data: {
                     UsuarioID: userId,
                     TipoAccionBitacoraID: 3,
-                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                    FechaHora: parsedDateTime,
+                    IPDir: ipDir
                 }
             });
             return {
@@ -69,12 +74,16 @@ export class AdminService {
                     ProfesionID: dto.ProfesionID
                 }
             });
-
+            const now = new Date();
+            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+            const parsedDateTime = parseISO(formattedDateTime);
             await this.prisma.bitacora.create({
                 data: {
                     UsuarioID: userId,
                     TipoAccionBitacoraID: 4,
-                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                    FechaHora: parsedDateTime,
+                    IPDir: ipDir
                 }
             });
             return {
@@ -84,7 +93,7 @@ export class AdminService {
         }
     }
 
-    async crearCliente(dto: CreateClienteDto, userId: number) {
+    async crearCliente(dto: CreateClienteDto, userId: number, ipDir: string) {
         const clienteRepetido = await this.prisma.cliente.findUnique({
             where: {
                 Email: dto.Email,
@@ -110,12 +119,16 @@ export class AdminService {
                 PersonalID: null
             }
         });
-
+        const now = new Date();
+        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+        const parsedDateTime = parseISO(formattedDateTime);
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: userId,
                 TipoAccionBitacoraID: 4,
-                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                FechaHora: parsedDateTime,
+                IPDir: ipDir
             }
         });
 
@@ -126,7 +139,7 @@ export class AdminService {
         }
     }
 
-    async crearMascota(dto: CreateMascotaDto, userId: number) {
+    async crearMascota(dto: CreateMascotaDto, userId: number, ipDir: string) {
         try {
             const result = await this.prisma.$transaction(async (prisma) => {
                 const mascota = await prisma.mascota.create({
@@ -142,12 +155,16 @@ export class AdminService {
       
                 // Aquí se puede agregar más lógica para validaciones y registros en el futuro
                 // Es problema del futuro yo
-
+                const now = new Date();
+                const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+                const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+                const parsedDateTime = parseISO(formattedDateTime);
                 await this.prisma.bitacora.create({
                     data: {
                         UsuarioID: userId,
                         TipoAccionBitacoraID: 5,
-                        FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                        FechaHora: parsedDateTime,
+                        IPDir: ipDir
                     }
                 });
                 return {
@@ -175,42 +192,57 @@ export class AdminService {
         });
     }
 
-    async getPersonal(userId: number) {
+    async getPersonal(userId: number, ipDir: string) {
+        const now = new Date();
+        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+        const parsedDateTime = parseISO(formattedDateTime);
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: userId,
                 TipoAccionBitacoraID: 9,
-                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                FechaHora: parsedDateTime,
+                IPDir: ipDir
             }
         });
     
         return await this.prisma.personal.findMany({});
     }
 
-    async getClientes(userId: number) {
+    async getClientes(userId: number, ipDir: string) {
+        const now = new Date();
+        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+        const parsedDateTime = parseISO(formattedDateTime);
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: userId,
                 TipoAccionBitacoraID: 10,
-                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                FechaHora: parsedDateTime,
+                IPDir: ipDir
             }
         });
     
         return await this.prisma.cliente.findMany({});
     }
 
-    async getMascotas(userId: number) {
+    async getMascotas(userId: number, ipDir: string) {
+        const now = new Date();
+        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+        const parsedDateTime = parseISO(formattedDateTime);
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: userId,
                 TipoAccionBitacoraID: 11,
-                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                FechaHora: parsedDateTime,
+                IPDir: ipDir
             }
         });
         return await this.prisma.mascota.findMany({});
     }
 
-    async updatePersonal(dto: UpdatePersonalDto, userId: number) {
+    async updatePersonal(dto: UpdatePersonalDto, userId: number, ipDir: string) {
         if (dto.cargoID == 2) {
             const personal =  await this.prisma.personal.update({
                 where: {
@@ -234,11 +266,16 @@ export class AdminService {
                     ClienteID: null
                 }
             });
+            const now = new Date();
+            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+            const parsedDateTime = parseISO(formattedDateTime);
             await this.prisma.bitacora.create({
                 data: {
                     UsuarioID: userId,
                     TipoAccionBitacoraID: 6,
-                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                    FechaHora: parsedDateTime,
+                    IPDir: ipDir
                 }
             });
             return {
@@ -268,11 +305,16 @@ export class AdminService {
                     ClienteID: null
                 }
             });
+            const now = new Date();
+            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+            const parsedDateTime = parseISO(formattedDateTime);
             await this.prisma.bitacora.create({
                 data: {
                     UsuarioID: userId,
                     TipoAccionBitacoraID: 6,
-                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                    FechaHora: parsedDateTime,
+                    IPDir: ipDir
                 }
             });
             return {
@@ -282,7 +324,7 @@ export class AdminService {
         }
     }
 
-    async updateCliente(dto: UpdateClienteDto, userId: number) {
+    async updateCliente(dto: UpdateClienteDto, userId: number, ipDir: string) {
         const cliente = await this.prisma.cliente.update({
             where: {
                 ClienteID: dto.clienteID
@@ -293,11 +335,16 @@ export class AdminService {
                 Telefono: dto.Telefono
             }
         });
+        const now = new Date();
+        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+        const parsedDateTime = parseISO(formattedDateTime);
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: userId,
                 TipoAccionBitacoraID: 7,
-                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                FechaHora: parsedDateTime,
+                IPDir: ipDir
             }
         });
         return {
@@ -306,7 +353,7 @@ export class AdminService {
         }
     }
 
-    async updateMascota(dto: UpdateMascotaDto, userId: number) {
+    async updateMascota(dto: UpdateMascotaDto, userId: number,ipDir: string) {
         const mascota = await this.prisma.mascota.update({
             where: {
                 MascotaID: dto.mascotaID
@@ -318,11 +365,16 @@ export class AdminService {
                 Observaciones: dto.Observaciones,
             }
         });
+        const now = new Date();
+        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+        const parsedDateTime = parseISO(formattedDateTime);
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: userId,
                 TipoAccionBitacoraID: 8,
-                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                FechaHora: parsedDateTime,
+                IPDir: ipDir
             }
         });
         return {

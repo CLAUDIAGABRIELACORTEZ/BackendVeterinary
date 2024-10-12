@@ -4,6 +4,8 @@ import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AuthLoginInDto, UpdateHashDto } from "./dto";
 import * as argon from 'argon2';
+import { format, parseISO } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 
 
@@ -13,7 +15,7 @@ export class AuthService {
                 private jwt: JwtService,
                 private config: ConfigService) {}
 
-    async login(dto: AuthLoginInDto) {
+    async login(dto: AuthLoginInDto, ipDir: string) {
         try {
             const cliente = await this.prisma.cliente.findUnique({
                 where: { Email: dto.email }
@@ -41,12 +43,17 @@ export class AuthService {
             if (!hashMatch) {
                 throw new ForbiddenException('Contraseña incorrecta.');
             }
-    
+            const now = new Date();
+            const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+            const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+            const parsedDateTime = parseISO(formattedDateTime);
+            console.log({"login_now": now, "login_parsed": parsedDateTime});
             await this.prisma.bitacora.create({
                 data: {
                     TipoAccionBitacoraID: 1,
                     UsuarioID: usuario.UsuarioID,
-                    FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                    FechaHora: parsedDateTime,
+                    IPDir: ipDir
                 }
             });
     
@@ -57,12 +64,18 @@ export class AuthService {
         }
     }
 
-    async logout(userId: number) {
+    async logout(userId: number, ipDir: string) {
+        const now = new Date();
+        const laPazDateTime = toZonedTime(now, 'America/La_Paz');
+        const formattedDateTime = format(laPazDateTime, "yyyy-MM-dd HH:mm:ss");
+        const parsedDateTime = parseISO(formattedDateTime);
+        console.log({"logout_now": now, "logout_parsed": parsedDateTime});
         await this.prisma.bitacora.create({
             data: {
                 UsuarioID: userId,
                 TipoAccionBitacoraID: 2,
-                FechaHora: new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}))
+                FechaHora: parsedDateTime,
+                IPDir: ipDir
             }
         });
     

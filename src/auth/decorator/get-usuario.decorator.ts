@@ -27,6 +27,10 @@ export const Usuario = createParamDecorator(
         }
         const jwtService = new JwtService({ secret: process.env.JWT_SECRET });
         const decoded = jwtService.verify(token);
-        return decoded.sub;
+        
+        // Obtener la IP
+        const ip = request.ip || request.connection.remoteAddress;
+        
+        return { userId: decoded.sub, ip };
     },
 );

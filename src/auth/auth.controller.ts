@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthLoginInDto, UpdateHashDto } from "./dto";
 import { JwtGuard, RolesGuard } from "./guard";
 import { Role, Roles, Usuario } from "./decorator";
+import { Request } from 'express';
 
 
 
@@ -12,16 +13,17 @@ export class AuthController {
 
     @HttpCode(HttpStatus.OK)
     @Post('login')  // {{local}}/auth/login
-    login(@Body() dto: AuthLoginInDto) {
-        return this.authService.login(dto);
+    login(@Body() dto: AuthLoginInDto, @Req() req: Request) {
+        const ipDir = req.ip || req.connection.remoteAddress;
+        return this.authService.login(dto, ipDir);
     }
     
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtGuard, RolesGuard)
     @Roles(Role.ADMIN, Role.CLIENT, Role.VETDOC)
     @Post('logout')  // {{local}}/auth/logout
-    logout(@Usuario() userId: number) {
-        return this.authService.logout(userId);
+    logout(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.authService.logout(userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
