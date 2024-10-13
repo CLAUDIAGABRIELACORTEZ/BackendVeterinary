@@ -14,31 +14,32 @@ export class AuthService {
                 private jwt: JwtService,
                 private config: ConfigService) {}
 
+    private async encontrarUsuario(email: string) {
+        const cliente = await this.prisma.cliente.findUnique({ where: { Email: email } });
+        const personal = await this.prisma.personal.findUnique({ where: { Email: email } });
+        let usuario;
+        if (cliente) {
+            usuario = await this.prisma.usuario.findFirst({ where: { ClienteID: cliente.ClienteID } });
+        } else if (personal) {
+            usuario = await this.prisma.usuario.findFirst({ where: { PersonalID: personal.PersonalID } });
+        }
+        if (!usuario) {
+            throw new ForbiddenException('El correo ingresado no tiene un usuario asociado.');
+        }
+        return usuario;
+    }
+
+    private async verificarHash(hashBD: string, hashDTO: string) {
+        const hashMatch = await argon.verify(hashBD, hashDTO);
+        if (!hashMatch) {
+            throw new ForbiddenException('Contraseña incorrecta.');
+        }
+    }
+    
     async login(dto: AuthLoginInDto, ipDir: string) {
         try {
-            const cliente = await this.prisma.cliente.findUnique({
-                where: { Email: dto.email }
-            });
-            const personal = await this.prisma.personal.findUnique({
-                where: { Email: dto.email }
-            });
-            let usuario;
-            if (cliente) {
-                usuario = await this.prisma.usuario.findFirst({
-                    where: { ClienteID: cliente.ClienteID }
-                });
-            } else if (personal) {
-                usuario = await this.prisma.usuario.findFirst({
-                    where: { PersonalID: personal.PersonalID }
-                });
-            }
-            if (!usuario) {
-                throw new ForbiddenException('El correo ingresado no tiene un usuario asociado.');
-            }
-            const hashMatch = await argon.verify(usuario.PasswrdHash, dto.password);
-            if (!hashMatch) {
-                throw new ForbiddenException('Contraseña incorrecta.');
-            }
+            const usuario = await this.encontrarUsuario(dto.email);
+            await this.verificarHash(usuario.PasswrdHash, dto.password);
             await registrarEnBitacora(this.prisma, usuario.UsuarioID, 1, ipDir);
             return this.signToken(usuario.UsuarioID, usuario.Rol);
         } catch (error) {
@@ -49,59 +50,27 @@ export class AuthService {
 
     async logout(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, 2, ipDir);
-        return { message: 'Cierre de sesión exitoso',
+        return { 
+            message: 'Cierre de sesión exitoso',
             UsuarioID: userId
         };
     }
 
     async updateHash(dto: UpdateHashDto) {
         try {
-            const result = await this.prisma.$transaction(async (prisma) => {
-                const cliente = await prisma.cliente.findUnique({
-                    where: { Email: dto.email }
-                });
-                const personal = await prisma.personal.findUnique({
-                    where: { Email: dto.email }
-                });
-    
-                let usuario;
-                if (cliente) {
-                    usuario = await prisma.usuario.findFirst({
-                        where: { ClienteID: cliente.ClienteID }
-                    });
-                } else if (personal) {
-                    usuario = await prisma.usuario.findFirst({
-                        where: { PersonalID: personal.PersonalID }
-                    });
-                }
-    
-                if (!usuario) {
-                    throw new ForbiddenException('El correo ingresado no tiene un usuario asociado.');
-                }
-    
-                const hashMatch = await argon.verify(usuario.PasswrdHash, dto.hashActual);
-                if (!hashMatch) {
-                    throw new ForbiddenException('Contraseña actual incorrecta');
-                }
-    
+            return await this.prisma.$transaction(async (prisma) => {
+                const usuario = await this.encontrarUsuario(dto.email);
+                await this.verificarHash(usuario.PasswrdHash, dto.hashActual);
                 const nuevoHash = await argon.hash(dto.hashNuevo);
-    
                 await prisma.usuario.update({
-                    where: {
-                        UsuarioID: usuario.UsuarioID
-                    },
-                    data: {
-                        PasswrdHash: nuevoHash
-                    }
+                    where: { UsuarioID: usuario.UsuarioID },
+                    data: { PasswrdHash: nuevoHash }
                 });
-    
                 return {
                     message: "Contraseña actualizada correctamente",
                     usuarioID: usuario.UsuarioID
                 };
             });
-    
-            return result;
         } catch (error) {
             console.error('Error en updateHash:', error);
             if (error instanceof ForbiddenException || error instanceof NotFoundException) {
@@ -110,47 +79,6 @@ export class AuthService {
             throw new InternalServerErrorException('Error al actualizar la contraseña');
         }
     }
-
-    // async updateHash(dto: UpdateHashDto) {
-    //     try {
-    //         const decodedToken = this.jwt.decode(dto.JWT);
-    //         const usuario = await this.prisma.usuario.findUnique({
-    //             where: {
-    //                 UsuarioID: decodedToken.sub
-    //             }
-    //         });
-          
-    //         if (!usuario) {
-    //             throw new NotFoundException('Usuario no encontrado');
-    //         }
-          
-    //         const hashMatch = await argon.verify(usuario.PasswrdHash, dto.hashActual);
-    //         if (!hashMatch) {
-    //             throw new ForbiddenException('Contraseña actual incorrecta');
-    //         }
-          
-    //         const nuevoHash = await argon.hash(dto.hashNuevo);
-    //         await this.prisma.usuario.update({
-    //             where: {
-    //                 UsuarioID: decodedToken.sub
-    //             },
-    //             data: {
-    //                 PasswrdHash: nuevoHash
-    //             }
-    //         });
-          
-    //         return {
-    //             message: "Contraseña actualizada correctamente",
-    //             usuarioID: decodedToken.sub
-    //         };
-    //     } catch (error) {
-    //         console.error('Error en updateHash:', error);
-    //         if (error instanceof ForbiddenException || error instanceof NotFoundException) {
-    //             throw error;
-    //         }
-    //         throw new InternalServerErrorException('Error al actualizar la contraseña');
-    //     }
-    // }
     
     async signToken(usuarioId: number, rol: string): Promise<{access_token: string, rol: string}> {
         const payload = {

@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
-import { PrismaClient, usuario_Rol } from '@prisma/client';
 import * as argon from 'argon2';
 import { registrarEnBitacora } from 'src/utils/index.utils';
 import { format, toZonedTime } from 'date-fns-tz';
@@ -15,71 +14,58 @@ export class AdminService {
     constructor(private prisma: PrismaService, 
                 private config: ConfigService) {}
 
-    async crearPersonal(dto: CreatePersonalDto, userId: number, ipDir: string) {
-        const personalRepetido = await this.prisma.personal.findUnique({
-            where: {
-                Email: dto.Email,
-            }
-        });
-        if (personalRepetido) {
+
+    private async logAccion(userId: number, actionId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, actionId, ipDir);
+    }
+
+    private async verificarEmail(email: string) {
+        const usuarioBD = await this.prisma.personal.findUnique({ where: { Email: email } })
+            || await this.prisma.cliente.findUnique({ where: { Email: email } });
+        if (usuarioBD) {
             throw new ForbiddenException('El correo ingresado ya existe en base de datos.');
-        }
-        if (dto.CargoID === 2) { // es veterinario, se le crea un perfil de usuario
-            const personal = await this.prisma.personal.create({
-                data: {
-                    NombreCompleto: dto.NombreCompleto,
-                    Telefono: dto.Telefono,
-                    Direccion: dto.Direccion,
-                    Email: dto.Email,
-                    FechaContratacion: dto.FechaContratacion.toISOString(),
-                    CargoID: dto.CargoID,
-                    ProfesionID: dto.ProfesionID
-                }
-            });
-            const hashPersonal = await argon.hash('personalnuevo');
-            const usuario = await this.prisma.usuario.create({
-                data: {
-                    Rol: 'Veterinario',
-                    PasswrdHash: hashPersonal,
-                    PersonalID: personal.PersonalID,
-                    ClienteID: null
-                }
-            });
-            await registrarEnBitacora(this.prisma, userId, 3, ipDir);
-            return {
-                "message": "Personal registrado con éxito",
-                "PersonalID": personal.PersonalID,
-                "UsuarioID": usuario.UsuarioID,
-            }
-        } else { // no es veterinario, no se le crea un perfil
-            const personal = await this.prisma.personal.create({
-                data: {
-                    NombreCompleto: dto.NombreCompleto,
-                    Telefono: dto.Telefono,
-                    Direccion: dto.Direccion,
-                    Email: dto.Email,
-                    FechaContratacion: dto.FechaContratacion,
-                    CargoID: dto.CargoID,
-                    ProfesionID: dto.ProfesionID
-                }
-            });
-            await registrarEnBitacora(this.prisma, userId, 3, ipDir);
-            return {
-                "message": "Personal registrado con éxito",
-                "PersonalID": personal.PersonalID
-            }
         }
     }
 
-    async crearCliente(dto: CreateClienteDto, userId: number, ipDir: string) {
-        const clienteRepetido = await this.prisma.cliente.findUnique({
-            where: {
-                Email: dto.Email,
+    private async crearUsuario(rol: 'Veterinario' | 'Cliente', id: number, isPersonal: boolean) {
+        const hash = await argon.hash(`${rol.toLowerCase()}nuevo`);
+        return this.prisma.usuario.create({
+            data: {
+                Rol: rol,
+                PasswrdHash: hash,
+                PersonalID: isPersonal ? id : null,
+                ClienteID: !isPersonal ? id : null
             }
         });
-        if (clienteRepetido) {
-            throw new ForbiddenException('El correo ingresado ya existe en base de datos.');
+    }
+
+    async crearPersonal(dto: CreatePersonalDto, userId: number, ipDir: string) {
+        await this.verificarEmail(dto.Email);
+        const personal = await this.prisma.personal.create({
+            data: {
+                NombreCompleto: dto.NombreCompleto,
+                Telefono: dto.Telefono,
+                Direccion: dto.Direccion,
+                Email: dto.Email,
+                FechaContratacion: dto.FechaContratacion,
+                CargoID: dto.CargoID,
+                ProfesionID: dto.ProfesionID
+            }
+        });
+        let usuario;
+        if (dto.CargoID === 2) {
+            usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
         }
+        await this.logAccion(userId, 3, ipDir);
+        return {
+            message: "Personal registrado con éxito",
+            PersonalID: personal.PersonalID,
+            ...(usuario && { UsuarioID: usuario.UsuarioID })
+        };
+    }
+
+    async crearCliente(dto: CreateClienteDto, userId: number, ipDir: string) {
+        await this.verificarEmail(dto.Email);
         const cliente = await this.prisma.cliente.create({
             data: {
                 NombreCompleto: dto.NombreCompleto,
@@ -88,22 +74,13 @@ export class AdminService {
                 Email: dto.Email
             }
         });
-        const hashUsuario = await argon.hash('clientenuevo');
-        const usuario = await this.prisma.usuario.create({
-            data: {
-                Rol: 'Cliente',
-                PasswrdHash: hashUsuario,
-                ClienteID: cliente.ClienteID,
-                PersonalID: null
-            }
-        });
-        await registrarEnBitacora(this.prisma, userId, 4, ipDir);
-
+        const usuario = await this.crearUsuario('Cliente', cliente.ClienteID, false);
+        await this.logAccion(userId, 4, ipDir);
         return {
-            "message": "Cliente registrado con éxito",
-            "ClienteID": cliente.ClienteID,
-            "UsuarioID": usuario.UsuarioID,
-        }
+            message: "Cliente registrado con éxito",
+            ClienteID: cliente.ClienteID,
+            UsuarioID: usuario.UsuarioID,
+        };
     }
 
     async crearMascota(dto: CreateMascotaDto, userId: number, ipDir: string) {
@@ -122,6 +99,7 @@ export class AdminService {
       
                 // Aquí se puede agregar más lógica para validaciones y registros en el futuro
                 // Es problema del futuro yo
+
                 await registrarEnBitacora(this.prisma, userId, 5, ipDir);
                 return {
                     message: "Mascota registrada correctamente",
@@ -129,7 +107,6 @@ export class AdminService {
                     propietarioID: mascota.ClienteID
                 };
             });
-      
             return result;
         } catch (error) {
             console.error('Error al crear la mascota:', error);
@@ -139,12 +116,8 @@ export class AdminService {
 
     async getOneCliente(id: number) {
         return await this.prisma.cliente.findUnique({
-            where: {
-                ClienteID: id
-            },
-            include: {
-                mascotas: true
-            }
+            where: { ClienteID: id },
+            include: { mascotas: true }
         });
     }
 
@@ -164,79 +137,47 @@ export class AdminService {
     }
 
     async updatePersonal(dto: UpdatePersonalDto, userId: number, ipDir: string) {
-        if (dto.cargoID == 2) {
-            const personal =  await this.prisma.personal.update({
-                where: {
-                    PersonalID: dto.personalID
-                },
-                data: {
-                    NombreCompleto: dto.nombreCompleto,
-                    ProfesionID: dto.profesionID,
-                    CargoID: dto.cargoID,
-                    Direccion: dto.direccion,
-                    Telefono: dto.telefono,
-                }
-            });
-            
-            const hashPersonal = await argon.hash('personalnuevo');
-            const usuario = await this.prisma.usuario.create({
-                data: {
-                    Rol: 'Veterinario',
-                    PasswrdHash: hashPersonal,
-                    PersonalID: personal.PersonalID,
-                    ClienteID: null
-                }
-            });
-            await registrarEnBitacora(this.prisma, userId, 9, ipDir);
-            return {
-                "message": "Personal actualizado con éxito",
-                "PersonalID": personal.PersonalID,
-                "UsuarioID": usuario.UsuarioID,
+        const personal = await this.prisma.personal.update({
+            where: { PersonalID: dto.personalID },
+            data: {
+                NombreCompleto: dto.nombreCompleto,
+                ProfesionID: dto.profesionID,
+                CargoID: dto.cargoID,
+                Direccion: dto.direccion,
+                Telefono: dto.telefono,
             }
-        } else {
-            const personal = await this.prisma.personal.update({
-                where: {
-                    PersonalID: dto.personalID
-                },
-                data: {
-                    NombreCompleto: dto.nombreCompleto,
-                    ProfesionID: dto.profesionID,
-                    CargoID: dto.cargoID,
-                    Direccion: dto.direccion,
-                    Telefono: dto.telefono,
-                }
-            });
-            await registrarEnBitacora(this.prisma, userId, 9, ipDir);
-            return {
-                "message": "Personal actualizado con éxito",
-                "PersonalID": personal.PersonalID,
-            }
+        });
+        let usuario;
+        if (dto.cargoID === 2) {
+            usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
         }
+        await this.logAccion(userId, 9, ipDir);
+        return {
+            message: "Personal actualizado con éxito",
+            PersonalID: personal.PersonalID,
+            ...(usuario && { UsuarioID: usuario.UsuarioID })
+        };
     }
 
     async updateCliente(dto: UpdateClienteDto, userId: number, ipDir: string) {
         const cliente = await this.prisma.cliente.update({
-            where: {
-                ClienteID: dto.clienteID
-            },
+            where: { ClienteID: dto.clienteID },
             data: {
                 NombreCompleto: dto.NombreCompleto,
                 Direccion: dto.Direccion,
                 Telefono: dto.Telefono
             }
         });
-        await registrarEnBitacora(this.prisma, userId, 10, ipDir);
+        await this.logAccion(userId, 10, ipDir);
         return {
-            "message": "Cliente actualizado con éxito",
-            "ClienteID": cliente.ClienteID,
-        }
+            message: "Cliente actualizado con éxito",
+            ClienteID: cliente.ClienteID,
+        };
     }
 
-    async updateMascota(dto: UpdateMascotaDto, userId: number,ipDir: string) {
+    async updateMascota(dto: UpdateMascotaDto, userId: number, ipDir: string) {
         const mascota = await this.prisma.mascota.update({
-            where: {
-                MascotaID: dto.mascotaID
-            },
+            where: { MascotaID: dto.mascotaID },
             data: {
                 Nombre: dto.Nombre,
                 Sexo: dto.Sexo,
@@ -244,50 +185,40 @@ export class AdminService {
                 Observaciones: dto.Observaciones,
             }
         });
-        await registrarEnBitacora(this.prisma, userId, 11, ipDir);
+        await this.logAccion(userId, 11, ipDir);
         return {
-            "message": "Mascota actualizada con éxito",
-            "MascotaID": mascota.MascotaID,
+            message: "Mascota actualizada con éxito",
+            MascotaID: mascota.MascotaID,
         };
     }
 
-    async getBitacoraEntries( limit: number = 10) {
+    async getBitacoraEntries(limit: number = 10) {
         const entries = await this.prisma.bitacora.findMany({
             take: limit,
-            orderBy: {
-                FechaHora: 'desc'
-            },
+            orderBy: { FechaHora: 'desc' },
             include: {
-                usuario: {
-                    select: {
-                        UsuarioID: true
-                    }
-                },
-                tipoAccion: {
-                    select: {
-                        TipoAccionBitacoraID: true
-                    }
-                }
+                usuario: { select: { UsuarioID: true } },
+                tipoAccion: { select: { TipoAccionBitacoraID: true } }
             }
         });
+
         const timeZone = 'America/La_Paz';
-        const formattedEntries = entries.map(entry => {
+        return entries.map(entry => {
             const laPazDateTime = toZonedTime(entry.FechaHora, timeZone);
-            return {
+            const formattedEntry = {
                 ...entry,
                 FechaHoraFormateada: format(laPazDateTime, 'yyyy-MM-dd HH:mm:ss', { timeZone })
             };
-        });
-      
-        formattedEntries.forEach(entry => {
+
             console.log(`
-                ID: ${entry.BitacoraID}
-                Usuario: ${entry.usuario.UsuarioID}
-                Acción: ${entry.tipoAccion.TipoAccionBitacoraID}
-                Fecha y hora: ${entry.FechaHoraFormateada}
-                IP: ${entry.IPDir}
+                ID: ${formattedEntry.BitacoraID}
+                Usuario: ${formattedEntry.usuario.UsuarioID}
+                Acción: ${formattedEntry.tipoAccion.TipoAccionBitacoraID}
+                Fecha y hora: ${formattedEntry.FechaHoraFormateada}
+                IP: ${formattedEntry.IPDir}
             `);
+
+            return formattedEntry;
         });
-        return formattedEntries;
     }
 }
