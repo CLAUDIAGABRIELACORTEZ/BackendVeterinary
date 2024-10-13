@@ -49,7 +49,6 @@ export class AuthService {
 
     async logout(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, 2, ipDir);
-    
         return { message: 'Cierre de sesión exitoso',
             UsuarioID: userId
         };

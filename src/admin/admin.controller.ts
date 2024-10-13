@@ -55,6 +55,13 @@ export class AdminController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Get('logs') // {{local}}/admin/mascotas
+    @Roles(Role.ADMIN)
+    async getBitacoraEntries(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return await this.admService.getBitacoraEntries();
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Patch('personal')   // {{local}}/admin/personal
     @Roles(Role.ADMIN)
     async updatePersonal(@Body() dto: UpdatePersonalDto, @Usuario() { userId, ip }: { userId: number, ip: string }) {

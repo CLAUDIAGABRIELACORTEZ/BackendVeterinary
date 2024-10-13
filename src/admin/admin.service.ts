@@ -3,9 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
-import { usuario_Rol } from '@prisma/client';
+import { PrismaClient, usuario_Rol } from '@prisma/client';
 import * as argon from 'argon2';
 import { registrarEnBitacora } from 'src/utils/index.utils';
+import { format, toZonedTime } from 'date-fns-tz';
 
 
 
@@ -248,5 +249,45 @@ export class AdminService {
             "message": "Mascota actualizada con éxito",
             "MascotaID": mascota.MascotaID,
         };
+    }
+
+    async getBitacoraEntries( limit: number = 10) {
+        const entries = await this.prisma.bitacora.findMany({
+            take: limit,
+            orderBy: {
+                FechaHora: 'desc'
+            },
+            include: {
+                usuario: {
+                    select: {
+                        UsuarioID: true
+                    }
+                },
+                tipoAccion: {
+                    select: {
+                        TipoAccionBitacoraID: true
+                    }
+                }
+            }
+        });
+        const timeZone = 'America/La_Paz';
+        const formattedEntries = entries.map(entry => {
+            const laPazDateTime = toZonedTime(entry.FechaHora, timeZone);
+            return {
+                ...entry,
+                FechaHoraFormateada: format(laPazDateTime, 'yyyy-MM-dd HH:mm:ss', { timeZone })
+            };
+        });
+      
+        formattedEntries.forEach(entry => {
+            console.log(`
+                ID: ${entry.BitacoraID}
+                Usuario: ${entry.usuario.UsuarioID}
+                Acción: ${entry.tipoAccion.TipoAccionBitacoraID}
+                Fecha y hora: ${entry.FechaHoraFormateada}
+                IP: ${entry.IPDir}
+            `);
+        });
+        return formattedEntries;
     }
 }
