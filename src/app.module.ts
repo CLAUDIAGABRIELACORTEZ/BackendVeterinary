@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ExampleModule } from './example/example.module';
 import { AdminModule } from './admin/admin.module';
 import { ClientModule } from './client/client.module';
+import { DocvetModule } from './docvet/docvet.module';
 
 
 
@@ -21,7 +22,8 @@ import { ClientModule } from './client/client.module';
               JwtModule,
               ExampleModule,
               AdminModule,
-              ClientModule],
+              ClientModule,
+              DocvetModule],
     controllers: [AppController, AuthController],
     providers: [AppService, AuthService],
 })

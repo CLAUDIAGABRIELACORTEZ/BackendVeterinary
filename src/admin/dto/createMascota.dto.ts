@@ -15,7 +15,7 @@ export class CreateMascotaDto {
     @IsNotEmpty()
     @IsDate()
     @Transform(({ value }) => new Date(value))
-    FechaDeNacimiento: Date
+    FechaDeNacimiento: Date;
 
     @IsString()
     @IsNotEmpty()

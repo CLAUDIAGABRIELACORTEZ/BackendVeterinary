@@ -8,11 +8,14 @@ export class UpdateClienteDto {
     clienteID: number;
     
     @IsString()
-    NombreCompleto: string;
+    @IsNotEmpty()
+    NombreCompleto?: string;
     
     @IsString()
-    Telefono: string;
-
+    @IsNotEmpty()
+    Telefono?: string;
+    
     @IsString()
-    Direccion: string;
+    @IsNotEmpty()
+    Direccion?: string;
 }

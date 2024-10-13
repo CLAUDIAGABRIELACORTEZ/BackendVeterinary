@@ -1,24 +1,35 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { Transform } from "class-transformer";
 
 
 
 export class UpdatePersonalDto {
     @IsNumber()
     @IsNotEmpty()
-    personalID: number;
+    PersonalID: number;
     
     @IsString()
-    nombreCompleto: string;
-
+    @IsOptional()
+    NombreCompleto?: string;
+    
     @IsString()
-    telefono: string;
-
+    @IsOptional()
+    Telefono?: string;
+    
     @IsString()
-    direccion: string;
+    @IsOptional()
+    Direccion?: string;
 
-    @IsNumber()
-    cargoID: number;
+    @IsDate()
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (value === "" || !value) return undefined;
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? undefined : date;
+    })
+    FechaContratacion?: Date
     
     @IsNumber()
-    profesionID: number;
+    @IsOptional()
+    CargoID?: number;
 }

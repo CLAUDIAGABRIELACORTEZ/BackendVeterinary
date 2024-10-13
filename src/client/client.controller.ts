@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { Role, Roles } from 'src/auth/decorator';
+import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { ClientService } from './client.service';
 import { GetMascotasDto } from './dto';
@@ -14,7 +14,7 @@ export class ClientController {
     @HttpCode(HttpStatus.OK)
     @Get('mascotas')    // {{local}}/client/mascotas
     @Roles(Role.CLIENT)
-    getMascotas(@Body() dto: GetMascotasDto) { // devuelve todas las mascotas del cliente
-        return this.clientService.getMascotas(dto);
+    getMascotas(@Usuario() { userId, ip }: { userId: number, ip: string }) { // devuelve todas las mascotas del cliente
+        return this.clientService.getMascotas(userId, ip);
     }
 }

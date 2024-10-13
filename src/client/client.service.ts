@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { GetMascotasDto } from './dto';
+import { registrarEnBitacora } from 'src/utils/registrarEnBitacora';
 
 
 
@@ -9,11 +9,10 @@ import { GetMascotasDto } from './dto';
 export class ClientService {
     constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
-    async getMascotas(dto: GetMascotasDto) {
-        const decodedToken = this.jwt.decode(dto.JWT);
+    async getMascotas(userId: number, ipDir: string) {
         const usuario = await this.prisma.usuario.findUnique({
             where: {
-                UsuarioID: decodedToken.sub
+                UsuarioID: userId
             }
         });
         const cliente = await this.prisma.cliente.findUnique({
@@ -21,6 +20,7 @@ export class ClientService {
                 ClienteID: usuario.ClienteID
             }
         });
+        await registrarEnBitacora(this.prisma, userId, 8, ipDir);
         return await this.prisma.mascota.findMany({
             where: {
                 ClienteID: cliente.ClienteID

@@ -6,6 +6,7 @@ import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto,
 import * as argon from 'argon2';
 import { registrarEnBitacora } from 'src/utils/index.utils';
 import { format, toZonedTime } from 'date-fns-tz';
+import { parseISO } from 'date-fns';
 
 
 
@@ -47,7 +48,7 @@ export class AdminService {
                 Telefono: dto.Telefono,
                 Direccion: dto.Direccion,
                 Email: dto.Email,
-                FechaContratacion: dto.FechaContratacion,
+                FechaContratacion: parseISO(dto.FechaContratacion.toString()),
                 CargoID: dto.CargoID,
                 ProfesionID: dto.ProfesionID
             }
@@ -90,7 +91,7 @@ export class AdminService {
                     data: {
                         Nombre: dto.Nombre,
                         Sexo: dto.Sexo,
-                        FechaNacimiento: dto.FechaDeNacimiento,
+                        FechaNacimiento: parseISO(dto.FechaDeNacimiento.toString()),
                         Observaciones: dto.Observaciones,
                         RazaID: dto.RazaID,
                         ClienteID: dto.ClienteID
@@ -137,18 +138,18 @@ export class AdminService {
     }
 
     async updatePersonal(dto: UpdatePersonalDto, userId: number, ipDir: string) {
+        const dataActualizada = {};
+        if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
+        if (dto.Telefono !== undefined && dto.Telefono !== "") dataActualizada['Telefono'] = dto.Telefono;
+        if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
+        if (dto.FechaContratacion !== undefined) dataActualizada['FechaContratacion'] = parseISO(dto.FechaContratacion.toString());
+        if (dto.CargoID !== undefined && Number.isNaN(dto.CargoID)) dataActualizada['CargoID'] = dto.CargoID;
         const personal = await this.prisma.personal.update({
-            where: { PersonalID: dto.personalID },
-            data: {
-                NombreCompleto: dto.nombreCompleto,
-                ProfesionID: dto.profesionID,
-                CargoID: dto.cargoID,
-                Direccion: dto.direccion,
-                Telefono: dto.telefono,
-            }
+            where: { PersonalID: dto.PersonalID },
+            data: dataActualizada
         });
         let usuario;
-        if (dto.cargoID === 2) {
+        if (dto.CargoID === 2) {
             usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
         }
         await this.logAccion(userId, 9, ipDir);
@@ -160,13 +161,13 @@ export class AdminService {
     }
 
     async updateCliente(dto: UpdateClienteDto, userId: number, ipDir: string) {
+        const dataActualizada = {};
+        if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
+        if (dto.Telefono !== undefined && dto.Telefono !== "") dataActualizada['Telefono'] = dto.Telefono;
+        if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
         const cliente = await this.prisma.cliente.update({
             where: { ClienteID: dto.clienteID },
-            data: {
-                NombreCompleto: dto.NombreCompleto,
-                Direccion: dto.Direccion,
-                Telefono: dto.Telefono
-            }
+            data: dataActualizada
         });
         await this.logAccion(userId, 10, ipDir);
         return {
@@ -176,14 +177,16 @@ export class AdminService {
     }
 
     async updateMascota(dto: UpdateMascotaDto, userId: number, ipDir: string) {
+        const dataActualizada = {};
+        
+        if (dto.Nombre !== undefined && dto.Nombre !== "") dataActualizada['Nombre'] = dto.Nombre;
+        if (dto.Sexo !== undefined && dto.Sexo !== "") dataActualizada['Sexo'] = dto.Sexo;
+        if (dto.FechaDeNacimiento !== undefined) dataActualizada['FechaNacimiento'] = parseISO(dto.FechaDeNacimiento.toString());
+        if (dto.Observaciones !== undefined && dto.Observaciones !== "") dataActualizada['Observaciones'] = dto.Observaciones;
+
         const mascota = await this.prisma.mascota.update({
             where: { MascotaID: dto.mascotaID },
-            data: {
-                Nombre: dto.Nombre,
-                Sexo: dto.Sexo,
-                FechaNacimiento: dto.FechaDeNacimiento,
-                Observaciones: dto.Observaciones,
-            }
+            data: dataActualizada,
         });
         await this.logAccion(userId, 11, ipDir);
         return {
