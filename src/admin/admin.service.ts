@@ -28,8 +28,36 @@ export class AdminService {
         }
     }
 
+    // private async crearUsuario(rol: 'Veterinario' | 'Cliente', id: number, isPersonal: boolean) {
+    //     const hash = await argon.hash(`${rol.toLowerCase()}nuevo`);
+    //     return this.prisma.usuario.create({
+    //         data: {
+    //             Rol: rol,
+    //             PasswrdHash: hash,
+    //             PersonalID: isPersonal ? id : null,
+    //             ClienteID: !isPersonal ? id : null
+    //         }
+    //     });
+    // }
+
     private async crearUsuario(rol: 'Veterinario' | 'Cliente', id: number, isPersonal: boolean) {
-        const hash = await argon.hash(`${rol.toLowerCase()}nuevo`);
+        let hash: string;
+        if (rol === 'Cliente') {
+            const clienteHash = this.config.get('CLIENTE_HASH');
+            hash = await argon.hash(clienteHash);
+            console.log({
+                "cliente_plain_text": this.config.get('CLIENTE_HASH'),
+                "cliente_hash": hash
+            });
+        } else {
+            const docVetHash = this.config.get('DOCVET_HASH');
+            hash = await argon.hash(docVetHash);
+            console.log({
+                "docvet_plain_text": this.config.get('DOCVET_HASH'),
+                "docvet_hash": hash
+            });
+        }
+
         return this.prisma.usuario.create({
             data: {
                 Rol: rol,
