@@ -50,7 +50,7 @@ export class AdminController {
             personal: this.admService.getPersonal, // {{local}}/admin/personal
             clientes: this.admService.getClientes, // {{local}}/admin/clientes
             mascotas: this.admService.getMascotas, // {{local}}/admin/mascotas
-            logs: this.admService.getBitacoraEntries, // {{local}}/admin/logs
+            logs: this.admService.getBitacoraLogs, // {{local}}/admin/logs
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {

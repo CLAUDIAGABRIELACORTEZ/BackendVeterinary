@@ -202,7 +202,7 @@ export class AdminService {
         };
     }
 
-    async getBitacoraEntries(limit: number = 20) {
+    async getBitacoraLogs(limit: number = 5) {
         const entries = await this.prisma.bitacora.findMany({
             take: limit,
             orderBy: { FechaHora: 'desc' },
