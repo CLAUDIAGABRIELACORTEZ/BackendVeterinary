@@ -1,11 +1,11 @@
 -- CreateEnum
-CREATE TYPE "cargo_Cargo" AS ENUM ('Recepcionista', 'Interno', 'Laboratorista', 'Enfermero', 'Peluquero', 'Practicante');
+CREATE TYPE "cargo_Cargo" AS ENUM ('Administrador', 'Medico', 'Laboratorista', 'Enfermero', 'Peluquero', 'Practicante');
 
 -- CreateEnum
 CREATE TYPE "servicio_TipoServicio" AS ENUM ('Consulta', 'Peluqueria', 'Internacion', 'Cirugia');
 
 -- CreateEnum
-CREATE TYPE "tipoaccionbitacora_Accion" AS ENUM ('Login', 'Logout', 'Consulta', 'Reservacion');
+CREATE TYPE "tipoaccionbitacora_Accion" AS ENUM ('Login', 'Logout', 'CrearPersonal', 'ReadPersonal', 'UpdatePersonal', 'CrearCliente', 'ReadCliente', 'UpdateCliente', 'CrearMascota', 'ReadMascota', 'UpdateMascota', 'CrearReservacion', 'ReadReservacion', 'UpdateReservacion');
 
 -- CreateEnum
 CREATE TYPE "usuario_Rol" AS ENUM ('Administrador', 'Veterinario', 'Cliente');
@@ -41,9 +41,10 @@ CREATE TABLE "analisisclinico" (
 -- CreateTable
 CREATE TABLE "bitacora" (
     "BitacoraID" SERIAL NOT NULL,
-    "FechaHora" TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
     "UsuarioID" SMALLINT NOT NULL,
     "TipoAccionBitacoraID" SMALLINT NOT NULL,
+    "FechaHora" TIMESTAMP(0) NOT NULL,
+    "IPDir" INET NOT NULL,
 
     CONSTRAINT "bitacora_pkey" PRIMARY KEY ("BitacoraID")
 );
@@ -352,7 +353,40 @@ CREATE INDEX "servicio_PersonalID" ON "servicio"("PersonalID");
 CREATE INDEX "ReservacionID" ON "servicio"("ReservacionID");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "usuario_PersonalID_key" ON "usuario"("PersonalID");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "usuario_ClienteID_key" ON "usuario"("ClienteID");
+
+-- CreateIndex
 CREATE INDEX "ClienteID" ON "usuario"("ClienteID");
 
 -- CreateIndex
 CREATE INDEX "PersonalID" ON "usuario"("PersonalID");
+
+-- AddForeignKey
+ALTER TABLE "bitacora" ADD CONSTRAINT "bitacora_UsuarioID_fkey" FOREIGN KEY ("UsuarioID") REFERENCES "usuario"("UsuarioID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "bitacora" ADD CONSTRAINT "bitacora_TipoAccionBitacoraID_fkey" FOREIGN KEY ("TipoAccionBitacoraID") REFERENCES "tipoaccionbitacora"("TipoAccionBitacoraID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "mascota" ADD CONSTRAINT "mascota_ClienteID_fkey" FOREIGN KEY ("ClienteID") REFERENCES "cliente"("ClienteID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "raza" ADD CONSTRAINT "raza_EspecieID_fkey" FOREIGN KEY ("EspecieID") REFERENCES "especie"("EspecieID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "registrodevacunas" ADD CONSTRAINT "registrodevacunas_VacunaID_fkey" FOREIGN KEY ("VacunaID") REFERENCES "vacuna"("VacunaID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "registrodevacunas" ADD CONSTRAINT "registrodevacunas_MascotaID_fkey" FOREIGN KEY ("MascotaID") REFERENCES "mascota"("MascotaID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "servicio" ADD CONSTRAINT "servicio_PersonalID_fkey" FOREIGN KEY ("PersonalID") REFERENCES "personal"("PersonalID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "usuario" ADD CONSTRAINT "usuario_PersonalID_fkey" FOREIGN KEY ("PersonalID") REFERENCES "personal"("PersonalID") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "usuario" ADD CONSTRAINT "usuario_ClienteID_fkey" FOREIGN KEY ("ClienteID") REFERENCES "cliente"("ClienteID") ON DELETE SET NULL ON UPDATE CASCADE;
