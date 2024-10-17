@@ -47,10 +47,10 @@ export class AdminController {
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
         const serviceMetodo = {
-            personal: this.admService.getPersonal, // {{local}}/admin/personal
+            personal: this.admService.getPersonalV2, // {{local}}/admin/personal
             clientes: this.admService.getClientes, // {{local}}/admin/clientes
-            mascotas: this.admService.getMascotas, // {{local}}/admin/mascotas
-            logs: this.admService.getBitacoraLogs, // {{local}}/admin/logs
+            mascotas: this.admService.getMascotasV2, // {{local}}/admin/mascotas
+            logs: this.admService.getBitacoraLogsV2, // {{local}}/admin/logs
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {

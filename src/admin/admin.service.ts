@@ -133,6 +133,25 @@ export class AdminService {
         await registrarEnBitacora(this.prisma, userId, 6, ipDir);
         return await this.prisma.personal.findMany({});
     }
+    
+    async getPersonalV2(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, 6, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                p."PersonalID" AS "ID",
+                p."NombreCompleto" AS "Nombre",
+                p."Telefono",
+                p."Direccion",
+                TO_CHAR(p."FechaContratacion", 'YYYY-MM-DD') AS "Fecha_De_Contratacion",
+                p."Activo",
+                p."Email",
+                c."Cargo" AS "Cargo",
+                pr."Profesion" AS "Profesion"
+            FROM personal p
+            JOIN cargo c ON p."CargoID" = c."CargoID"
+            JOIN profesion pr ON p."ProfesionID" = pr."ProfesionID";
+        `;
+    }
 
     async getClientes(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, 7, ipDir);
@@ -142,6 +161,23 @@ export class AdminService {
     async getMascotas(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, 8, ipDir);
         return await this.prisma.mascota.findMany({});
+    }
+
+    async getMascotasV2(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, 8, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                m."MascotaID" AS "ID",
+                m."Nombre",
+                m."Sexo",
+                TO_CHAR(m."FechaNacimiento", 'YYYY-MM-DD') AS "Fecha_De_Nacimiento",
+                m."Observaciones",
+                e."NombreEspecie" AS "Especie",
+                r."NombreRaza" AS "Raza"
+            FROM mascota m
+            JOIN raza r ON m."RazaID" = r."RazaID"
+            JOIN especie e ON r."EspecieID" = e."EspecieID"
+        `;
     }
 
     async updatePersonal(dto: UpdatePersonalDto, userId: number, ipDir: string) {
@@ -230,5 +266,22 @@ export class AdminService {
 
             return formattedEntry;
         });
+    }
+
+    async getBitacoraLogsV2() { // DONE
+        return this.prisma.$queryRaw`
+            SELECT 
+                b."BitacoraID" AS "ID",
+                b."UsuarioID" AS "UsuarioID",
+                t."Accion" AS "Accion",
+                b."FechaHora" - INTERVAL '4 hours' AS "Fecha_Hora",
+                b."IPDir" AS "IP"
+            FROM 
+                bitacora b
+            JOIN 
+                tipoaccionbitacora t 
+            ON 
+                b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID";
+        `;
     }
 }
