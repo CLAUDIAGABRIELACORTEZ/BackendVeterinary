@@ -42,6 +42,8 @@ model bitacora {
 model cargo {
   CargoID     Int         @id @default(autoincrement()) @db.SmallInt
   Cargo       cargo_Cargo @default(Enfermero)
+
+  personal    personal[]
 }
 
 model cirugia {
@@ -133,15 +135,17 @@ model peluqueria {
 }
 
 model personal {
-  PersonalID            Int      @id @default(autoincrement()) @db.SmallInt
-  NombreCompleto        String   @db.VarChar(60)
-  Telefono              String   @db.VarChar(30)
-  Direccion             String   @db.VarChar(100)
-  FechaContratacion     DateTime @db.Date
-  Activo                Boolean  @default(true)
-  Email                 String   @unique(map: "UniquePersonalEmail") @db.VarChar(50)
-  CargoID               Int      @db.SmallInt
-  ProfesionID           Int      @db.SmallInt
+  PersonalID            Int         @id @default(autoincrement()) @db.SmallInt
+  NombreCompleto        String      @db.VarChar(60)
+  Telefono              String      @db.VarChar(30)
+  Direccion             String      @db.VarChar(100)
+  FechaContratacion     DateTime    @db.Date
+  Activo                Boolean     @default(true)
+  Email                 String      @unique(map: "UniquePersonalEmail") @db.VarChar(50)
+  CargoID               Int         @db.SmallInt
+  cargo                 cargo       @relation(fields: [CargoID], references: [CargoID])
+  ProfesionID           Int         @db.SmallInt
+  profesion             profesion   @relation(fields: [ProfesionID], references: [ProfesionID])
   servicios             servicio[] // Relación uno a muchos con servicio
   usuario               usuario?
 
@@ -152,6 +156,8 @@ model personal {
 model profesion {
   ProfesionID     Int    @id @default(autoincrement()) @db.SmallInt
   Profesion       String @db.VarChar(30)
+
+  personal        personal[]
 }
 
 model raza {
