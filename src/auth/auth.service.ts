@@ -4,7 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AuthLoginInDto, UpdateHashDto } from "./dto";
 import * as argon from 'argon2';
-import { registrarEnBitacora } from "src/utils/index.utils";
+import { BitacoraAccion, registrarEnBitacora } from "src/utils/index.utils";
 
 
 
@@ -40,7 +40,7 @@ export class AuthService {
         try {
             const usuario = await this.encontrarUsuario(dto.email);
             await this.verificarHash(usuario.PasswrdHash, dto.password);
-            await registrarEnBitacora(this.prisma, usuario.UsuarioID, 1, ipDir);
+            await registrarEnBitacora(this.prisma, usuario.UsuarioID, BitacoraAccion.Login, ipDir);
             return this.signToken(usuario.UsuarioID, usuario.Rol);
         } catch (error) {
             console.error('Error en login:', error);
@@ -49,7 +49,7 @@ export class AuthService {
     }
 
     async logout(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, 2, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.Logout, ipDir);
         return { 
             message: 'Cierre de sesión exitoso',
             UsuarioID: userId

@@ -4,7 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
 import * as argon from 'argon2';
-import { registrarEnBitacora } from 'src/utils/index.utils';
+import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { format, toZonedTime } from 'date-fns-tz';
 import { parseISO } from 'date-fns';
 
@@ -64,7 +64,7 @@ export class AdminService {
         if (dto.CargoID === 2) {
             usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
         }
-        await this.logAccion(userId, 3, ipDir);
+        await this.logAccion(userId, BitacoraAccion.CrearPersonal, ipDir);
         return {
             message: "Personal registrado con éxito",
             PersonalID: personal.PersonalID,
@@ -83,7 +83,7 @@ export class AdminService {
             }
         });
         const usuario = await this.crearUsuario('Cliente', cliente.ClienteID, false);
-        await this.logAccion(userId, 4, ipDir);
+        await this.logAccion(userId, BitacoraAccion.CrearCliente, ipDir);
         return {
             message: "Cliente registrado con éxito",
             ClienteID: cliente.ClienteID,
@@ -108,7 +108,7 @@ export class AdminService {
                 // Aquí se puede agregar más lógica para validaciones y registros en el futuro
                 // Es problema del futuro yo
 
-                await registrarEnBitacora(this.prisma, userId, 5, ipDir);
+                await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearMascota, ipDir);
                 return {
                     message: "Mascota registrada correctamente",
                     mascotaID: mascota.MascotaID,
@@ -130,12 +130,12 @@ export class AdminService {
     }
 
     async getPersonal(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, 6, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadPersonal, ipDir);
         return await this.prisma.personal.findMany({});
     }
     
     async getPersonalV2(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, 6, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadPersonal, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 p."PersonalID" AS "ID",
@@ -154,17 +154,17 @@ export class AdminService {
     }
 
     async getClientes(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, 7, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadCliente, ipDir);
         return await this.prisma.cliente.findMany({});
     }
 
     async getMascotas(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, 8, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadMascota, ipDir);
         return await this.prisma.mascota.findMany({});
     }
 
     async getMascotasV2(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, 8, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadMascota, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID" AS "ID",
@@ -195,7 +195,7 @@ export class AdminService {
         if (dto.CargoID === 2) {
             usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
         }
-        await this.logAccion(userId, 9, ipDir);
+        await this.logAccion(userId, BitacoraAccion.UpdatePersonal, ipDir);
         return {
             message: "Personal actualizado con éxito",
             PersonalID: personal.PersonalID,
@@ -212,7 +212,7 @@ export class AdminService {
             where: { ClienteID: dto.clienteID },
             data: dataActualizada
         });
-        await this.logAccion(userId, 10, ipDir);
+        await this.logAccion(userId, BitacoraAccion.UpdateCliente, ipDir);
         return {
             message: "Cliente actualizado con éxito",
             ClienteID: cliente.ClienteID,
@@ -231,7 +231,7 @@ export class AdminService {
             where: { MascotaID: dto.mascotaID },
             data: dataActualizada,
         });
-        await this.logAccion(userId, 11, ipDir);
+        await this.logAccion(userId, BitacoraAccion.UpdateMascota, ipDir);
         return {
             message: "Mascota actualizada con éxito",
             MascotaID: mascota.MascotaID,
@@ -271,17 +271,14 @@ export class AdminService {
     async getBitacoraLogsV2() { // DONE
         return this.prisma.$queryRaw`
             SELECT 
-                b."BitacoraID" AS "ID",
-                b."UsuarioID" AS "UsuarioID",
-                t."Accion" AS "Accion",
-                b."FechaHora" - INTERVAL '4 hours' AS "Fecha_Hora",
-                b."IPDir" AS "IP"
-            FROM 
-                bitacora b
-            JOIN 
-                tipoaccionbitacora t 
-            ON 
-                b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID";
+              b."BitacoraID" AS "ID",
+              b."UsuarioID" AS "UsuarioID",
+              t."Accion" AS "Accion",
+              TO_CHAR((b."FechaHora" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+              b."IPDir" AS "IP"
+            FROM bitacora b
+            JOIN tipoaccionbitacora t 
+            ON b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID";
         `;
     }
 }
