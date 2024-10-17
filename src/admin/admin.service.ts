@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
-import * as argon from 'argon2';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { parseISO } from 'date-fns';
+import * as argon from 'argon2';
 
 
 @Injectable()
@@ -130,7 +130,7 @@ export class AdminService {
     async getPersonalV2(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadPersonal, ipDir);
         return this.prisma.$queryRaw`
-            SELECT 
+            SELECT
                 p."PersonalID" AS "ID",
                 p."NombreCompleto" AS "Nombre",
                 p."Telefono",
@@ -141,8 +141,9 @@ export class AdminService {
                 c."Cargo" AS "Cargo",
                 pr."Profesion" AS "Profesion"
             FROM personal p
-            JOIN cargo c ON p."CargoID" = c."CargoID"
-            JOIN profesion pr ON p."ProfesionID" = pr."ProfesionID";
+            LEFT OUTER JOIN cargo c ON p."CargoID" = c."CargoID"
+            LEFT OUTER JOIN profesion pr ON p."ProfesionID" = pr."ProfesionID"
+            ORDER BY p."PersonalID" ASC;
         `;
     }
 
