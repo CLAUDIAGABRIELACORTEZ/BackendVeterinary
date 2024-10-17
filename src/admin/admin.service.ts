@@ -5,7 +5,6 @@ import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto,
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
 import * as argon from 'argon2';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { format, toZonedTime } from 'date-fns-tz';
 import { parseISO } from 'date-fns';
 
 
@@ -128,11 +127,6 @@ export class AdminService {
         });
     }
 
-    async getPersonal(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadPersonal, ipDir);
-        return await this.prisma.personal.findMany({});
-    }
-    
     async getPersonalV2(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadPersonal, ipDir);
         return this.prisma.$queryRaw`
@@ -152,14 +146,18 @@ export class AdminService {
         `;
     }
 
-    async getClientes(userId: number, ipDir: string) {
+    async getClientesV2(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadCliente, ipDir);
-        return await this.prisma.cliente.findMany({});
-    }
-
-    async getMascotas(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadMascota, ipDir);
-        return await this.prisma.mascota.findMany({});
+        return await this.prisma.$queryRaw`
+            SELECT
+                c."ClienteID" AS "ClienteID",
+                c."NombreCompleto" AS "NombreCompleto",
+                c."Telefono" AS "Telefono",
+                c."Direccion" AS "Direccion",
+                c."Email" AS "Email"
+            FROM cliente c
+            ORDER BY c."ClienteID" ASC;
+        `;
     }
 
     async getMascotasV2(userId: number, ipDir: string) {
@@ -178,6 +176,21 @@ export class AdminService {
             JOIN raza r ON m."RazaID" = r."RazaID"
             JOIN especie e ON r."EspecieID" = e."EspecieID"
             JOIN cliente c ON m."ClienteID" = c."ClienteID";
+        `;
+    }
+
+    async getBitacoraLogsV2() {
+        return this.prisma.$queryRaw`
+            SELECT 
+              b."BitacoraID" AS "ID",
+              b."UsuarioID" AS "UsuarioID",
+              t."Accion" AS "Accion",
+              TO_CHAR((b."FechaHora" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+              b."IPDir" AS "IP"
+            FROM bitacora b
+            JOIN tipoaccionbitacora t 
+            ON b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID"
+            ORDER BY b."FechaHora" DESC;
         `;
     }
 
@@ -221,12 +234,10 @@ export class AdminService {
 
     async updateMascota(dto: UpdateMascotaDto, userId: number, ipDir: string) {
         const dataActualizada = {};
-        
         if (dto.Nombre !== undefined && dto.Nombre !== "") dataActualizada['Nombre'] = dto.Nombre;
         if (dto.Sexo !== undefined && dto.Sexo !== "") dataActualizada['Sexo'] = dto.Sexo;
         if (dto.Observaciones !== undefined && dto.Observaciones !== "") dataActualizada['Observaciones'] = dto.Observaciones;
         if (dto.ClienteID !== undefined && dto.ClienteID !== "") dataActualizada['ClienteID'] = parseInt(dto.ClienteID);
-        
         const mascota = await this.prisma.mascota.update({
             where: { MascotaID: dto.mascotaID },
             data: dataActualizada,
@@ -236,50 +247,5 @@ export class AdminService {
             message: "Mascota actualizada con éxito",
             MascotaID: mascota.MascotaID,
         };
-    }
-
-    async getBitacoraLogs(limit: number = 5) {
-        const entries = await this.prisma.bitacora.findMany({
-            take: limit,
-            orderBy: { FechaHora: 'desc' },
-            include: {
-                usuario: { select: { UsuarioID: true } },
-                tipoAccion: { select: { TipoAccionBitacoraID: true } }
-            }
-        });
-
-        const timeZone = 'America/La_Paz';
-        return entries.map(entry => {
-            const laPazDateTime = toZonedTime(entry.FechaHora, timeZone);
-            const formattedEntry = {
-                ...entry,
-                FechaHoraFormateada: format(laPazDateTime, 'yyyy-MM-dd HH:mm:ss', { timeZone })
-            };
-
-            console.log(`
-                ID: ${formattedEntry.BitacoraID}
-                Usuario: ${formattedEntry.usuario.UsuarioID}
-                Acción: ${formattedEntry.tipoAccion.TipoAccionBitacoraID}
-                Fecha y hora: ${formattedEntry.FechaHoraFormateada}
-                IP: ${formattedEntry.IPDir}
-            `);
-
-            return formattedEntry;
-        });
-    }
-
-    async getBitacoraLogsV2() { // DONE
-        return this.prisma.$queryRaw`
-            SELECT 
-              b."BitacoraID" AS "ID",
-              b."UsuarioID" AS "UsuarioID",
-              t."Accion" AS "Accion",
-              TO_CHAR((b."FechaHora" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
-              b."IPDir" AS "IP"
-            FROM bitacora b
-            JOIN tipoaccionbitacora t 
-            ON b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID"
-            ORDER BY b."FechaHora" DESC;
-        `;
     }
 }

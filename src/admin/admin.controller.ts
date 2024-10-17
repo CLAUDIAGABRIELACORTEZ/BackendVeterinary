@@ -47,7 +47,7 @@ export class AdminController {
     ) {
         const serviceMetodo = {
             personal: this.admService.getPersonalV2, // {{local}}/admin/personal
-            clientes: this.admService.getClientes, // {{local}}/admin/clientes
+            clientes: this.admService.getClientesV2, // {{local}}/admin/clientes
             mascotas: this.admService.getMascotasV2, // {{local}}/admin/mascotas
             logs: this.admService.getBitacoraLogsV2, // {{local}}/admin/logs
         }[tipoDeEntidad];
