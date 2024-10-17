@@ -1,6 +1,4 @@
-import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-import { Transform } from "class-transformer";
-
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 
 export class UpdatePersonalDto {
@@ -20,16 +18,7 @@ export class UpdatePersonalDto {
     @IsOptional()
     Direccion?: string;
 
-    @IsDate()
-    @IsOptional()
-    @Transform(({ value }) => {
-        if (value === "" || !value) return undefined;
-        const date = new Date(value);
-        return isNaN(date.getTime()) ? undefined : date;
-    })
-    FechaContratacion?: Date
-    
     @IsNumber()
     @IsOptional()
-    CargoID?: number;
+    CargoID?: string;
 }

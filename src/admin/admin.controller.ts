@@ -7,7 +7,6 @@ import { CreatePersonalDto, CreateClienteDto, CreateMascotaDto,
 import { AdminService } from './admin.service';
 
 
-
 @UseGuards(JwtGuard, RolesGuard)
 @Controller('admin')
 @Roles(Role.ADMIN)

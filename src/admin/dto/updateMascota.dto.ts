@@ -1,6 +1,4 @@
-import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-import { Transform } from "class-transformer";
-
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 
 export class UpdateMascotaDto {
@@ -16,16 +14,11 @@ export class UpdateMascotaDto {
     @IsOptional()
     Sexo?: string;
     
-    @IsDate()
-    @IsOptional()
-    @Transform(({ value }) => {
-        if (value === "" || !value) return undefined;
-        const date = new Date(value);
-        return isNaN(date.getTime()) ? undefined : date;
-    })
-    FechaDeNacimiento?: Date
-    
     @IsString()
     @IsOptional()
     Observaciones?: string;
+
+    @IsString()
+    @IsOptional()
+    ClienteID?: string;
 }

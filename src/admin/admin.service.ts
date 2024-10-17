@@ -9,7 +9,6 @@ import { format, toZonedTime } from 'date-fns-tz';
 import { parseISO } from 'date-fns';
 
 
-
 @Injectable()
 export class AdminService {
     constructor(private prisma: PrismaService, 
@@ -173,10 +172,12 @@ export class AdminService {
                 TO_CHAR(m."FechaNacimiento", 'YYYY-MM-DD') AS "Fecha_De_Nacimiento",
                 m."Observaciones",
                 e."NombreEspecie" AS "Especie",
-                r."NombreRaza" AS "Raza"
+                r."NombreRaza" AS "Raza",
+                c."ClienteID" AS "DueñoID"
             FROM mascota m
             JOIN raza r ON m."RazaID" = r."RazaID"
             JOIN especie e ON r."EspecieID" = e."EspecieID"
+            JOIN cliente c ON m."ClienteID" = c."ClienteID";
         `;
     }
 
@@ -185,14 +186,13 @@ export class AdminService {
         if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
         if (dto.Telefono !== undefined && dto.Telefono !== "") dataActualizada['Telefono'] = dto.Telefono;
         if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
-        if (dto.FechaContratacion !== undefined) dataActualizada['FechaContratacion'] = parseISO(dto.FechaContratacion.toString());
-        if (dto.CargoID !== undefined && Number.isNaN(dto.CargoID)) dataActualizada['CargoID'] = dto.CargoID;
+        if (dto.CargoID !== undefined && dto.CargoID !== "") dataActualizada['CargoID'] = parseInt(dto.CargoID);
         const personal = await this.prisma.personal.update({
             where: { PersonalID: dto.PersonalID },
             data: dataActualizada
         });
         let usuario;
-        if (dto.CargoID === 2) {
+        if (parseInt(dto.CargoID) === 2) {
             usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
         }
         await this.logAccion(userId, BitacoraAccion.UpdatePersonal, ipDir);
@@ -224,9 +224,9 @@ export class AdminService {
         
         if (dto.Nombre !== undefined && dto.Nombre !== "") dataActualizada['Nombre'] = dto.Nombre;
         if (dto.Sexo !== undefined && dto.Sexo !== "") dataActualizada['Sexo'] = dto.Sexo;
-        if (dto.FechaDeNacimiento !== undefined) dataActualizada['FechaNacimiento'] = parseISO(dto.FechaDeNacimiento.toString());
         if (dto.Observaciones !== undefined && dto.Observaciones !== "") dataActualizada['Observaciones'] = dto.Observaciones;
-
+        if (dto.ClienteID !== undefined && dto.ClienteID !== "") dataActualizada['ClienteID'] = parseInt(dto.ClienteID);
+        
         const mascota = await this.prisma.mascota.update({
             where: { MascotaID: dto.mascotaID },
             data: dataActualizada,
@@ -278,7 +278,8 @@ export class AdminService {
               b."IPDir" AS "IP"
             FROM bitacora b
             JOIN tipoaccionbitacora t 
-            ON b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID";
+            ON b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID"
+            ORDER BY b."FechaHora" DESC;
         `;
     }
 }
