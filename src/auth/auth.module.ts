@@ -6,7 +6,6 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategy';
 
 
-
 @Module({
     imports: [
         JwtModule.registerAsync({

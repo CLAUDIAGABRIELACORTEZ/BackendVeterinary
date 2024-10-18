@@ -19,7 +19,7 @@ export class ClientService {
                 ClienteID: usuario.ClienteID
             }
         });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadMascota, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
         return await this.prisma.mascota.findMany({
             where: {
                 ClienteID: cliente.ClienteID

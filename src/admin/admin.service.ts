@@ -127,8 +127,8 @@ export class AdminService {
         });
     }
 
-    async getPersonalV2(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadPersonal, ipDir);
+    async getPersonal(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);
         return this.prisma.$queryRaw`
             SELECT
                 p."PersonalID" AS "ID",
@@ -147,8 +147,8 @@ export class AdminService {
         `;
     }
 
-    async getClientesV2(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadCliente, ipDir);
+    async getClientes(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarClientes, ipDir);
         return await this.prisma.$queryRaw`
             SELECT
                 c."ClienteID" AS "ClienteID",
@@ -161,8 +161,8 @@ export class AdminService {
         `;
     }
 
-    async getMascotasV2(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadMascota, ipDir);
+    async getMascotas(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID" AS "ID",
@@ -180,7 +180,7 @@ export class AdminService {
         `;
     }
 
-    async getBitacoraLogsV2() {
+    async getBitacoraLogs() {
         return this.prisma.$queryRaw`
             SELECT 
               b."BitacoraID" AS "ID",
@@ -209,7 +209,7 @@ export class AdminService {
         if (parseInt(dto.CargoID) === 2) {
             usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
         }
-        await this.logAccion(userId, BitacoraAccion.UpdatePersonal, ipDir);
+        await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
         return {
             message: "Personal actualizado con éxito",
             PersonalID: personal.PersonalID,
@@ -226,7 +226,7 @@ export class AdminService {
             where: { ClienteID: dto.ClienteID },
             data: dataActualizada
         });
-        await this.logAccion(userId, BitacoraAccion.UpdateCliente, ipDir);
+        await this.logAccion(userId, BitacoraAccion.ActualizarCliente, ipDir);
         return {
             message: "Cliente actualizado con éxito",
             ClienteID: cliente.ClienteID,
@@ -243,7 +243,7 @@ export class AdminService {
             where: { MascotaID: dto.MascotaID },
             data: dataActualizada,
         });
-        await this.logAccion(userId, BitacoraAccion.UpdateMascota, ipDir);
+        await this.logAccion(userId, BitacoraAccion.ActualizarMascota, ipDir);
         return {
             message: "Mascota actualizada con éxito",
             MascotaID: mascota.MascotaID,

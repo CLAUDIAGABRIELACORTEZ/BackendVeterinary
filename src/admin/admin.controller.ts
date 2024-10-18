@@ -14,7 +14,7 @@ export class AdminController {
     constructor(private readonly admService: AdminService) {}
     
     @HttpCode(HttpStatus.OK)
-    @Get('testing')
+    @Get('testing') // $argon2id$v=19$m=16,t=2,p=1$ZzVuTmNJM0FNejFPc3Rzcg$xpurD+2skNn2yfW5q8SQHQ - admclaveingreso
     async getGreetings() {
         return 'Saludos desde la zona de administrador.';
     }
@@ -46,10 +46,10 @@ export class AdminController {
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
         const serviceMetodo = {
-            personal: this.admService.getPersonalV2, // {{local}}/admin/personal
-            clientes: this.admService.getClientesV2, // {{local}}/admin/clientes
-            mascotas: this.admService.getMascotasV2, // {{local}}/admin/mascotas
-            logs: this.admService.getBitacoraLogsV2, // {{local}}/admin/logs
+            personal: this.admService.getPersonal, // {{local}}/admin/personal
+            clientes: this.admService.getClientes, // {{local}}/admin/clientes
+            mascotas: this.admService.getMascotas, // {{local}}/admin/mascotas
+            logs: this.admService.getBitacoraLogs, // {{local}}/admin/logs
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {

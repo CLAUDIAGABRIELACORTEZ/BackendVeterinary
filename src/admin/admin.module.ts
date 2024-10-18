@@ -5,7 +5,6 @@ import { AdminService } from './admin.service';
 import { JwtStrategy } from 'src/auth/strategy';
 
 
-
 @Module({
     imports: [JwtModule.register({})],
     controllers: [AdminController],

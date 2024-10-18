@@ -1,9 +1,7 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { ClientService } from './client.service';
-import { GetMascotasDto } from './dto';
-
 
 
 @Controller('client')

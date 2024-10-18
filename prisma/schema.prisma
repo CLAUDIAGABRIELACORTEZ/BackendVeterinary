@@ -278,17 +278,17 @@ enum tipoaccionbitacora_Accion {
   Login
   Logout
   CrearPersonal
-  ReadPersonal
-  UpdatePersonal
+  ListarPersonal
+  ActualizarPersonal
   CrearCliente
-  ReadCliente
-  UpdateCliente
+  ListarClientes
+  ActualizarCliente
   CrearMascota
-  ReadMascota
-  UpdateMascota
+  ListarMascotas
+  ActualizarMascota
   CrearReservacion
-  ReadReservacion
-  UpdateReservacion
+  ListarReservacion
+  ActualizarReservacion
 }
 
 enum usuario_Rol {

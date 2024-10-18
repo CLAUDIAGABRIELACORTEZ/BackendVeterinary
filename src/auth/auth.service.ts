@@ -2,10 +2,9 @@ import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundE
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
-import { AuthLoginInDto, UpdateHashDto } from "./dto";
+import { AuthLoginInDto, UpdateHashDto } from "./dto/index";
 import * as argon from 'argon2';
 import { BitacoraAccion, registrarEnBitacora } from "src/utils/index.utils";
-
 
 
 @Injectable()
