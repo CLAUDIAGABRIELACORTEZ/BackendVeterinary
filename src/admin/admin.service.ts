@@ -223,7 +223,7 @@ export class AdminService {
         if (dto.Telefono !== undefined && dto.Telefono !== "") dataActualizada['Telefono'] = dto.Telefono;
         if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
         const cliente = await this.prisma.cliente.update({
-            where: { ClienteID: dto.clienteID },
+            where: { ClienteID: dto.ClienteID },
             data: dataActualizada
         });
         await this.logAccion(userId, BitacoraAccion.UpdateCliente, ipDir);
@@ -240,7 +240,7 @@ export class AdminService {
         if (dto.Observaciones !== undefined && dto.Observaciones !== "") dataActualizada['Observaciones'] = dto.Observaciones;
         if (dto.ClienteID !== undefined && dto.ClienteID !== "") dataActualizada['ClienteID'] = parseInt(dto.ClienteID);
         const mascota = await this.prisma.mascota.update({
-            where: { MascotaID: dto.mascotaID },
+            where: { MascotaID: dto.MascotaID },
             data: dataActualizada,
         });
         await this.logAccion(userId, BitacoraAccion.UpdateMascota, ipDir);

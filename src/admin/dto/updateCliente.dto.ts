@@ -5,7 +5,7 @@ import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 export class UpdateClienteDto {
     @IsNumber()
     @IsNotEmpty()
-    clienteID: number;
+    ClienteID: number;
     
     @IsString()
     @IsNotEmpty()

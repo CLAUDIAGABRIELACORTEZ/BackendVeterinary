@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { registrarEnBitacora } from 'src/utils/registrarEnBitacora';
-
+import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 
 
 @Injectable()
@@ -20,7 +19,7 @@ export class ClientService {
                 ClienteID: usuario.ClienteID
             }
         });
-        await registrarEnBitacora(this.prisma, userId, 8, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ReadMascota, ipDir);
         return await this.prisma.mascota.findMany({
             where: {
                 ClienteID: cliente.ClienteID
