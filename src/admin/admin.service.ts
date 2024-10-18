@@ -35,6 +35,7 @@ export class AdminService {
             const docVetHash = this.config.get('DOCVET_HASH'); // doctorprimerizo || personalnuevo
             hash = await argon.hash(docVetHash);
         }
+        
         return this.prisma.usuario.create({
             data: {
                 Rol: rol,

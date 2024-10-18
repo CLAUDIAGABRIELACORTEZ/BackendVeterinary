@@ -2,7 +2,6 @@ import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Transform } from "class-transformer";
 
 
-
 export class CreateMascotaDto {
     @IsString()
     @IsNotEmpty()
