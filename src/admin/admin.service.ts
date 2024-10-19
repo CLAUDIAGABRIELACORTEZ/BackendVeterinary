@@ -177,7 +177,8 @@ export class AdminService {
             FROM mascota m
             JOIN raza r ON m."RazaID" = r."RazaID"
             JOIN especie e ON r."EspecieID" = e."EspecieID"
-            JOIN cliente c ON m."ClienteID" = c."ClienteID";
+            JOIN cliente c ON m."ClienteID" = c."ClienteID"
+            ORDER BY m."MascotaID" ASC;
         `;
     }
 

@@ -28,8 +28,8 @@ export class AdminController {
     ) {
         const serviceMetodo = {
             personal: this.admService.crearPersonal, // {{local}}/admin/personal
-            cliente: this.admService.crearCliente, // {{local}}/admin/cliente
-            mascota: this.admService.crearMascota, // {{local}}/admin/mascota
+            clientes: this.admService.crearCliente, // {{local}}/admin/clientes
+            mascotas: this.admService.crearMascota, // {{local}}/admin/mascotas
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
@@ -68,8 +68,8 @@ export class AdminController {
     ) {
         const serviceMetodo = {
             personal: this.admService.updatePersonal, // {{local}}/admin/personal
-            cliente: this.admService.updateCliente, // {{local}}/admin/cliente
-            mascota: this.admService.updateMascota, // {{local}}/admin/mascota
+            clientes: this.admService.updateCliente, // {{local}}/admin/clientes
+            mascotas: this.admService.updateMascota, // {{local}}/admin/mascotas
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
