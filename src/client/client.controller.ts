@@ -4,7 +4,7 @@ import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { ClientService } from './client.service';
 
 
-@Controller('client')
+@Controller('cliente')
 @UseGuards(JwtGuard, RolesGuard)
 export class ClientController {
     constructor(private readonly clientService: ClientService) {}
