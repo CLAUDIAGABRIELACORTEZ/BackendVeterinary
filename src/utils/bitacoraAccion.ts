@@ -12,5 +12,8 @@ export enum BitacoraAccion {
     ActualizarMascota = 11,
     CrearReservacion = 12,
     ListarReservacion = 13,
-    ActualizarReservacion = 14
+    ActualizarReservacion = 14,
+    CrearRegVac = 15,
+    ListarRegVac = 16,
+    ActualizarRegVac = 17
 }
