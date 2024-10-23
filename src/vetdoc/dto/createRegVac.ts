@@ -8,6 +8,7 @@ export class CreateRegvacDto {
     @Transform(({ value }) => new Date(value))
     FechaVacunacion: Date;
     
+    @IsNotEmpty()
     @IsDate()
     @Transform(({ value }) => new Date(value))
     ProximaFecha: Date;

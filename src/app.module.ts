@@ -7,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { ExampleModule } from './example/example.module';
 import { AdminModule } from './admin/admin.module';
 import { ClientModule } from './client/client.module';
-import { DocvetModule } from './docvet/docvet.module';
 import { VetdocModule } from './vetdoc/vetdoc.module';
 
 
@@ -20,7 +19,6 @@ import { VetdocModule } from './vetdoc/vetdoc.module';
             ExampleModule,
             AdminModule,
             ClientModule,
-            DocvetModule,
             VetdocModule],
     controllers: [ AppController ],
     providers: [ AppService ],

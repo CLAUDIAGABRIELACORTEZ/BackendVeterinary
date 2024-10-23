@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion } from 'src/utils/bitacoraAccion';
 import { registrarEnBitacora } from 'src/utils/registrarEnBitacora';
 import { CreateRegvacDto } from './dto';
+import { parseISO } from 'date-fns';
 
 
 @Injectable()
@@ -11,11 +12,11 @@ export class VetdocService {
 
     async createRegVac(dto: CreateRegvacDto, userId: number, ipDir: string) {
         const result = await this.prisma.$transaction(async (prisma) => {
-            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRegVac, ipDir);
+            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarMascota, ipDir);
             const regVac = await prisma.registrodevacunas.create({
                 data: {
-                    FechaVacunacion: dto.FechaVacunacion,
-                    ProximaFecha: dto.ProximaFecha,
+                    FechaVacunacion: parseISO(dto.FechaVacunacion.toISOString()),
+                    ProximaFecha: parseISO(dto.ProximaFecha.toISOString()),
                     MascotaID: dto.MascotaID,
                     VacunaID: dto.VacunaID
                 }
