@@ -11,9 +11,7 @@ export class VetdocService {
 
     async createRegVac(dto: CreateRegvacDto, userId: number, ipDir: string) {
         const result = await this.prisma.$transaction(async (prisma) => {
-            // Registrar en la bitácora
-            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
-            // Crear el registro de vacunación
+            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRegVac, ipDir);
             const regVac = await prisma.registrodevacunas.create({
                 data: {
                     FechaVacunacion: dto.FechaVacunacion,
@@ -32,10 +30,20 @@ export class VetdocService {
         };
     }
     
-
     async getRegVacMascota(mascotaID: number, userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarRegVac, ipDir);
         return this.prisma.$queryRaw`
-        
+            SELECT 
+                m."Nombre" AS "Nombre",
+                r."NombreRaza" AS "Raza",
+                v."NombreVacuna" AS "Vacuna",
+                reg."FechaVacunacion" AS "Fecha_De_Vacunacion",
+                reg."ProximaFecha" AS "Proxima_Fecha"
+            FROM "registrodevacunas" reg
+            JOIN "mascota" m ON reg."MascotaID" = m."MascotaID"
+            JOIN "vacuna" v ON reg."VacunaID" = v."VacunaID"
+            JOIN "raza" r ON m."RazaID" = r."RazaID"
+            WHERE m."MascotaID" = ${mascotaID};
         `;
     }
 }

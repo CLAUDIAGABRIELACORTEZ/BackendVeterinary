@@ -289,6 +289,9 @@ enum tipoaccionbitacora_Accion {
   CrearReservacion
   ListarReservacion
   ActualizarReservacion
+  CrearRegVac
+  ListarRegVac
+  ActualizarRegVac
 }
 
 enum usuario_Rol {
