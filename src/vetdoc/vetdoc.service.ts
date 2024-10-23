@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BitacoraAccion } from 'src/utils/bitacoraAccion';
-import { registrarEnBitacora } from 'src/utils/registrarEnBitacora';
+import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { CreateRegvacDto } from './dto';
 import { parseISO } from 'date-fns';
 
@@ -12,7 +11,7 @@ export class VetdocService {
 
     async createRegVac(dto: CreateRegvacDto, userId: number, ipDir: string) {
         const result = await this.prisma.$transaction(async (prisma) => {
-            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarMascota, ipDir);
+            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRegVac, ipDir);
             const regVac = await prisma.registrodevacunas.create({
                 data: {
                     FechaVacunacion: parseISO(dto.FechaVacunacion.toISOString()),
@@ -27,7 +26,8 @@ export class VetdocService {
     
         return {
             Mensaje: "Vacunación registrada exitosamente.",
-            RegvacID: result.RegistroID
+            RegvacID: result.RegistroID,
+            MascotaID: result.MascotaID
         };
     }
     

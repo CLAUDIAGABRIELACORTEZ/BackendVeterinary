@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
@@ -16,18 +16,22 @@ export class VetdocController {
     async getGreetings() {
         return 'Saludos desde la zona del matasanos.';
     }
-    
+
     @HttpCode(HttpStatus.OK)
-    @Get('regvac')
-    async leerRegistro(@Usuario() { userId, ip }: { userId: number; ip: string }) {
-        return "Vacuna registrada";
+    @Post('regvac') // {{local}}/vetdoc/regvac
+    async registrarVacuna(
+        @Body() dto: CreateRegvacDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        return await this.vetdocService.createRegVac(dto, userId, ip);
     }
     
     @HttpCode(HttpStatus.OK)
-    @Post('regvac')
-    async registrarVacuna(@Body() dto: CreateRegvacDto, @Usuario() { userId, ip }: { userId: number; ip: string }) {
-        console.log({dto});
-        return await this.vetdocService.createRegVac(dto, userId, ip);
-        // return "Listado de vacunas";
+    @Get('regvac/:mascotaID') // // {{local}}/vetdoc/regvac/id
+    async leerRegistro(
+        @Param('mascotaID') mascotaID: number,
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        return await this.vetdocService.getRegVacMascota(mascotaID, userId, ip);
     }
 }
