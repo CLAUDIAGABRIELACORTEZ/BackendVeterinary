@@ -4,7 +4,7 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 export class UpdatePersonalDto {
     @IsNumber()
     @IsNotEmpty()
-    PersonalID: number;
+    ID: number;
     
     @IsString()
     @IsOptional()

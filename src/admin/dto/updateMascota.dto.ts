@@ -4,7 +4,7 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 export class UpdateMascotaDto {
     @IsNumber()
     @IsNotEmpty()
-    MascotaID: number;
+    ID: number;
     
     @IsString()
     @IsOptional()

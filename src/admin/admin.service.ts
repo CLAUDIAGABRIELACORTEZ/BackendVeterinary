@@ -205,7 +205,7 @@ export class AdminService {
         if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
         if (dto.CargoID !== undefined && dto.CargoID !== "") dataActualizada['CargoID'] = parseInt(dto.CargoID);
         const personal = await this.prisma.personal.update({
-            where: { PersonalID: dto.PersonalID },
+            where: { PersonalID: dto.ID },
             data: dataActualizada
         });
         let usuario;
@@ -243,7 +243,7 @@ export class AdminService {
         if (dto.Observaciones !== undefined && dto.Observaciones !== "") dataActualizada['Observaciones'] = dto.Observaciones;
         if (dto.ClienteID !== undefined && dto.ClienteID !== "") dataActualizada['ClienteID'] = parseInt(dto.ClienteID);
         const mascota = await this.prisma.mascota.update({
-            where: { MascotaID: dto.MascotaID },
+            where: { MascotaID: dto.ID },
             data: dataActualizada,
         });
         await this.logAccion(userId, BitacoraAccion.ActualizarMascota, ipDir);
