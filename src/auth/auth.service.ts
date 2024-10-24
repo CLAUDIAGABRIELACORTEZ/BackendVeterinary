@@ -18,9 +18,9 @@ export class AuthService {
         const personal = await this.prisma.personal.findUnique({ where: { Email: email } });
         let usuario;
         if (cliente) {
-            usuario = await this.prisma.usuario.findFirst({ where: { ClienteID: cliente.ClienteID } });
+            usuario = await this.prisma.usuario.findFirst({ where: { ClienteID: cliente.ClienteID, Estado: 'Activo' } });
         } else if (personal) {
-            usuario = await this.prisma.usuario.findFirst({ where: { PersonalID: personal.PersonalID } });
+            usuario = await this.prisma.usuario.findFirst({ where: { PersonalID: personal.PersonalID, Estado: 'Activo' } });
         }
         if (!usuario) {
             throw new ForbiddenException('El correo ingresado no tiene un usuario asociado.');
@@ -50,7 +50,7 @@ export class AuthService {
     async logout(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.Logout, ipDir);
         return { 
-            message: 'Cierre de sesión exitoso',
+            Respuesta: 'Cierre de sesión exitoso',
             UsuarioID: userId
         };
     }
@@ -66,7 +66,7 @@ export class AuthService {
                     data: { PasswrdHash: nuevoHash }
                 });
                 return {
-                    message: "Contraseña actualizada correctamente",
+                    Respuesta: "Contraseña actualizada correctamente",
                     usuarioID: usuario.UsuarioID
                 };
             });

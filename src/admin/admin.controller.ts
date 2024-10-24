@@ -3,7 +3,8 @@ import { BadRequestException, Body, Controller, Get, HttpCode,
 import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { CreatePersonalDto, CreateClienteDto, CreateMascotaDto, 
-        UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
+        UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
+        UpdateUsuarioDto} from './dto';
 import { AdminService } from './admin.service';
 
 
@@ -62,7 +63,7 @@ export class AdminController {
     @HttpCode(HttpStatus.OK)
     @Patch(':tipoDeEntidad')
     async actualizarEntidad(
-        @Body() dto: UpdatePersonalDto | UpdateClienteDto | UpdateMascotaDto,
+        @Body() dto: UpdatePersonalDto | UpdateClienteDto | UpdateMascotaDto | UpdateUsuarioDto,
         @Usuario() { userId, ip }: { userId: number; ip: string },
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
@@ -70,6 +71,7 @@ export class AdminController {
             personal: this.admService.updatePersonal, // {{local}}/admin/personal
             clientes: this.admService.updateCliente, // {{local}}/admin/clientes
             mascotas: this.admService.updateMascota, // {{local}}/admin/mascotas
+            usuarios: this.admService.updateUsuario, // {{local}}/admin/usuarios
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {

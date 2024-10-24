@@ -1,9 +1,6 @@
-process.env.TZ = 'America/La_Paz';
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-
 
 
 async function bootstrap() {
@@ -11,7 +8,7 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
     app.enableCors({
         origin: '*', // Aquí puedes especificar el dominio del frontend en lugar de '*'
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        methods: 'GET,HEAD,PUT,PATCH,POST',
         credentials: true,
       });
     app.useGlobalPipes(new ValidationPipe({
