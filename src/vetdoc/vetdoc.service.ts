@@ -25,7 +25,7 @@ export class VetdocService {
         });
     
         return {
-            Mensaje: "Vacunación registrada exitosamente.",
+            Respuesta: "Vacunación registrada exitosamente.",
             RegvacID: result.RegistroID,
             MascotaID: result.MascotaID
         };

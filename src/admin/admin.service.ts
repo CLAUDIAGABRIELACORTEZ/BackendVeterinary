@@ -2,7 +2,8 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
-        UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto } from './dto';
+        UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
+        UpdateUsuarioDto} from './dto';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { parseISO } from 'date-fns';
 import * as argon from 'argon2';
@@ -65,7 +66,7 @@ export class AdminService {
         }
         await this.logAccion(userId, BitacoraAccion.CrearPersonal, ipDir);
         return {
-            message: "Personal registrado con éxito",
+            Respuesta: "Personal registrado con éxito",
             PersonalID: personal.PersonalID,
             ...(usuario && { UsuarioID: usuario.UsuarioID })
         };
@@ -84,7 +85,7 @@ export class AdminService {
         const usuario = await this.crearUsuario('Cliente', cliente.ClienteID, false);
         await this.logAccion(userId, BitacoraAccion.CrearCliente, ipDir);
         return {
-            message: "Cliente registrado con éxito",
+            Respuesta: "Cliente registrado con éxito",
             ClienteID: cliente.ClienteID,
             UsuarioID: usuario.UsuarioID,
         };
@@ -109,9 +110,9 @@ export class AdminService {
 
                 await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearMascota, ipDir);
                 return {
-                    message: "Mascota registrada correctamente",
-                    mascotaID: mascota.MascotaID,
-                    propietarioID: mascota.ClienteID
+                    Respuesta: "Mascota registrada correctamente",
+                    MascotaID: mascota.MascotaID,
+                    PropietarioID: mascota.ClienteID
                 };
             });
             return result;
@@ -204,7 +205,7 @@ export class AdminService {
         if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
         if (dto.CargoID !== undefined && dto.CargoID !== "") dataActualizada['CargoID'] = parseInt(dto.CargoID);
         const personal = await this.prisma.personal.update({
-            where: { PersonalID: dto.PersonalID },
+            where: { PersonalID: dto.ID },
             data: dataActualizada
         });
         let usuario;
@@ -213,7 +214,7 @@ export class AdminService {
         }
         await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
         return {
-            message: "Personal actualizado con éxito",
+            Respuesta: "Personal actualizado con éxito",
             PersonalID: personal.PersonalID,
             ...(usuario && { UsuarioID: usuario.UsuarioID })
         };
@@ -230,7 +231,7 @@ export class AdminService {
         });
         await this.logAccion(userId, BitacoraAccion.ActualizarCliente, ipDir);
         return {
-            message: "Cliente actualizado con éxito",
+            Respuesta: "Cliente actualizado con éxito",
             ClienteID: cliente.ClienteID,
         };
     }
@@ -242,13 +243,25 @@ export class AdminService {
         if (dto.Observaciones !== undefined && dto.Observaciones !== "") dataActualizada['Observaciones'] = dto.Observaciones;
         if (dto.ClienteID !== undefined && dto.ClienteID !== "") dataActualizada['ClienteID'] = parseInt(dto.ClienteID);
         const mascota = await this.prisma.mascota.update({
-            where: { MascotaID: dto.MascotaID },
+            where: { MascotaID: dto.ID },
             data: dataActualizada,
         });
         await this.logAccion(userId, BitacoraAccion.ActualizarMascota, ipDir);
         return {
-            message: "Mascota actualizada con éxito",
+            Respuesta: "Mascota actualizada con éxito",
             MascotaID: mascota.MascotaID,
+        };
+    }
+
+    async updateUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
+        const usuario = await this.prisma.usuario.update({
+            where: { UsuarioID: dto.UsuarioID },
+            data: { Estado: 'Inactivo' }
+        });
+        await this.logAccion(userId, BitacoraAccion.ActualizarUsuario, ipDir);
+        return {
+            Respuesta: "Usuario actualizado con éxito",
+            UsuarioID: usuario.UsuarioID,
         };
     }
 }
