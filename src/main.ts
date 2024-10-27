@@ -7,8 +7,12 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.setGlobalPrefix('api');
     app.enableCors({
-        origin: '*', // Aquí puedes especificar el dominio del frontend en lugar de '*'
-        methods: 'GET,HEAD,PUT,PATCH,POST',
+        origin: [
+            'https://javiercabrerac.github.io/next-vet/',  // dominio en producción
+            'http://localhost:3000'      //desarrollo local
+        ],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
       });
     app.useGlobalPipes(new ValidationPipe({

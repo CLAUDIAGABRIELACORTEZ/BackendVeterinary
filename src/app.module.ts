@@ -10,7 +10,6 @@ import { ClientModule } from './client/client.module';
 import { VetdocModule } from './vetdoc/vetdoc.module';
 
 
-
 @Module({
     imports: [
             ConfigModule.forRoot({ isGlobal: true }), 
