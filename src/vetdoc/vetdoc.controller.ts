@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } f
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { CreateRegvacDto } from './dto';
+import { CreateRegvacDto, CreateVacunaDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -18,18 +18,27 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Post('regvac') // {{local}}/vetdoc/regvac
+    @Post('vacunas') // {{local}}/vetdoc/vacunas
     async registrarVacuna(
-        @Body() dto: CreateRegvacDto, 
+        @Body() dto: CreateVacunaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
-        return await this.vetdocService.createRegVac(dto, userId, ip);
+        return await this.vetdocService.createVacuna(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
     @Get('vacunas') // // {{local}}/vetdoc/vacunas
     async leerVacunas(@Usuario() { userId, ip }: { userId: number; ip: string }) {
         return await this.vetdocService.getVacunas(userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('regvac') // {{local}}/vetdoc/regvac
+    async registrarRegistroVacunacion(
+        @Body() dto: CreateRegvacDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        return await this.vetdocService.createRegVac(dto, userId, ip);
     }
     
     @HttpCode(HttpStatus.OK)

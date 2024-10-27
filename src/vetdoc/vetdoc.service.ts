@@ -11,7 +11,7 @@ export class VetdocService {
 
     async createVacuna(dto: CreateVacunaDto, userId: number, ipDir: string) {
         const result = await this.prisma.$transaction(async (prisma) => {
-            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRegVac, ipDir);
+            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearVacuna, ipDir);
             const vacuna = await prisma.vacuna.create({
                 data: {
                     NombreVacuna: dto.NombreVacuna,
@@ -53,7 +53,7 @@ export class VetdocService {
     }
 
     async getVacunas(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarVacunas, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 "VacunaID" AS "ID",
@@ -82,6 +82,4 @@ export class VetdocService {
             WHERE m."MascotaID" = ${mascotaID};
         `;
     }
-
-
 }
