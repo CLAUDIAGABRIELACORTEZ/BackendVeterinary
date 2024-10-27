@@ -62,7 +62,7 @@ model cliente {
   Telefono          String  @db.VarChar(30)
   Direccion         String? @db.VarChar(100)
   Email             String  @unique(map: "UniqueClienteEmail") @db.VarChar(50)
-  mascotas          mascota[] // Relación uno a muchos con mascota
+  mascotas          mascota[]
   usuario           usuario?
 }
 
@@ -92,7 +92,7 @@ model detallerecibo {
 model especie {
   EspecieID         Int    @id @default(autoincrement()) @db.SmallInt
   NombreEspecie     String @unique(map: "NombreEspecie") @db.VarChar(20)
-  razas             raza[] // Relación uno a muchos con raza
+  razas             raza[]
 }
 
 model internacion {
@@ -146,7 +146,7 @@ model personal {
   cargo                 cargo       @relation(fields: [CargoID], references: [CargoID])
   ProfesionID           Int         @db.SmallInt
   profesion             profesion   @relation(fields: [ProfesionID], references: [ProfesionID])
-  servicios             servicio[] // Relación uno a muchos con servicio
+  servicios             servicio[]
   usuario               usuario?
 
   @@index([CargoID], map: "CargoID")
@@ -289,6 +289,7 @@ enum tipoaccionbitacora_Accion {
   CrearReservacion
   ListarReservacion
   ActualizarReservacion
+  CrearVacuna
   ListarVacunas
   CrearRegVac
   ListarRegVac
