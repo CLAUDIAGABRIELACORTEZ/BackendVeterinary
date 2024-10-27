@@ -25,6 +25,12 @@ export class VetdocController {
     ) {
         return await this.vetdocService.createRegVac(dto, userId, ip);
     }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('vacunas') // // {{local}}/vetdoc/vacunas
+    async leerVacunas(@Usuario() { userId, ip }: { userId: number; ip: string }) {
+        return await this.vetdocService.getVacunas(userId, ip);
+    }
     
     @HttpCode(HttpStatus.OK)
     @Get('regvac/:mascotaID') // // {{local}}/vetdoc/regvac/id

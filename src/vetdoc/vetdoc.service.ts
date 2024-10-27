@@ -30,6 +30,20 @@ export class VetdocService {
             MascotaID: result.MascotaID
         };
     }
+
+    async getVacunas(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                "VacunaID" AS "ID",
+                "NombreVacuna" AS "Vacuna",
+                "Descripcion",
+                "Laboratorio",
+                "Tipo",
+                "EdadMinima"
+            FROM "vacuna"
+        `;    
+    }
     
     async getRegVacMascota(mascotaID: number, userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarRegVac, ipDir);
@@ -47,4 +61,6 @@ export class VetdocService {
             WHERE m."MascotaID" = ${mascotaID};
         `;
     }
+
+
 }
