@@ -12,7 +12,7 @@ export class ClientService {
         const reserva = this.prisma.reservacion.create({
             data: {
                 Motivo: dto.Motivo,
-                UsuarioID: dto.UsuarioID,
+                UsuarioID: userId,
                 FechaHoraReservada: dto.FechaHoraReservada
             }
         });
