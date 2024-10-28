@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { ExampleModule } from './example/example.module';
-import { AdminModule } from './admin/admin.module';
 import { ClientModule } from './client/client.module';
 import { VetdocModule } from './vetdoc/vetdoc.module';
+import { ExampleModule } from './example/example.module';
+import { AppController } from './app.controller';
 
 
 @Module({

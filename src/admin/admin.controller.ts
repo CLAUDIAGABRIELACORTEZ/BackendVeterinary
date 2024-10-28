@@ -79,4 +79,16 @@ export class AdminController {
         }
         return await serviceMetodo.call(this.admService, dto, userId, ip);
     }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('reservacion')
+    createReservacion(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return "Reservacion creada";
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Patch('reservacion')
+    updateReservacion(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return "Reservacion creada";
+    }
 }

@@ -1,1 +1,1 @@
-export * from './getMascotas.dto';
+export * from './createReservacion.dto';

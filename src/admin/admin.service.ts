@@ -48,47 +48,51 @@ export class AdminService {
     }
 
     async crearPersonal(dto: CreatePersonalDto, userId: number, ipDir: string) {
-        await this.verificarEmail(dto.Email);
-        const personal = await this.prisma.personal.create({
-            data: {
-                NombreCompleto: dto.NombreCompleto,
-                Telefono: dto.Telefono,
-                Direccion: dto.Direccion,
-                Email: dto.Email,
-                FechaContratacion: parseISO(dto.FechaContratacion.toString()),
-                CargoID: dto.CargoID,
-                ProfesionID: dto.ProfesionID
+        return await this.prisma.$transaction(async (tx) => {
+            await this.verificarEmail(dto.Email);
+            const personal = await tx.personal.create({
+                data: {
+                    NombreCompleto: dto.NombreCompleto,
+                    Telefono: dto.Telefono,
+                    Direccion: dto.Direccion,
+                    Email: dto.Email,
+                    FechaContratacion: parseISO(dto.FechaContratacion.toString()),
+                    CargoID: dto.CargoID,
+                    ProfesionID: dto.ProfesionID
+                }
+            });
+            let usuario;
+            if (dto.CargoID === 2) {
+                usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
             }
+            await this.logAccion(userId, BitacoraAccion.CrearPersonal, ipDir);
+            return {
+                Respuesta: "Personal registrado con éxito",
+                PersonalID: personal.PersonalID,
+                ...(usuario && { UsuarioID: usuario.UsuarioID })
+            };
         });
-        let usuario;
-        if (dto.CargoID === 2) {
-            usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
-        }
-        await this.logAccion(userId, BitacoraAccion.CrearPersonal, ipDir);
-        return {
-            Respuesta: "Personal registrado con éxito",
-            PersonalID: personal.PersonalID,
-            ...(usuario && { UsuarioID: usuario.UsuarioID })
-        };
     }
 
     async crearCliente(dto: CreateClienteDto, userId: number, ipDir: string) {
-        await this.verificarEmail(dto.Email);
-        const cliente = await this.prisma.cliente.create({
-            data: {
-                NombreCompleto: dto.NombreCompleto,
-                Telefono: dto.Telefono,
-                Direccion: dto.Direccion,
-                Email: dto.Email
-            }
+        return await this.prisma.$transaction(async (tx) => {
+            await this.verificarEmail(dto.Email);
+            const cliente = await tx.cliente.create({
+                data: {
+                    NombreCompleto: dto.NombreCompleto,
+                    Telefono: dto.Telefono,
+                    Direccion: dto.Direccion,
+                    Email: dto.Email
+                }
+            });
+            const usuario = await this.crearUsuario('Cliente', cliente.ClienteID, false);
+            await this.logAccion(userId, BitacoraAccion.CrearCliente, ipDir);
+            return {
+                Respuesta: "Cliente registrado con éxito",
+                ClienteID: cliente.ClienteID,
+                UsuarioID: usuario.UsuarioID,
+            };
         });
-        const usuario = await this.crearUsuario('Cliente', cliente.ClienteID, false);
-        await this.logAccion(userId, BitacoraAccion.CrearCliente, ipDir);
-        return {
-            Respuesta: "Cliente registrado con éxito",
-            ClienteID: cliente.ClienteID,
-            UsuarioID: usuario.UsuarioID,
-        };
     }
 
     async crearMascota(dto: CreateMascotaDto, userId: number, ipDir: string) {

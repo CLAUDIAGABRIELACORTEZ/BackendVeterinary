@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CreateReservacionDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 
@@ -6,6 +7,21 @@ import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 @Injectable()
 export class ClientService {
     constructor(private prisma: PrismaService) {}
+
+    async crearReservacion(dto: CreateReservacionDto, userId: number, ipDir: string) {
+        const reserva = this.prisma.reservacion.create({
+            data: {
+                Motivo: dto.Motivo,
+                UsuarioID: dto.UsuarioID,
+                FechaHoraReservada: dto.FechaHoraReservada
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearReservacion, ipDir);
+        return {
+            Mensaje: "Reservación registrada exitosamente",
+            ReservaID: (await reserva).ReservacionID
+        }
+    }
 
     async getMascotas(userId: number, ipDir: string) {
         const usuario = await this.prisma.usuario.findUnique({
