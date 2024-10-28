@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { vacuna_Tipo } from "@prisma/client";
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator"
 
 
 export class CreateVacunaDto {
@@ -17,4 +18,8 @@ export class CreateVacunaDto {
     @IsNotEmpty()
     @IsNumber()
     EdadMinima: number;
+
+    @IsNotEmpty()
+    @IsEnum(vacuna_Tipo)
+    Tipo: vacuna_Tipo;
 }

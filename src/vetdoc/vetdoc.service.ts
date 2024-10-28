@@ -18,6 +18,7 @@ export class VetdocService {
                     Descripcion: dto.Descripcion,
                     Laboratorio: dto.Laboratorio,
                     EdadMinima: dto.EdadMinima,
+                    Tipo: dto.Tipo
                 }
             });
     
