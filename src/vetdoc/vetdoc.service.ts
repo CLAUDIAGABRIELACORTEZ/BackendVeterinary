@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { parseISO } from 'date-fns';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRegvacDto, CreateVacunaDto } from './dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 
 
@@ -71,7 +71,8 @@ export class VetdocService {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
-                m."Nombre" AS "Nombre",
+                m."MascotaID",
+                m."Nombre",
                 r."NombreRaza" AS "Raza",
                 v."NombreVacuna" AS "Vacuna",
                 reg."FechaVacunacion" AS "Fecha_De_Vacunacion",
