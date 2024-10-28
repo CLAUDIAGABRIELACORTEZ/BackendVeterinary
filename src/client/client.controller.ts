@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { ClientService } from './client.service';
@@ -20,5 +20,11 @@ export class ClientController {
     @Post('reservacion')
     createReservacion(@Usuario() { userId, ip }: { userId: number, ip: string }) {
         return "Reservacion creada";
-    }    
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Patch('reservacion')
+    updateReservacion(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return "Reservacion creada";
+    }
 }
