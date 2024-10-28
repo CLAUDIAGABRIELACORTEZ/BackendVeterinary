@@ -188,37 +188,37 @@ model recibo {
 }
 
 model registrodevacunas {
-  RegistroID          Int      @id @default(autoincrement())
-  FechaVacunacion     DateTime @db.Date
-  ProximaFecha        DateTime @db.Date
-  VacunaID            Int      @db.SmallInt
-  MascotaID           Int      @db.SmallInt
-  vacuna              vacuna   @relation(fields: [VacunaID], references: [VacunaID])
-  mascota             mascota  @relation(fields: [MascotaID], references: [MascotaID])
+  RegistroID          Int         @id @default(autoincrement())
+  FechaVacunacion     DateTime    @db.Date
+  ProximaFecha        DateTime    @db.Date
+  VacunaID            Int         @db.SmallInt
+  MascotaID           Int         @db.SmallInt
+  vacuna              vacuna      @relation(fields: [VacunaID], references: [VacunaID])
+  mascota             mascota     @relation(fields: [MascotaID], references: [MascotaID])
 
   @@index([MascotaID], map: "registrodevacunas_MascotaID")
   @@index([VacunaID], map: "VacunaID")
 }
 
 model reservacion {
-  ReservacionID         Int                 @id @default(autoincrement())
-  Motivo                String              @db.VarChar(80)
-  FechaHoraReservada    DateTime            @db.Timestamp(0)
-  Estado                reservacion_Estado? @default(Pendiente)
-  UsuarioID             Int                 @db.SmallInt
+  ReservacionID         Int                   @id @default(autoincrement())
+  Motivo                String                @db.VarChar(80)
+  FechaHoraReservada    DateTime              @db.Timestamp(0)
+  Estado                reservacion_Estado?   @default(Pendiente)
+  UsuarioID             Int                   @db.SmallInt
 
   @@index([UsuarioID], map: "UsuarioID")
 }
 
 model servicio {
-  ServicioID          Int                   @id @default(autoincrement())
-  TipoServicio        servicio_TipoServicio
-  Estado              servicio_Estado?      @default(En_Proceso)
-  FechaHoraInicio     DateTime              @db.Timestamp(0)
-  ReservacionID       Int?
-  MascotaID           Int                   @db.SmallInt
-  PersonalID          Int                   @db.SmallInt
-  personal            personal              @relation(fields: [PersonalID], references: [PersonalID])
+  ServicioID          Int                     @id @default(autoincrement())
+  TipoServicio        servicio_TipoServicio 
+  Estado              servicio_Estado?        @default(En_Proceso)
+  FechaHoraInicio     DateTime                @db.Timestamp(0)
+  ReservacionID       Int?  
+  MascotaID           Int                     @db.SmallInt
+  PersonalID          Int                     @db.SmallInt
+  personal            personal                @relation(fields: [PersonalID], references: [PersonalID])
 
   @@index([MascotaID], map: "MascotaID")
   @@index([PersonalID], map: "servicio_PersonalID")
