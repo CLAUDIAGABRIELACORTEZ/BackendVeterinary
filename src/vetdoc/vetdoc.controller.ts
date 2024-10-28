@@ -40,13 +40,19 @@ export class VetdocController {
     ) {
         return await this.vetdocService.createRegVac(dto, userId, ip);
     }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('regvac')   // {{local}}/vetdoc/regvac
+    async leerRegVac(@Usuario() { userId, ip }: { userId: number; ip: string }) {
+        return await this.vetdocService.leerRegVac(userId, ip);
+    }
     
     @HttpCode(HttpStatus.OK)
     @Get('regvac/:mascotaID')   // {{local}}/vetdoc/regvac/id
-    async leerRegistro(
+    async leerRegVacMascota(
         @Param('mascotaID') mascotaID: number,
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
-        return await this.vetdocService.getRegVacMascota(mascotaID, userId, ip);
+        return await this.vetdocService.leerRegVacMascota(mascotaID, userId, ip);
     }
 }
