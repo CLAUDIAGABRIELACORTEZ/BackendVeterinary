@@ -1,8 +1,7 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { Role, Roles } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
-
+import { Role, Roles } from 'src/auth/decorator';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 
 
 @Controller('example')
@@ -17,7 +16,7 @@ export class ExampleController {
     @Get('vetdoc')          // {{local}}/example/vetdoc
     @Roles(Role.VETDOC)
     getVetDocRoute() {
-        return 'Bienvenido, Vet Doc. Esta ruta es sólo para el veterinario';
+        return 'Bienvenido, Doctor Vet. Esta ruta es sólo para el veterinario';
     }
 
     @Get('cliente')         // {{local}}/example/cliente
@@ -34,6 +33,6 @@ export class ExampleController {
 
     @Get('abierto')         // {{local}}/example/abierto
     getOpenRoute() {        // se puede ingresar a esta ruta sin ningún token
-        return 'Bienvenidos. Esta ruta es abierta para todos.';
+        return 'Bienvenidos. Esta ruta es abierta para todos, sin validación.';
     }
 }

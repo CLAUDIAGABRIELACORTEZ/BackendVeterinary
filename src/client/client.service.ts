@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { CreateReservacionDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { CreateReservacionDto } from './dto';
 
 
 @Injectable()
