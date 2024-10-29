@@ -18,7 +18,23 @@ export class ClientService {
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearReservacion, ipDir);
         return {
-            Mensaje: "Reservación registrada exitosamente",
+            Mensaje: "Reservación registrada exitosamente.",
+            ReservaID: (await reserva).ReservacionID
+        }
+    }
+
+    async cancelarReservacion(userId: number, ipDir: string) {
+        const reserva = this.prisma.reservacion.update({
+            where: {
+                ReservacionID: 1
+            },
+            data: {
+                Estado: 'Cancelada'
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarReservacion, ipDir);
+        return {
+            Mensaje: "Reservación cancelada.",
             ReservaID: (await reserva).ReservacionID
         }
     }
@@ -51,6 +67,34 @@ export class ClientService {
             JOIN cliente c ON m."ClienteID" = c."ClienteID"
             WHERE c."ClienteID" = ${cliente.ClienteID}
             ORDER BY m."MascotaID" ASC;
+        `;
+    }
+
+    // async getReservaciones(userId: number, ipDir: string) {
+    //     await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+    //     return this.prisma.$queryRaw`
+    //         SELECT 
+    //             TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+    //             "Estado"
+    //         FROM reservacion;
+    //     `;
+    // }
+
+    async getReservaciones(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+        const diaActual = new Date();
+        diaActual.setHours(diaActual.getHours() - 4);
+        const formattedDate = diaActual.toISOString().split('T')[0].toString();
+        console.log({formattedDate});
+        return this.prisma.$queryRaw`
+            SELECT 
+                TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+                "Estado"
+            FROM 
+                reservacion
+            WHERE 
+                "Estado" = 'Pendiente' AND
+                DATE("FechaHoraReservada") = CURRENT_DATE;
         `;
     }
 }

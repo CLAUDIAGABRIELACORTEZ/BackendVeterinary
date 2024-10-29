@@ -18,9 +18,15 @@ export class ClientController {
     }
     
     @HttpCode(HttpStatus.OK)
-    @Post('reservacion')
+    @Post('reservacion')    // {{local}}/client/reservacion
     createReservacion(@Body() dto: CreateReservacionDto, @Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.clientService.crearReservacion(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('reservacion')    // {{local}}/client/reservacion
+    getReservaciones(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.clientService.getReservaciones(userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)

@@ -20,9 +20,9 @@ export class CreateReservacionDto {
     // })
     // Estado: reservacion_Estado;
 
-    @IsNotEmpty()
-    @IsInt()
-    @Min(1, { message: 'El ID de usuario debe ser mayor a 0' })
-    @Type(() => Number)
-    UsuarioID: number;
+    // @IsNotEmpty()
+    // @IsInt()
+    // @Min(1, { message: 'El ID de usuario debe ser mayor a 0' })
+    // @Type(() => Number)
+    // UsuarioID: number;
 }
