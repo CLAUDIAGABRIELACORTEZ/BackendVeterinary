@@ -30,6 +30,12 @@ export class ClientController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Get('reservaciones/gral')    // {{local}}/client/reservaciones
+    getReservacionesGral(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.clientService.getReservacionesGral(userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Get('reservacion')    // {{local}}/client/reservacion
     getReservacionCli(@Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.clientService.getReservacionesCli(userId, ip);
