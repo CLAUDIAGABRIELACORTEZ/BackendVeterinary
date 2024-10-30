@@ -1,12 +1,12 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import * as argon from 'argon2';
+import { parseISO } from 'date-fns';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
         UpdateUsuarioDto} from './dto';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { parseISO } from 'date-fns';
-import * as argon from 'argon2';
 
 
 @Injectable()
