@@ -36,6 +36,20 @@ export class AdminController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Get('usuarios')         // {{local}}/admin/usuarios
+    getUsuarios(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.admService.getUsuarios(userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Patch('usuarios')       // {{local}}/admin/usuarios
+    updateUsuario(
+        @Body() dto: UpdateUsuarioDto,
+        @Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.admService.updateUsuario(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Post(':tipoDeEntidad')
     async crearEntidad(
         @Body() dto: CreatePersonalDto | CreateClienteDto | CreateMascotaDto,

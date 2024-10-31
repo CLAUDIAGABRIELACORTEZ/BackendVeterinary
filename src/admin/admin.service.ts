@@ -261,15 +261,10 @@ export class AdminService {
     async getUsuarios(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);
         return this.prisma.$queryRaw`
-            SELECT 
-                m."MascotaID" AS "ID",
-                m."Nombre",
-                m."Sexo",
-                TO_CHAR(m."FechaNacimiento", 'YYYY-MM-DD') AS "Fecha_De_Nacimiento",
-                m."Observaciones",
-                e."NombreEspecie" AS "Especie",
-                r."NombreRaza" AS "Raza",
-                c."ClienteID" AS "DueñoID"
+            SELECT
+                "UsuarioID",
+                "Rol",
+                "Estado"
             FROM usuario
             ORDER BY "UsuarioID" ASC;
         `;
@@ -280,24 +275,12 @@ export class AdminService {
             where: { UsuarioID: dto.UsuarioID },
             data: { Estado: 'Inactivo' }
         });
-        await this.logAccion(userId, BitacoraAccion.ActualizarUsuario, ipDir);
+        await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
         return {
-            Respuesta: "Usuario actualizado con éxito",
+            Respuesta: "Usuario inactivado exitosamente",
             UsuarioID: usuario.UsuarioID,
         };
     }
-
-    // async getReservacionesGral(userId: number, ipDir: string) {
-    //     await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
-    //     return this.prisma.$queryRaw`
-    //         SELECT
-    //             "ReservacionID",
-    //             TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
-    //             "Estado"
-    //         FROM reservacion
-    //         WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") >= CURRENT_DATE;
-    //     `;
-    // }
 
     async getReservacionesGral(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);

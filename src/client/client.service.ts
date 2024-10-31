@@ -73,7 +73,8 @@ export class ClientService {
                 "Estado"
             FROM reservacion
             WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") >= CURRENT_DATE
-            AND "UsuarioID" = ${userId};
+            AND "UsuarioID" = ${userId}
+            ORDER BY "ReservacionID" DESC;
         `;
     }
 

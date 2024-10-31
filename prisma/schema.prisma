@@ -305,6 +305,8 @@ enum tipoaccionbitacora_Accion {
   ListarRegVac
   ActualizarRegVac
   ActualizarUsuario
+  ListarUsuarios
+  ActualizarUsuarios
 }
 
 enum usuario_Rol {
