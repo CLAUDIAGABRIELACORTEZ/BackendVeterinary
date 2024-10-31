@@ -1,12 +1,12 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import * as argon from 'argon2';
+import { parseISO } from 'date-fns';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
         UpdateUsuarioDto} from './dto';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { parseISO } from 'date-fns';
-import * as argon from 'argon2';
 
 
 @Injectable()
@@ -255,6 +255,23 @@ export class AdminService {
             Respuesta: "Mascota actualizada con éxito",
             MascotaID: mascota.MascotaID,
         };
+    }
+
+    async getUsuarios(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                m."MascotaID" AS "ID",
+                m."Nombre",
+                m."Sexo",
+                TO_CHAR(m."FechaNacimiento", 'YYYY-MM-DD') AS "Fecha_De_Nacimiento",
+                m."Observaciones",
+                e."NombreEspecie" AS "Especie",
+                r."NombreRaza" AS "Raza",
+                c."ClienteID" AS "DueñoID"
+            FROM usuario
+            ORDER BY "UsuarioID" ASC;
+        `;
     }
 
     async updateUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {

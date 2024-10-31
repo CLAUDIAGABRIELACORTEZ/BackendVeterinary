@@ -1,12 +1,12 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, 
         HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { CreatePersonalDto, CreateClienteDto, CreateMascotaDto, 
-        UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
-        UpdateUsuarioDto} from './dto';
+    UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
+    UpdateUsuarioDto} from './dto';
 import { AdminService } from './admin.service';
-
+import { JwtGuard, RolesGuard } from 'src/auth/guard';
+import { Role, Roles, Usuario } from 'src/auth/decorator';
+            
 
 @UseGuards(JwtGuard, RolesGuard)
 @Controller('admin')

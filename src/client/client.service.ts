@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateReservacionDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateReservacionDto, UpdateReservacionDto } from './dto';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 
 
@@ -12,13 +12,13 @@ export class ClientService {
         const reserva = this.prisma.reservacion.create({
             data: {
                 Motivo: dto.Motivo,
-                UsuarioID: dto.UsuarioID,
+                UsuarioID: userId,
                 FechaHoraReservada: dto.FechaHoraReservada
             }
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearReservacion, ipDir);
         return {
-            Mensaje: "Reservación registrada exitosamente",
+            Mensaje: "Reservación registrada exitosamente.",
             ReservaID: (await reserva).ReservacionID
         }
     }
@@ -52,5 +52,48 @@ export class ClientService {
             WHERE c."ClienteID" = ${cliente.ClienteID}
             ORDER BY m."MascotaID" ASC;
         `;
+    }
+
+    async getReservacionesGral(userId: number, ipDir: string) {
+        const diaActual = new Date();
+        diaActual.setHours(diaActual.getHours() - 4);
+        const formattedDate = diaActual.toISOString().split('T')[0].toString();
+        console.log({formattedDate});
+        return this.prisma.$queryRaw`
+            SELECT 
+                TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+                "Estado"
+            FROM reservacion
+            WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") >= CURRENT_DATE;
+        `;
+    }
+
+    async getReservacionesCli(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+        const diaActual = new Date();
+        diaActual.setHours(diaActual.getHours() - 4);
+        const formattedDate = diaActual.toISOString().split('T')[0].toString();
+        console.log({formattedDate});
+        return this.prisma.$queryRaw`
+            SELECT
+                "ReservacionID",
+                TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+                "Estado"
+            FROM reservacion
+            WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") >= CURRENT_DATE
+            AND "UsuarioID" = ${userId};
+        `;
+    }
+
+    async updateReservacion(dto: UpdateReservacionDto, userId: number, ipDir: string) {
+        const reserva = await this.prisma.reservacion.update({
+            where: { ReservacionID: dto.ReservacionID },
+            data: { Estado: 'Cancelada' }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarReservacion, ipDir);
+        return {
+            Respuesta : "Reservación cancelada",
+            ReservaID : reserva.ReservacionID
+        }
     }
 }
