@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
         UpdateUsuarioDto} from './dto';
+        import { UpdateReservacionDto } from 'src/client/dto';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 
 
@@ -284,5 +285,46 @@ export class AdminService {
             Respuesta: "Usuario actualizado con éxito",
             UsuarioID: usuario.UsuarioID,
         };
+    }
+
+    // async getReservacionesGral(userId: number, ipDir: string) {
+    //     await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+    //     return this.prisma.$queryRaw`
+    //         SELECT
+    //             "ReservacionID",
+    //             TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+    //             "Estado"
+    //         FROM reservacion
+    //         WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") >= CURRENT_DATE;
+    //     `;
+    // }
+
+    async getReservacionesGral(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT
+                r."ReservacionID",
+                TO_CHAR((r."FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+                u."UsuarioID",
+                c."NombreCompleto" AS "NombreCliente",
+                r."Estado"
+            FROM reservacion r
+            JOIN usuario u ON r."UsuarioID" = u."UsuarioID"
+            JOIN cliente c ON u."ClienteID" = c."ClienteID"
+            WHERE r."Estado" = 'Pendiente'
+            AND DATE(r."FechaHoraReservada") >= CURRENT_DATE;
+        `;
+    }
+
+    async updateReservacion(dto: UpdateReservacionDto, userId: number, ipDir: string) {
+        const reserva = await this.prisma.reservacion.update({
+            where: { ReservacionID: dto.ReservacionID },
+            data: { Estado: 'Cancelada' }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarReservacion, ipDir);
+        return {
+            Respuesta : "Reservación cancelada",
+            ReservaID : reserva.ReservacionID
+        }
     }
 }
