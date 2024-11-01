@@ -395,7 +395,7 @@ export class AdminService {
         return this.prisma.$queryRaw`
             SELECT
                 r."ReservacionID",
-                TO_CHAR((r."FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+                TO_CHAR((r."FechaHoraReservada"), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
                 u."UsuarioID",
                 c."NombreCompleto" AS "NombreCliente",
                 r."Estado"
