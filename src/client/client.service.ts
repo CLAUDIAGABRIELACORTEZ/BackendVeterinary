@@ -61,7 +61,7 @@ export class ClientService {
         console.log({formattedDate});
         return this.prisma.$queryRaw`
             SELECT 
-                TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+                TO_CHAR(("FechaHoraReservada"), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
                 "Estado"
             FROM reservacion
             WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") >= CURRENT_DATE;
