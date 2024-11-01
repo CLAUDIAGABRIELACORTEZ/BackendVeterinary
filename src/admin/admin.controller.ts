@@ -5,8 +5,9 @@ import { CreatePersonalDto, CreateClienteDto, CreateMascotaDto,
     UpdateUsuarioDto} from './dto';
 import { AdminService } from './admin.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
+import { UpdateReservacionDto } from 'src/client/dto';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-            
+
 
 @UseGuards(JwtGuard, RolesGuard)
 @Controller('admin')
@@ -18,6 +19,22 @@ export class AdminController {
     @Get('testing') // $argon2id$v=19$m=16,t=2,p=1$ZzVuTmNJM0FNejFPc3Rzcg$xpurD+2skNn2yfW5q8SQHQ - admclaveingreso
     async getGreetings() {
         return 'Saludos desde la zona de administrador.';
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Patch('reservacion')       // {{local}}/admin/reservacion
+    updateReservacion(
+        @Body() dto: UpdateReservacionDto,
+        @Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.admService.updateReservacion(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Patch('usuarios')       // {{local}}/admin/usuarios
+    updateUsuario(
+        @Body() dto: UpdateUsuarioDto,
+        @Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.admService.updateUsuario(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -47,10 +64,12 @@ export class AdminController {
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
         const serviceMetodo = {
-            personal: this.admService.getPersonal, // {{local}}/admin/personal
-            clientes: this.admService.getClientes, // {{local}}/admin/clientes
-            mascotas: this.admService.getMascotas, // {{local}}/admin/mascotas
-            logs: this.admService.getBitacoraLogs, // {{local}}/admin/logs
+            personal: this.admService.getPersonal,
+            clientes: this.admService.getClientes,
+            mascotas: this.admService.getMascotas,
+            logs: this.admService.getBitacoraLogs,
+            reservacion: this.admService.getReservacionesGral,
+            usuarios: this.admService.getUsuarios
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
@@ -78,17 +97,5 @@ export class AdminController {
             throw new BadRequestException(`Tipo de entidad inválido: ${tipoDeEntidad}`);
         }
         return await serviceMetodo.call(this.admService, dto, userId, ip);
-    }
-
-    @HttpCode(HttpStatus.OK)
-    @Post('reservacion')
-    createReservacion(@Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return "Reservacion creada";
-    }
-
-    @HttpCode(HttpStatus.OK)
-    @Patch('reservacion')
-    updateReservacion(@Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return "Reservacion creada";
     }
 }

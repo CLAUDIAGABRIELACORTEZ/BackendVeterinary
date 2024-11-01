@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Ip, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
 import { CreateReservacionDto } from './dto';
 import { ClientService } from './client.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';

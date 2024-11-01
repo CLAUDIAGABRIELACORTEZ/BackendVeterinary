@@ -55,10 +55,6 @@ export class ClientService {
     }
 
     async getReservacionesGral(userId: number, ipDir: string) {
-        const diaActual = new Date();
-        diaActual.setHours(diaActual.getHours() - 4);
-        const formattedDate = diaActual.toISOString().split('T')[0].toString();
-        console.log({formattedDate});
         return this.prisma.$queryRaw`
             SELECT 
                 TO_CHAR(("FechaHoraReservada"), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
@@ -70,10 +66,6 @@ export class ClientService {
 
     async getReservacionesCli(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
-        const diaActual = new Date();
-        diaActual.setHours(diaActual.getHours() - 4);
-        const formattedDate = diaActual.toISOString().split('T')[0].toString();
-        console.log({formattedDate});
         return this.prisma.$queryRaw`
             SELECT
                 "ReservacionID",
@@ -81,7 +73,8 @@ export class ClientService {
                 "Estado"
             FROM reservacion
             WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") >= CURRENT_DATE
-            AND "UsuarioID" = ${userId};
+            AND "UsuarioID" = ${userId}
+            ORDER BY "ReservacionID" DESC;
         `;
     }
 
