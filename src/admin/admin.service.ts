@@ -207,12 +207,12 @@ export class AdminService {
               b."BitacoraID" AS "ID",
               b."UsuarioID" AS "UsuarioID",
               t."Accion" AS "Accion",
-              TO_CHAR((b."FechaHora" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+              TO_CHAR((b."FechaHora"), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
               b."IPDir" AS "IPDir"
             FROM bitacora b
             JOIN tipoaccionbitacora t 
             ON b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID"
-            ORDER BY b."FechaHora" DESC;
+            ORDER BY b."BitacoraID" DESC;
         `;
     }
 
