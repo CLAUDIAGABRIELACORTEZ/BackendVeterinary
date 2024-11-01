@@ -5,8 +5,8 @@ import { CreatePersonalDto, CreateClienteDto, CreateMascotaDto,
     UpdateUsuarioDto} from './dto';
 import { AdminService } from './admin.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
-import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { UpdateReservacionDto } from 'src/client/dto';
+import { Role, Roles, Usuario } from 'src/auth/decorator';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -22,23 +22,11 @@ export class AdminController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Get('reservacion')         // {{local}}/admin/reservacion
-    getReservacionesGral(@Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return this.admService.getReservacionesGral(userId, ip);
-    }
-
-    @HttpCode(HttpStatus.OK)
     @Patch('reservacion')       // {{local}}/admin/reservacion
     updateReservacion(
         @Body() dto: UpdateReservacionDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.admService.updateReservacion(dto, userId, ip);
-    }
-
-    @HttpCode(HttpStatus.OK)
-    @Get('usuarios')         // {{local}}/admin/usuarios
-    getUsuarios(@Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return this.admService.getUsuarios(userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -76,10 +64,12 @@ export class AdminController {
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
         const serviceMetodo = {
-            personal: this.admService.getPersonal, // {{local}}/admin/personal
-            clientes: this.admService.getClientes, // {{local}}/admin/clientes
-            mascotas: this.admService.getMascotas, // {{local}}/admin/mascotas
-            logs: this.admService.getBitacoraLogs, // {{local}}/admin/logs
+            personal: this.admService.getPersonal,
+            clientes: this.admService.getClientes,
+            mascotas: this.admService.getMascotas,
+            logs: this.admService.getBitacoraLogs,
+            reservacion: this.admService.getReservacionesGral,
+            usuarios: this.admService.getUsuarios
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
