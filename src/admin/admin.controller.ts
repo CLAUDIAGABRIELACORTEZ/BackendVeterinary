@@ -26,6 +26,7 @@ export class AdminController {
     updateReservacion(
         @Body() dto: UpdateReservacionDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
+        console.log({userId, ip});
         return this.admService.updateReservacion(dto, userId, ip);
     }
 
