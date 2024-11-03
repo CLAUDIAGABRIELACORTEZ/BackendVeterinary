@@ -76,7 +76,7 @@ export class AdminController {
         if (!serviceMetodo) {
             throw new BadRequestException(`Tipo de entidad inválido: ${tipoDeEntidad}`);
         }
-
+        console.log({userId, ip});
         return await serviceMetodo.call(this.admService, userId, ip);
     }
 

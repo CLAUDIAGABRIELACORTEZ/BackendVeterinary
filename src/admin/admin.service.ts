@@ -216,28 +216,6 @@ export class AdminService {
         `;
     }
 
-    // async updatePersonal(dto: UpdatePersonalDto, userId: number, ipDir: string) {
-    //     const dataActualizada = {};
-    //     if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
-    //     if (dto.Telefono !== undefined && dto.Telefono !== "") dataActualizada['Telefono'] = dto.Telefono;
-    //     if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
-    //     if (dto.CargoID !== undefined && dto.CargoID !== "") dataActualizada['CargoID'] = parseInt(dto.CargoID);
-    //     const personal = await this.prisma.personal.update({
-    //         where: { PersonalID: dto.ID },
-    //         data: dataActualizada
-    //     });
-    //     let usuario;
-    //     if (parseInt(dto.CargoID) === 2) {
-    //         usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
-    //     }
-    //     await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
-    //     return {
-    //         Respuesta: "Personal actualizado con éxito",
-    //         PersonalID: personal.PersonalID,
-    //         ...(usuario && { UsuarioID: usuario.UsuarioID })
-    //     };
-    // }
-
     async updatePersonal(dto: UpdatePersonalDto, userId: number, ipDir: string) {
         const dataActualizada: any = {};
         if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
@@ -269,23 +247,6 @@ export class AdminService {
             };
         });
     }
-    
-
-    // async updateCliente(dto: UpdateClienteDto, userId: number, ipDir: string) {
-    //     const dataActualizada = {};
-    //     if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
-    //     if (dto.Telefono !== undefined && dto.Telefono !== "") dataActualizada['Telefono'] = dto.Telefono;
-    //     if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
-    //     const cliente = await this.prisma.cliente.update({
-    //         where: { ClienteID: dto.ClienteID },
-    //         data: dataActualizada
-    //     });
-    //     await this.logAccion(userId, BitacoraAccion.ActualizarCliente, ipDir);
-    //     return {
-    //         Respuesta: "Cliente actualizado con éxito",
-    //         ClienteID: cliente.ClienteID,
-    //     };
-    // }
 
     async updateCliente(dto: UpdateClienteDto, userId: number, ipDir: string) {
         const dataActualizada: any = {};
@@ -307,24 +268,6 @@ export class AdminService {
             };
         });
     }
-    
-
-    // async updateMascota(dto: UpdateMascotaDto, userId: number, ipDir: string) {
-    //     const dataActualizada = {};
-    //     if (dto.Nombre !== undefined && dto.Nombre !== "") dataActualizada['Nombre'] = dto.Nombre;
-    //     if (dto.Sexo !== undefined && dto.Sexo !== "") dataActualizada['Sexo'] = dto.Sexo;
-    //     if (dto.Observaciones !== undefined && dto.Observaciones !== "") dataActualizada['Observaciones'] = dto.Observaciones;
-    //     if (dto.ClienteID !== undefined && dto.ClienteID !== "") dataActualizada['ClienteID'] = parseInt(dto.ClienteID);
-    //     const mascota = await this.prisma.mascota.update({
-    //         where: { MascotaID: dto.ID },
-    //         data: dataActualizada,
-    //     });
-    //     await this.logAccion(userId, BitacoraAccion.ActualizarMascota, ipDir);
-    //     return {
-    //         Respuesta: "Mascota actualizada con éxito",
-    //         MascotaID: mascota.MascotaID,
-    //     };
-    // }
 
     async updateMascota(dto: UpdateMascotaDto, userId: number, ipDir: string) {
         const dataActualizada: any = {};
@@ -357,21 +300,10 @@ export class AdminService {
                 "Rol",
                 "Estado"
             FROM usuario
+            WHERE "Estado" = 'Activo'
             ORDER BY "UsuarioID" ASC;
         `;
     }
-
-    // async updateUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
-    //     const usuario = await this.prisma.usuario.update({
-    //         where: { UsuarioID: dto.UsuarioID },
-    //         data: { Estado: 'Inactivo' }
-    //     });
-    //     await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
-    //     return {
-    //         Respuesta: "Usuario inactivado exitosamente",
-    //         UsuarioID: usuario.UsuarioID,
-    //     };
-    // }
 
     async updateUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
         return await this.prisma.$transaction(async (prisma) => {
