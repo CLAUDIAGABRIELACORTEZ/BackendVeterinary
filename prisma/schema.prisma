@@ -287,12 +287,16 @@ enum servicio_TipoServicio {
 enum tipoaccionbitacora_Accion {
   Login
   Logout
+  CrearProfesion
+  LeerProfesion
   CrearPersonal
   ListarPersonal
   ActualizarPersonal
   CrearCliente
   ListarClientes
   ActualizarCliente
+  CrearRaza
+  LeerRaza
   CrearMascota
   ListarMascotas
   ActualizarMascota
@@ -304,9 +308,26 @@ enum tipoaccionbitacora_Accion {
   CrearRegVac
   ListarRegVac
   ActualizarRegVac
-  ActualizarUsuario
   ListarUsuarios
   ActualizarUsuarios
+  CrearPeluqueria
+  LeerPeluqueria
+  ActualizarPeluqueria
+  CearReceta
+  LeerReceta
+  ActualizarReceta
+  CrearAnalisis
+  LeerAnalisis
+  ActualizarAnalisis
+  CrearConsulta
+  LeerConsulta
+  ActualizarConsulta
+  CrearInternacion
+  LeerInternacion
+  ActualizarInternacion
+  CrearCirugia
+  LeerCirugua
+  ActualizarCirugia
 }
 
 enum usuario_Rol {
