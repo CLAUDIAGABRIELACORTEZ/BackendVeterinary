@@ -302,7 +302,7 @@ enum tipoaccionbitacora_Accion {
   ActualizarMascota
   CrearReservacion
   ListarReservacion
-  ActualizarReservacion
+  CancelarReservacion
   CrearVacuna
   ListarVacunas
   CrearRegVac
@@ -310,6 +310,9 @@ enum tipoaccionbitacora_Accion {
   ActualizarRegVac
   ListarUsuarios
   ActualizarUsuarios
+  CrearServicio
+  LeerServicio
+  ActualizarServicio
   CrearPeluqueria
   LeerPeluqueria
   ActualizarPeluqueria
