@@ -1,13 +1,13 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
-import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { CreateRegvacDto, CreateVacunaDto } from './dto';
+import { Role, Roles, Usuario } from 'src/auth/decorator';
 
 
 @UseGuards(JwtGuard, RolesGuard)
-@Controller('vetdoc')
 @Roles(Role.VETDOC)
+@Controller('vetdoc')
 export class VetdocController {
     constructor(private readonly vetdocService: VetdocService) {}
 
