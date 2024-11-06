@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { parseISO } from 'date-fns';
 import { UpdateReservacionDto } from 'src/client/dto';
-import { CreateRegvacDto, CreateVacunaDto } from './dto';
+import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 
@@ -32,7 +32,6 @@ export class VetdocService {
 
     async createRegVac(dto: CreateRegvacDto, userId: number, ipDir: string) {
         const result = await this.prisma.$transaction(async (prisma) => {
-            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRegVac, ipDir);
             const regVac = await prisma.registrodevacunas.create({
                 data: {
                     FechaVacunacion: parseISO(dto.FechaVacunacion.toISOString()),
@@ -41,6 +40,7 @@ export class VetdocService {
                     VacunaID: dto.VacunaID
                 }
             });
+            await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRegVac, ipDir);
             return regVac;
         });
         return {
@@ -48,6 +48,35 @@ export class VetdocService {
             RegvacID: result.RegistroID,
             MascotaID: result.MascotaID
         };
+    }
+
+    async createServPeluqueria(dto: CreatePeluqueriaDto, userId: number, ipDir: string) {
+        const reserva = await this.prisma.reservacion.update({
+            where: { ReservacionID: dto.ReservacionID },
+            data: { Estado: 'Realizada' }
+        });
+        const servicio = await this.prisma.servicio.create({
+            data: {
+                TipoServicio: 'Peluqueria',
+                FechaHoraInicio: Date(),
+                MascotaID: dto.MascotaID,
+                PersonalID: userId,
+                ReservacionID: reserva.ReservacionID
+            }
+        });
+        const peluqueria = await this.prisma.peluqueria.create({
+            data: {
+                TipoCorte: dto.TipoCorte,
+                Lavado: dto.Lavado,
+                ServicioID: servicio.ServicioID
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioPeluqueria, ipDir);
+        return {
+            Message: "Servicio registrado exitosamente",
+            ServicioID: servicio.ServicioID,
+            PeluqueriaID: peluqueria.ID
+        }
     }
 
     async getVacunas(userId: number, ipDir: string) {
@@ -101,7 +130,8 @@ export class VetdocService {
     async getReservacionesGral(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
         return this.prisma.$queryRaw`
-            SELECT 
+            SELECT
+                "ReservacionID",
                 TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
                 "Estado"
             FROM reservacion
