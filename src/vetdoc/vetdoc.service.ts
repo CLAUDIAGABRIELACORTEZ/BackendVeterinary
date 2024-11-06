@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { parseISO } from 'date-fns';
+import { UpdateReservacionDto } from 'src/client/dto';
 import { CreateRegvacDto, CreateVacunaDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { UpdateReservacionDto } from 'src/client/dto';
 
 
 @Injectable()

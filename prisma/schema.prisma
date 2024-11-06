@@ -14,12 +14,14 @@ datasource db {
 }
 
 model analisisclinico {
-  AnalisisID        Int                           @id @default(autoincrement())
-  TipoAnalisis      String                        @db.VarChar(100)
-  FechaAnalisis     DateTime                      @db.Date
-  Resultado         analisisclinico_Resultado?    @default(Normal)
+  ID                Int                            @id @default(autoincrement())
+  TipoAnalisis      String                         @db.VarChar(100)
+  FechaAnalisis     DateTime                       @db.Date
+  Resultado         analisisclinico_Resultado?     @default(Normal)
   InternacionID     Int?
+  internaciones     internacion?                   @relation(fields: [InternacionID], references: [ID])
   ConsultaID        Int?
+  consultas         consultamedica?                @relation(fields: [ConsultaID], references: [ID])
 
   @@index([ConsultaID], map: "analisisclinico_ConsultaID")  
   @@index([InternacionID], map: "analisisclinico_InternacionID")
@@ -45,11 +47,12 @@ model cargo {
 }
 
 model cirugia {
-  CirugiaID           Int          @id @default(autoincrement())
-  TipoDeCirugia       String       @db.VarChar(50)
-  FechaHoraTermino    DateTime?    @db.Timestamp(0)
-  Notas               String       @db.VarChar(500)
-  ServicioID          Int
+  ID                  Int             @id @default(autoincrement())
+  TipoDeCirugia       String          @db.VarChar(50)
+  Notas               String          @db.VarChar(500)
+  ServicioID          Int   
+  servicio            servicio        @relation(fields: [ServicioID], references: [ServicioID])
+  internaciones       internacion[]
 
   @@index([ServicioID], map: "cirugia_ServicioID")
 }
@@ -65,45 +68,52 @@ model cliente {
 }
 
 model consultamedica {
-  ConsultaID    Int         @id @default(autoincrement())
-  Peso          Decimal     @db.Decimal(6, 2)
-  Temperatura   Decimal     @db.Decimal(6, 2)
-  Diagnostico   String      @db.VarChar(500)
-  Tratamiento   String?     @db.VarChar(500)
-  ServicioID    Int
-  servicio      servicio    @relation(fields: [ServicioID], references: [ServicioID])
+  ID              Int             @id @default(autoincrement())
+  Peso            Decimal         @db.Decimal(6, 2)
+  Temperatura     Decimal         @db.Decimal(6, 2)
+  Diagnostico     String          @db.VarChar(500)
+  Tratamiento     String?         @db.VarChar(500)
+  ServicioID      Int   
+  servicio        servicio        @relation(fields: [ServicioID], references: [ServicioID])
+  analisis        analisisclinico[]
+  recetas         receta[]
 
   @@index([ServicioID], map: "consultamedica_ServicioID")
 }
 
 model detallerecibo {
-  DetalleReciboID   Int        @id @default(autoincrement())
-  ReciboID          Int  
-  ServicioID        Int  
-  Cantidad          Int        @default(1)
-  PrecioUnitario    Decimal    @db.Decimal(6, 2)
-  Subtotal          Decimal    @db.Decimal(8, 2)
+  ID                  Int           @id @default(autoincrement())
+  ReciboID            Int
+  recibos             recibo        @relation(fields: [ReciboID], references: [ID])
+  ServicioID          Int?
+  servicios           servicio?     @relation(fields: [ServicioID], references: [ServicioID])
+  Cantidad            Int           @default(1)
+  PrecioUnitario      Decimal       @db.Decimal(6, 2)
+  Subtotal            Decimal       @db.Decimal(8, 2)
 
   @@index([ReciboID], map: "ReciboID")
   @@index([ServicioID], map: "detallerecibo_ServicioID")
 }
 
 model especie {
-  EspecieID         Int       @id @default(autoincrement()) @db.SmallInt
-  NombreEspecie     String    @unique(map: "NombreEspecie") @db.VarChar(20)
+  EspecieID         Int         @id @default(autoincrement()) @db.SmallInt
+  NombreEspecie     String      @unique(map: "NombreEspecie") @db.VarChar(20)
   razas             raza[]
 }
 
 model internacion {
-  InternacionID         Int          @id @default(autoincrement())
-  MotivoPrincipal       String       @db.VarChar(200)
-  PesoEntrada           Decimal      @db.Decimal(6, 2)
-  TemperaturaEntrada    Decimal      @db.Decimal(6, 2)
-  PesoSalida            Decimal?     @db.Decimal(6, 2)
-  TemperaturaSalida     Decimal?     @db.Decimal(6, 2)
-  FechaHoraSalida       DateTime?    @db.Timestamp()
-  ServicioID            Int
+  ID                    Int                  @id @default(autoincrement())
+  NotasProgreso         String               @db.VarChar(1500)
+  PesoEntrada           Decimal              @db.Decimal(6, 2)
+  TemperaturaEntrada    Decimal              @db.Decimal(6, 2)
+  PesoSalida            Decimal?             @db.Decimal(6, 2)
+  TemperaturaSalida     Decimal?             @db.Decimal(6, 2)
+  ServicioID            Int?     
+  servicio              servicio?            @relation(fields: [ServicioID], references: [ServicioID])
   CirugiaID             Int?
+  cirugia               cirugia?             @relation(fields: [CirugiaID], references: [ID])
+  analisis              analisisclinico[]
+  recetas               receta[]
 
   @@index([CirugiaID], map: "CirugiaID")
   @@index([ServicioID], map: "internacion_ServicioID")
@@ -127,7 +137,7 @@ model mascota {
 }
 
 model peluqueria {
-  PeluqueriaID    Int         @id @default(autoincrement())
+  ID              Int         @id @default(autoincrement())
   TipoCorte       String      @db.VarChar(50)
   Lavado          Boolean
   ServicioID      Int
@@ -137,17 +147,17 @@ model peluqueria {
 }
 
 model personal {
-  PersonalID            Int          @id @default(autoincrement()) @db.SmallInt
-  NombreCompleto        String       @db.VarChar(60)
-  Telefono              String       @db.VarChar(30)
-  Direccion             String       @db.VarChar(100)
-  FechaContratacion     DateTime     @db.Date
-  Activo                Boolean      @default(true)
-  Email                 String       @unique(map: "UniquePersonalEmail") @db.VarChar(50)
-  CargoID               Int          @db.SmallInt
-  cargo                 cargo        @relation(fields: [CargoID], references: [CargoID])
-  ProfesionID           Int          @db.SmallInt
-  profesion             profesion    @relation(fields: [ProfesionID], references: [ProfesionID])
+  PersonalID            Int           @id @default(autoincrement()) @db.SmallInt
+  NombreCompleto        String        @db.VarChar(60)
+  Telefono              String        @db.VarChar(30)
+  Direccion             String        @db.VarChar(100)
+  FechaContratacion     DateTime      @db.Date
+  Activo                Boolean       @default(true)
+  Email                 String        @unique(map: "UniquePersonalEmail") @db.VarChar(50)
+  CargoID               Int           @db.SmallInt
+  cargo                 cargo         @relation(fields: [CargoID], references: [CargoID])
+  ProfesionID           Int           @db.SmallInt
+  profesion             profesion     @relation(fields: [ProfesionID], references: [ProfesionID])
   servicios             servicio[]
   usuario               usuario?
 
@@ -172,61 +182,68 @@ model raza {
 }
 
 model receta {
-  RecetaID        Int       @id @default(autoincrement())
-  Medicamento     String    @db.VarChar(100)
-  Dosis           String    @db.VarChar(50)
-  Indicaciones    String    @db.VarChar(200)
-  InternacionID   Int?
-  ConsultaID      Int?
+  ID                  Int                @id @default(autoincrement())
+  Medicamento         String             @db.VarChar(100)
+  Dosis               String             @db.VarChar(50)
+  Indicaciones        String             @db.VarChar(200)
+  InternacionID       Int?
+  internaciones       internacion?       @relation(fields: [InternacionID], references: [ID])
+  ConsultaID          Int?
+  consultas           consultamedica?    @relation(fields: [ConsultaID], references: [ID])
 
   @@index([ConsultaID], map: "ConsultaID")
   @@index([InternacionID], map: "InternacionID")
 }
 
 model recibo {
-  ReciboID        Int         @id @default(autoincrement())
-  FechaEmision    DateTime    @default(now()) @db.Timestamp(0)
-  Total           Decimal     @db.Decimal(10, 2)
+  ID                Int             @id @default(autoincrement())
+  FechaEmision      DateTime        @default(now()) @db.Timestamp(0)
+  Total             Decimal         @db.Decimal(10, 2)
+  detalles          detallerecibo[]
 }
 
 model registrodevacunas {
-  RegistroID          Int         @id @default(autoincrement())
-  FechaVacunacion     DateTime    @db.Date
-  ProximaFecha        DateTime    @db.Date
-  VacunaID            Int         @db.SmallInt
-  MascotaID           Int         @db.SmallInt
-  vacuna              vacuna      @relation(fields: [VacunaID], references: [VacunaID])
-  mascota             mascota     @relation(fields: [MascotaID], references: [MascotaID])
+  RegistroID          Int            @id @default(autoincrement())
+  FechaVacunacion     DateTime       @db.Date
+  ProximaFecha        DateTime?      @db.Date
+  VacunaID            Int            @db.SmallInt
+  vacuna              vacuna         @relation(fields: [VacunaID], references: [VacunaID])
+  MascotaID           Int            @db.SmallInt
+  mascota             mascota        @relation(fields: [MascotaID], references: [MascotaID])
 
   @@index([MascotaID], map: "registrodevacunas_MascotaID")
   @@index([VacunaID], map: "VacunaID")
 }
 
 model reservacion {
-  ReservacionID         Int                    @id @default(autoincrement())
-  Motivo                String                 @db.VarChar(80)
-  FechaHoraReservada    DateTime               @db.Timestamp(0)
-  Estado                reservacion_Estado?    @default(Pendiente)
-  UsuarioID             Int                    @db.SmallInt
-  usuario               usuario                @relation(fields: [UsuarioID], references: [UsuarioID])
+  ReservacionID         Int                     @id @default(autoincrement())
+  Motivo                String                  @db.VarChar(80)
+  FechaHoraReservada    DateTime                @db.Timestamp(0)
+  Estado                reservacion_Estado?     @default(Pendiente)
+  UsuarioID             Int                     @db.SmallInt
+  usuario               usuario                 @relation(fields: [UsuarioID], references: [UsuarioID])
   servicio              servicio[]
 
   @@index([UsuarioID], map: "UsuarioID")
 }
 
 model servicio {
-  ServicioID          Int                     @id @default(autoincrement())
-  TipoServicio        servicio_TipoServicio 
-  Estado              servicio_Estado?        @default(En_Proceso)
-  FechaHoraInicio     DateTime                @db.Timestamp(0)
-  ReservacionID       Int
-  reservacion         reservacion             @relation(fields: [ReservacionID], references: [ReservacionID])  
-  MascotaID           Int                     @db.SmallInt
-  mascota             mascota                 @relation(fields: [MascotaID], references: [MascotaID])
-  PersonalID          Int                     @db.SmallInt
-  personal            personal                @relation(fields: [PersonalID], references: [PersonalID])
+  ServicioID          Int                       @id @default(autoincrement())
+  TipoServicio        servicio_TipoServicio   
+  Estado              servicio_Estado?          @default(En_Proceso)
+  FechaHoraInicio     DateTime                  @db.Timestamp(0)
+  FechaHoraFin        DateTime?                 @db.Timestamp(0)
+  ReservacionID       Int?  
+  reservacion         reservacion?              @relation(fields: [ReservacionID], references: [ReservacionID])  
+  MascotaID           Int                       @db.SmallInt
+  mascota             mascota                   @relation(fields: [MascotaID], references: [MascotaID])
+  PersonalID          Int                       @db.SmallInt
+  personal            personal                  @relation(fields: [PersonalID], references: [PersonalID])
   peluqueria          peluqueria[]
   consultas           consultamedica[]
+  cirugias            cirugia[]
+  internaciones       internacion[]
+  detalles            detallerecibo[]
 
   @@index([MascotaID], map: "MascotaID")
   @@index([PersonalID], map: "servicio_PersonalID")
@@ -234,9 +251,9 @@ model servicio {
 }
 
 model tipoaccionbitacora {
-  TipoAccionBitacoraID    Int                       @id @default(autoincrement()) @db.SmallInt
-  Accion                  tipoaccionbitacora_Accion
-  bitacoras               bitacora[]
+  TipoAccionBitacoraID      Int                       @id @default(autoincrement()) @db.SmallInt
+  Accion                    tipoaccionbitacora_Accion
+  bitacoras                 bitacora[]
 }
 
 model usuario {
@@ -258,12 +275,12 @@ model usuario {
 }
 
 model vacuna {
-  VacunaID            Int             @id @default(autoincrement()) @db.SmallInt
-  NombreVacuna        String          @db.VarChar(50)
-  Descripcion         String          @db.VarChar(50)
-  Laboratorio         String          @db.VarChar(50)
-  Tipo                vacuna_Tipo?    @default(Canina)
-  EdadMinima          Int             @db.SmallInt
+  VacunaID            Int                   @id @default(autoincrement()) @db.SmallInt
+  NombreVacuna        String                @db.VarChar(50)
+  Descripcion         String                @db.VarChar(50)
+  Laboratorio         String                @db.VarChar(50)
+  Tipo                vacuna_Tipo?          @default(Canina)
+  EdadMinima          Int                   @db.SmallInt
   registroDeVacunas   registrodevacunas[]
 }
 
@@ -309,29 +326,34 @@ enum tipoaccionbitacora_Accion {
   ListarRegVac
   ActualizarRegVac
   ListarUsuarios
-  ActualizarUsuarios
-  CrearServicio
-  LeerServicio
-  ActualizarServicio
-  CrearPeluqueria
-  LeerPeluqueria
-  ActualizarPeluqueria
+  DesactivarUsuario
+  CrearServicioPeluqueria
+  LeerServicioPeluqueria
+  FinalizarServicioPeluqueria
   CearReceta
   LeerReceta
   ActualizarReceta
   CrearAnalisis
   LeerAnalisis
   ActualizarAnalisis
-  CrearConsulta
-  LeerConsulta
-  ActualizarConsulta
-  CrearInternacion
-  LeerInternacion
-  ActualizarInternacion
-  CrearCirugia
-  LeerCirugua
-  ActualizarCirugia
+  CrearServicioConsulta
+  LeerServicioConsulta
+  ActualizarServicioConsulta
+  FinalizarServicioConsulta
+  CrearServicioCirugia
+  LeerServicioCirugia
+  ActualizarServicioCirugia
   FinalizarCirugia
+  CrearServicioInternacion
+  LeerServicioInternacion
+  ActualizarServicioInternacion
+  FinalizarServicioInternacion
+  CrearRecibo
+  LeerRecibo
+  ActualizarRecibo
+  CrearDetalleRecibo
+  LeerDetalleRecibo
+  ActualizarDetalleRecibo
 }
 
 enum usuario_Rol {
@@ -361,11 +383,13 @@ enum analisisclinico_Resultado {
   Bajo
   Elevado
   Bueno
+  Estable
   Critico
 }
 
 enum vacuna_Tipo {
   Canina
   Felina
+  Roedores
   General
 }
