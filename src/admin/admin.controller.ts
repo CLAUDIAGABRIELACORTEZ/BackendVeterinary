@@ -2,7 +2,8 @@ import { BadRequestException, Body, Controller, Get, HttpCode,
         HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CreatePersonalDto, CreateClienteDto, CreateMascotaDto, 
     UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
-    UpdateUsuarioDto} from './dto';
+    UpdateUsuarioDto,
+    CreateRazaDto} from './dto';
 import { AdminService } from './admin.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { UpdateReservacionDto } from 'src/client/dto';
@@ -41,7 +42,7 @@ export class AdminController {
     @HttpCode(HttpStatus.OK)
     @Post(':tipoDeEntidad')
     async crearEntidad(
-        @Body() dto: CreatePersonalDto | CreateClienteDto | CreateMascotaDto,
+        @Body() dto: CreatePersonalDto | CreateClienteDto | CreateMascotaDto | CreateRazaDto,
         @Usuario() { userId, ip }: { userId: number; ip: string },
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
@@ -49,6 +50,7 @@ export class AdminController {
             personal: this.admService.crearPersonal, // {{local}}/admin/personal
             clientes: this.admService.crearCliente, // {{local}}/admin/clientes
             mascotas: this.admService.crearMascota, // {{local}}/admin/mascotas
+            raza: this.admService.crearRaza, // {{local}}/admin/raza
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
@@ -70,7 +72,8 @@ export class AdminController {
             mascotas: this.admService.getMascotas,
             logs: this.admService.getBitacoraLogs,
             reservacion: this.admService.getReservacionesGral,
-            usuarios: this.admService.getUsuarios
+            usuarios: this.admService.getUsuarios,
+            raza: this.admService.getRazas
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {

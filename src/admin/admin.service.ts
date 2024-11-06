@@ -5,7 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
         UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
-        UpdateUsuarioDto} from './dto';
+        UpdateUsuarioDto,
+        CreateRazaDto} from './dto';
         import { UpdateReservacionDto } from 'src/client/dto';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 
@@ -109,8 +110,39 @@ export class AdminService {
         });
     }
 
-    async crearRaza(userId: number, ipDir: string) {
+    async crearRaza(dto: CreateRazaDto, userId: number, ipDir: string) {
+        try {
+            const result = await this.prisma.$transaction(async (prisma) => {
+                const raza = await prisma.raza.create({
+                    data: {
+                        NombreRaza: dto.NombreRaza,
+                        EspecieID: dto.EspecieID
+                    },
+                });
 
+                await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRaza, ipDir);
+                return {
+                    Respuesta: "Raza registrada correctamente",
+                    RazaID: raza.RazaID
+                };
+            });
+            return result;
+        } catch (error) {
+            console.error('Error al registrar la raza:', error);
+            throw new Error('No se pudo registrar la raza. Las quejas con Rodrigo.');
+        }
+    }
+
+    async getRazas(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRaza, ipDir);
+        return await this.prisma.$queryRaw`
+            SELECT 
+                raza."RazaID",
+                raza."NombreRaza",
+                especie."NombreEspecie"
+            FROM raza
+            JOIN especie ON raza."EspecieID" = especie."EspecieID";
+        `;
     }
 
     async crearMascota(dto: CreateMascotaDto, userId: number, ipDir: string) {

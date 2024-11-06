@@ -3,6 +3,7 @@ import { parseISO } from 'date-fns';
 import { CreateRegvacDto, CreateVacunaDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
+import { UpdateReservacionDto } from 'src/client/dto';
 
 
 @Injectable()
@@ -21,10 +22,8 @@ export class VetdocService {
                     Tipo: dto.Tipo
                 }
             });
-    
             return vacuna;
         });
-    
         return {
             Respuesta: "Vacuna registrada exitosamente.",
             VacunaID: result.VacunaID
@@ -42,10 +41,8 @@ export class VetdocService {
                     VacunaID: dto.VacunaID
                 }
             });
-    
             return regVac;
         });
-    
         return {
             Respuesta: "Vacunación registrada exitosamente.",
             RegvacID: result.RegistroID,
@@ -100,4 +97,29 @@ export class VetdocService {
             WHERE m."MascotaID" = ${mascotaID};
         `;
     }
+
+    async getReservacionesGral(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
+                "Estado"
+            FROM reservacion
+            WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") <= CURRENT_DATE
+            ORDER BY "ReservacionID" DESC;
+        `;
+    }
+
+    async updateReservacion(dto: UpdateReservacionDto, userId: number, ipDir: string) {
+        const reserva = await this.prisma.reservacion.update({
+            where: { ReservacionID: dto.ReservacionID },
+            data: { Estado: 'Realizada' }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CerrarReservacion, ipDir);
+        return {
+            Respuesta : "Reservación realizada",
+            ReservaID : reserva.ReservacionID
+        }
+    }
+
 }

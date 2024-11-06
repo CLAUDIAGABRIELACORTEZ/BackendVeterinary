@@ -1,3 +1,7 @@
-export * from './createRegVac';
+export * from './createAnalisis.dto';
 
-export * from './createVacuna';
+export * from './createReceta.dto';
+
+export * from './createRegVac.dto';
+
+export * from './createVacuna.dto';

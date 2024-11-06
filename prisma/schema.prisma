@@ -16,8 +16,7 @@ datasource db {
 model analisisclinico {
   AnalisisID        Int                           @id @default(autoincrement())
   TipoAnalisis      String                        @db.VarChar(100)
-  FechaSolicitud    DateTime                      @db.Date
-  FechaResultado    DateTime?                     @db.Date
+  FechaAnalisis     DateTime                      @db.Date
   Resultado         analisisclinico_Resultado?    @default(Normal)
   InternacionID     Int?
   ConsultaID        Int?
@@ -49,7 +48,7 @@ model cirugia {
   CirugiaID           Int          @id @default(autoincrement())
   TipoDeCirugia       String       @db.VarChar(50)
   FechaHoraTermino    DateTime?    @db.Timestamp(0)
-  Notas               String?      @db.Text
+  Notas               String       @db.VarChar(500)
   ServicioID          Int
 
   @@index([ServicioID], map: "cirugia_ServicioID")
@@ -69,8 +68,8 @@ model consultamedica {
   ConsultaID    Int         @id @default(autoincrement())
   Peso          Decimal     @db.Decimal(6, 2)
   Temperatura   Decimal     @db.Decimal(6, 2)
-  Diagnostico   String      @db.Text
-  Tratamiento   String?     @db.Text
+  Diagnostico   String      @db.VarChar(500)
+  Tratamiento   String?     @db.VarChar(500)
   ServicioID    Int
   servicio      servicio    @relation(fields: [ServicioID], references: [ServicioID])
 
@@ -303,6 +302,7 @@ enum tipoaccionbitacora_Accion {
   CrearReservacion
   ListarReservacion
   CancelarReservacion
+  CerrarReservacion
   CrearVacuna
   ListarVacunas
   CrearRegVac
@@ -331,6 +331,7 @@ enum tipoaccionbitacora_Accion {
   CrearCirugia
   LeerCirugua
   ActualizarCirugia
+  FinalizarCirugia
 }
 
 enum usuario_Rol {

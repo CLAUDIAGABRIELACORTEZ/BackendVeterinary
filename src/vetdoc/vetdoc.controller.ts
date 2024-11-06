@@ -55,4 +55,12 @@ export class VetdocController {
     ) {
         return await this.vetdocService.leerRegVacMascota(mascotaID, userId, ip);
     }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('reservaciones')    // {{local}}/vetdoc/reservaciones
+    getReservacionesGral(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.vetdocService.getReservacionesGral(userId, ip);
+    }
+
+    
 }
