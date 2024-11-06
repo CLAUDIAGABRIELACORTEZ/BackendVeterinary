@@ -109,6 +109,10 @@ export class AdminService {
         });
     }
 
+    async crearRaza(userId: number, ipDir: string) {
+
+    }
+
     async crearMascota(dto: CreateMascotaDto, userId: number, ipDir: string) {
         try {
             const result = await this.prisma.$transaction(async (prisma) => {
@@ -344,7 +348,7 @@ export class AdminService {
             where: { ReservacionID: dto.ReservacionID },
             data: { Estado: 'Cancelada' }
         });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarReservacion, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CancelarReservacion, ipDir);
         return {
             Respuesta : "Reservación cancelada",
             ReservaID : reserva.ReservacionID
