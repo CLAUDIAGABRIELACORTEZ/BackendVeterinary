@@ -348,7 +348,7 @@ export class AdminService {
                 data: { Estado: 'Inactivo' },
             });
     
-            await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
+            await this.logAccion(userId, BitacoraAccion.DesactivarUsuario, ipDir);
     
             return {
                 Respuesta: "Usuario inactivado exitosamente",

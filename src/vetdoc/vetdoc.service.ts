@@ -65,7 +65,7 @@ export class VetdocService {
     }
 
     async leerRegVac(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarRegVac, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID",
@@ -82,7 +82,7 @@ export class VetdocService {
     }
     
     async leerRegVacMascota(mascotaID: number, userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarRegVac, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."Nombre" AS "Nombre",
@@ -121,5 +121,4 @@ export class VetdocService {
             ReservaID : reserva.ReservacionID
         }
     }
-
 }
