@@ -130,13 +130,16 @@ export class VetdocService {
     async getReservacionesGral(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
         return this.prisma.$queryRaw`
-            SELECT
-                "ReservacionID",
-                TO_CHAR(("FechaHoraReservada" - INTERVAL '4 hours'), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
-                "Estado"
+            SELECT 
+                reservacion."ReservacionID",
+                reservacion."Estado",
+                reservacion."FechaHoraReservada" AS "Hora",
+                cliente."NombreCompleto" AS "Cliente"
             FROM reservacion
-            WHERE "Estado" = 'Pendiente' AND DATE("FechaHoraReservada") <= CURRENT_DATE
-            ORDER BY "ReservacionID" DESC;
+            JOIN usuario ON reservacion."UsuarioID" = usuario."UsuarioID"
+            JOIN cliente ON usuario."ClienteID" = cliente."ClienteID"
+            WHERE reservacion."Estado" = 'Pendiente' AND DATE(reservacion."FechaHoraReservada") <= CURRENT_DATE
+            ORDER BY reservacion."FechaHoraReservada" DESC;
         `;
     }
 
