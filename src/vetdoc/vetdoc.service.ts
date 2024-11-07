@@ -133,13 +133,27 @@ export class VetdocService {
             SELECT 
                 reservacion."ReservacionID",
                 reservacion."Estado",
-                reservacion."FechaHoraReservada" AS "Hora",
-                cliente."NombreCompleto" AS "Cliente"
+                TO_CHAR((reservacion."FechaHoraReservada"), 'YYYY-MM-DD HH24:MI:SS') AS "Hora",
+                cliente."NombreCompleto" AS "Cliente",
+                cliente."ClienteID" AS "ClienteID"
             FROM reservacion
             JOIN usuario ON reservacion."UsuarioID" = usuario."UsuarioID"
             JOIN cliente ON usuario."ClienteID" = cliente."ClienteID"
             WHERE reservacion."Estado" = 'Pendiente' AND DATE(reservacion."FechaHoraReservada") <= CURRENT_DATE
             ORDER BY reservacion."FechaHoraReservada" DESC;
+        `;
+    }
+
+    async getMascotasCli(ClienteID: number, userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                m."MascotaID",
+                m."Nombre"
+            FROM mascota m
+            JOIN cliente c ON m."ClienteID" = c."ClienteID"
+            WHERE c."ClienteID" = ${ClienteID}
+            ORDER BY m."MascotaID" ASC;
         `;
     }
 
