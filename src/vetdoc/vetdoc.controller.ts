@@ -73,7 +73,7 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Post('servicios/peluqueria')
+    @Post('servicios/consulta')
     async createServConsulta(
         @Body() dto: CreateConsultaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
