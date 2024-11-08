@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { parseISO } from 'date-fns';
 import { UpdateReservacionDto } from 'src/client/dto';
-import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
+import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto } from './dto';
 
 
 @Injectable()
@@ -51,14 +51,14 @@ export class VetdocService {
     }
 
     async createServPeluqueria(dto: CreatePeluqueriaDto, userId: number, ipDir: string) {
-        // const reserva = await this.prisma.reservacion.update({
-        //     where: { ReservacionID: dto.ReservacionID },
-        //     data: { Estado: 'Realizada' }
-        // });
+        await this.prisma.reservacion.update({
+            where: { ReservacionID: dto.ReservacionID },
+            data: { Estado: 'Realizada' }
+        });
         const servicio = await this.prisma.servicio.create({
             data: {
                 TipoServicio: 'Peluqueria',
-                FechaHoraInicio: Date(),
+                FechaHoraInicio: parseISO(new Date().toISOString()),
                 MascotaID: dto.MascotaID,
                 PersonalID: userId,
                 ReservacionID: dto.ReservacionID

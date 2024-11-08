@@ -1,8 +1,8 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
-import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto } from './dto';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
+import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -68,6 +68,7 @@ export class VetdocController {
         @Body() dto: CreatePeluqueriaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log({dto});
         return await this.vetdocService.createServPeluqueria(dto, userId, ip);
     }
 
