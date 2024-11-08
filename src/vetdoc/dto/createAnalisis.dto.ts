@@ -14,12 +14,13 @@ export class CreateAnalisisDto {
     @IsDate({ message: 'La fecha y hora debe ser válida' })
     FechaAnalisis: Date;
 
+    @IsNotEmpty()
+    @IsEnum(AnalisisResultado, { message: 'El resultado debe ser uno de: Normal, Bajo, Elevado, Bueno, Critico' })
+    Resultado: AnalisisResultado;
+
     @IsNumber()
     ConsultaID: number;
 
     @IsNumber()
     InternacionID: number;
-
-    @IsEnum(AnalisisResultado, { message: 'El resultado debe ser uno de: Normal, Bajo, Elevado, Bueno, Critico' })
-    Resultado: AnalisisResultado;
 }

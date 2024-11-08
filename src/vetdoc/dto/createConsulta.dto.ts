@@ -12,6 +12,14 @@ export class CreateConsultaDto {
     @Matches(/^\d+(\.\d{1,2})?$/, { message: 'La temperatura debe tener como máximo dos decimales.' })
     Temperatura: number;
 
+    @IsNumber()
+    @IsNotEmpty()
+    ReservacionID: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    MascotaID: number;
+
     @IsNotEmpty()
     @IsString()
     @MaxLength(500, { message: 'El diagnóstico no puede exceder los 500 caracteres.' })
@@ -20,8 +28,4 @@ export class CreateConsultaDto {
     @IsString()
     @MaxLength(500, { message: 'El tratamiento no puede exceder los 500 caracteres.' })
     Tratamiento: string;
-
-    @IsNumber()
-    @IsNotEmpty()
-    ServicioID: number;
 }

@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGua
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
+import { CreateConsultaDto, CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -73,9 +73,29 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Get('servicios/active')          // {{local}}/vetdoc/servicios
-    getServPeluqeriasEnProceso(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+    @Post('servicios/peluqueria')
+    async createServConsulta(
+        @Body() dto: CreateConsultaDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        console.log({dto});
+        return await this.vetdocService.createServConsulta(dto, userId, ip);
+    }
+
+    // ***************************************************************************************************
+    // ***************************************************************************************************
+    // ***************************************************************************************************
+
+    @HttpCode(HttpStatus.OK)
+    @Get('servicios/active')          // {{local}}/vetdoc/servicios/active
+    getServiciosEnProceso(@Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.vetdocService.getServiciosEnProceso(userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('servicios/completed')          // {{local}}/vetdoc/servicios/completed
+    getServiciosCompletados(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.vetdocService.getServiciosCompletados(userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
