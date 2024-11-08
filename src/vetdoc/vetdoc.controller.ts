@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGua
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { CreateConsultaDto, CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
+import { CreateAnalisisDto, CreateConsultaDto, CreatePeluqueriaDto, CreateRecetaDto, CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -80,6 +80,26 @@ export class VetdocController {
     ) {
         console.log({dto});
         return await this.vetdocService.createServConsulta(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('receta')
+    async createReceta(
+        @Body() dto: CreateRecetaDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        console.log({dto});
+        return await this.vetdocService.createReceta(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('analisis')
+    async createAnalisis(
+        @Body() dto: CreateAnalisisDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        console.log({dto});
+        return await this.vetdocService.createAnalisis(dto, userId, ip);
     }
 
     // ***************************************************************************************************
