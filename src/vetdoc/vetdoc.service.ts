@@ -51,17 +51,17 @@ export class VetdocService {
     }
 
     async createServPeluqueria(dto: CreatePeluqueriaDto, userId: number, ipDir: string) {
-        const reserva = await this.prisma.reservacion.update({
-            where: { ReservacionID: dto.ReservacionID },
-            data: { Estado: 'Realizada' }
-        });
+        // const reserva = await this.prisma.reservacion.update({
+        //     where: { ReservacionID: dto.ReservacionID },
+        //     data: { Estado: 'Realizada' }
+        // });
         const servicio = await this.prisma.servicio.create({
             data: {
                 TipoServicio: 'Peluqueria',
                 FechaHoraInicio: Date(),
                 MascotaID: dto.MascotaID,
                 PersonalID: userId,
-                ReservacionID: reserva.ReservacionID
+                ReservacionID: dto.ReservacionID
             }
         });
         const peluqueria = await this.prisma.peluqueria.create({
@@ -139,7 +139,8 @@ export class VetdocService {
             FROM reservacion
             JOIN usuario ON reservacion."UsuarioID" = usuario."UsuarioID"
             JOIN cliente ON usuario."ClienteID" = cliente."ClienteID"
-            WHERE reservacion."Estado" = 'Pendiente' AND DATE(reservacion."FechaHoraReservada") <= CURRENT_DATE
+            WHERE reservacion."FechaHoraReservada" <= CURRENT_DATE 
+            AND reservacion."Estado" = 'Pendiente'
             ORDER BY reservacion."FechaHoraReservada" DESC;
         `;
     }
@@ -154,6 +155,21 @@ export class VetdocService {
             JOIN cliente c ON m."ClienteID" = c."ClienteID"
             WHERE c."ClienteID" = ${ClienteID}
             ORDER BY m."MascotaID" ASC;
+        `;
+    }
+    
+    async getServPeluqeriasEnProceso(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioPeluqueria, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                peluqueria."ID",
+                peluqueria."TipoCorte",
+                peluqueria."Lavado",
+                servicio."Estado",
+                servicio."FechaHoraInicio"
+            FROM peluqueria
+            JOIN servicio ON peluqueria."ServicioID" = servicio."ServicioID"
+            WHERE servicio."Estado" = 'En Proceso';
         `;
     }
 

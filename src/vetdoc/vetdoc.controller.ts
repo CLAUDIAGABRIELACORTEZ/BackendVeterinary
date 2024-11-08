@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
-import { CreateRegvacDto, CreateVacunaDto } from './dto';
+import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto } from './dto';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
 
 
@@ -46,7 +46,7 @@ export class VetdocController {
     async leerRegVac(@Usuario() { userId, ip }: { userId: number; ip: string }) {
         return await this.vetdocService.leerRegVac(userId, ip);
     }
-    
+
     @HttpCode(HttpStatus.OK)
     @Get('regvac/:mascotaID')           // {{local}}/vetdoc/regvac/id
     async leerRegVacMascota(
@@ -63,7 +63,22 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Get('mascotas/:ClienteID')         // {{local}}/mascotas/:ClienteID
+    @Post('servicios/peluqueria')
+    async createServPeluqueria(
+        @Body() dto: CreatePeluqueriaDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        return await this.vetdocService.createServPeluqueria(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('servicios/peluqueria/active')          // {{local}}/vetdoc/reservaciones
+    getServPeluqeriasEnProceso(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.vetdocService.getServPeluqeriasEnProceso(userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('mascotas/:ClienteID')         // {{local}}/vetdoc/mascotas/:ClienteID
     async leerMascotaCli(
         @Param('ClienteID') ClienteID: number,
         @Usuario() { userId, ip }: { userId: number; ip: string }
