@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
+import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 
 
 export class CreateRecetaDto {
@@ -17,9 +17,7 @@ export class CreateRecetaDto {
     @MaxLength(200, { message: 'Las indicaciones no pueden exceder los 200 caracteres' })
     Indicaciones: string;
 
-    @IsNumber()
     ConsultaID: number;
 
-    @IsNumber()
     InternacionID: number;
 }

@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { AnalisisResultado } from "src/utils/index.utils";
-import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
+import { IsDate, IsEnum, IsNotEmpty, IsString, MaxLength } from "class-validator";
 
 
 export class CreateAnalisisDto {
@@ -18,9 +18,7 @@ export class CreateAnalisisDto {
     @IsEnum(AnalisisResultado, { message: 'El resultado debe ser uno de: Normal, Bajo, Elevado, Bueno, Critico' })
     Resultado: AnalisisResultado;
 
-    @IsNumber()
     ConsultaID: number;
 
-    @IsNumber()
     InternacionID: number;
 }

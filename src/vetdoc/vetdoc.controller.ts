@@ -2,7 +2,8 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGua
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { CreateAnalisisDto, CreateConsultaDto, CreatePeluqueriaDto, CreateRecetaDto, CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
+import { CreateAnalisisDto, CreateConsultaDto, CreatePeluqueriaDto, CreateRecetaDto, 
+    CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -68,7 +69,6 @@ export class VetdocController {
         @Body() dto: CreatePeluqueriaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
-        console.log({dto});
         return await this.vetdocService.createServPeluqueria(dto, userId, ip);
     }
 
@@ -78,7 +78,6 @@ export class VetdocController {
         @Body() dto: CreateConsultaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
-        console.log({dto});
         return await this.vetdocService.createServConsulta(dto, userId, ip);
     }
 
@@ -88,17 +87,15 @@ export class VetdocController {
         @Body() dto: CreateRecetaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
-        console.log({dto});
         return await this.vetdocService.createReceta(dto, userId, ip);
     }
-
+    
     @HttpCode(HttpStatus.OK)
     @Post('analisis')
     async createAnalisis(
         @Body() dto: CreateAnalisisDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
-        console.log({dto});
         return await this.vetdocService.createAnalisis(dto, userId, ip);
     }
 
@@ -132,7 +129,6 @@ export class VetdocController {
     updateServicio(
         @Body() dto: UpdateServicioDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
-            console.log({dto});
         return this.vetdocService.updateServicio(dto, userId, ip);
     }
 }
