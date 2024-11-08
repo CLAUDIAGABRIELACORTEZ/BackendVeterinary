@@ -51,5 +51,7 @@ export enum BitacoraAccion {
     ActualizarRecibo = 50,
     CrearDetalleRecibo = 51,
     LeerDetalleRecibo = 52,
-    ActualizarDetalleRecibo = 53
+    ActualizarDetalleRecibo = 53,
+    LeerServiciosEnProceso = 54,
+    LeerServiciosTerminados = 55
 }

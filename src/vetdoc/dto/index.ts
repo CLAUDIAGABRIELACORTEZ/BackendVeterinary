@@ -10,3 +10,4 @@ export * from './createVacuna.dto';
 
 export * from './updateCirugia.dto';
 export * from './updateInternacion.dto';
+export * from './UpdateServicio.dto';

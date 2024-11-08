@@ -1,8 +1,8 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto } from './dto';
+import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -73,9 +73,9 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Get('servicios/peluqueria/active')          // {{local}}/vetdoc/reservaciones
+    @Get('servicios/active')          // {{local}}/vetdoc/servicios
     getServPeluqeriasEnProceso(@Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return this.vetdocService.getServPeluqeriasEnProceso(userId, ip);
+        return this.vetdocService.getServiciosEnProceso(userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -85,5 +85,14 @@ export class VetdocController {
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
         return await this.vetdocService.getMascotasCli(ClienteID, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Patch('servicios')       // {{local}}/vetdoc/servicios
+    updateServicio(
+        @Body() dto: UpdateServicioDto,
+        @Usuario() { userId, ip }: { userId: number, ip: string }) {
+            console.log({dto});
+        return this.vetdocService.updateServicio(dto, userId, ip);
     }
 }

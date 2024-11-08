@@ -354,6 +354,8 @@ enum tipoaccionbitacora_Accion {
   CrearDetalleRecibo
   LeerDetalleRecibo
   ActualizarDetalleRecibo
+  LeerServiciosEnProceso
+  LeerServiciosTerminados
 }
 
 enum usuario_Rol {

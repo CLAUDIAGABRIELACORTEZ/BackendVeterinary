@@ -3,7 +3,7 @@ import { parseISO } from 'date-fns';
 import { UpdateReservacionDto } from 'src/client/dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto } from './dto';
+import { CreatePeluqueriaDto, CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
 
 
 @Injectable()
@@ -158,30 +158,30 @@ export class VetdocService {
         `;
     }
     
-    async getServPeluqeriasEnProceso(userId: number, ipDir: string) {
+    async getServiciosEnProceso(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioPeluqueria, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
-                peluqueria."ID",
-                peluqueria."TipoCorte",
-                peluqueria."Lavado",
-                servicio."Estado",
-                servicio."FechaHoraInicio"
-            FROM peluqueria
-            JOIN servicio ON peluqueria."ServicioID" = servicio."ServicioID"
-            WHERE servicio."Estado" = 'En Proceso';
+                s."ServicioID",
+                s."TipoServicio" AS "Servicio",
+                s."Estado",
+                TO_CHAR((s."FechaHoraInicio"), 'YYYY-MM-DD HH24:MI:SS') AS "Hora de inicio",
+                m."Nombre" AS "Nombre de Mascota"
+            FROM "servicio" s
+            JOIN "mascota" m ON s."MascotaID" = m."MascotaID"
+            WHERE s."Estado" = 'En Proceso';
         `;
     }
 
-    async updateReservacion(dto: UpdateReservacionDto, userId: number, ipDir: string) {
-        const reserva = await this.prisma.reservacion.update({
-            where: { ReservacionID: dto.ReservacionID },
-            data: { Estado: 'Realizada' }
+    async updateServicio(dto: UpdateServicioDto, userId: number, ipDir: string) {
+        const servicio = await this.prisma.servicio.update({
+            where: { ServicioID: dto.ServicioID },
+            data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
         });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CerrarReservacion, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.FinalizarServicioPeluqueria, ipDir);
         return {
-            Respuesta : "Reservación realizada",
-            ReservaID : reserva.ReservacionID
+            Respuesta : "Servicio completado",
+            ServicioID : servicio.ServicioID
         }
     }
 }
