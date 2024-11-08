@@ -1,15 +1,13 @@
-import { IsNotEmpty, IsNumber, IsString, Matches, MaxLength } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
 
 
 export class CreateConsultaDto {
     @IsNumber()
     @IsNotEmpty()
-    @Matches(/^\d+(\.\d{1,2})?$/, { message: 'El peso debe tener como máximo dos decimales.' })
     Peso: number;
 
     @IsNumber()
     @IsNotEmpty()
-    @Matches(/^\d+(\.\d{1,2})?$/, { message: 'La temperatura debe tener como máximo dos decimales.' })
     Temperatura: number;
 
     @IsNumber()
