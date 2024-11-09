@@ -2,11 +2,11 @@ import { IsDecimal, IsNotEmpty, IsNumber, IsString, MaxLength } from "class-vali
 
 
 export class CreateConsultaDto {
-    @IsDecimal()
+    @IsNumber()
     @IsNotEmpty()
     Peso: number;
 
-    @IsDecimal()
+    @IsNumber()
     @IsNotEmpty()
     Temperatura: number;
 

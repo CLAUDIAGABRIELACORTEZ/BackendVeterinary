@@ -78,6 +78,7 @@ export class VetdocController {
         @Body() dto: CreateConsultaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log({dto});
         return await this.vetdocService.createServConsulta(dto, userId, ip);
     }
 
@@ -158,6 +159,7 @@ export class VetdocController {
     updateServicio(
         @Body() dto: UpdateServicioDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
+        console.log({dto});
         return this.vetdocService.updateServicio(dto, userId, ip);
     }
 }

@@ -320,13 +320,23 @@ export class VetdocService {
             SELECT 
                 s."ServicioID",
                 s."TipoServicio" AS "Servicio",
+                CASE 
+                    WHEN s."TipoServicio" = 'Consulta' THEN c."ID"
+                    WHEN s."TipoServicio" = 'Internacion' THEN i."ID"
+                    WHEN s."TipoServicio" = 'Cirugia' THEN cir."ID"
+                    WHEN s."TipoServicio" = 'Peluqueria' THEN pel."ID"
+                END as "ServicioEspecificoID",
                 s."Estado",
-                TO_CHAR((s."FechaHoraInicio"), 'YYYY-MM-DD HH24:MI:SS') AS "Hora de inicio",
-                m."Nombre" AS "Nombre de Mascota"
-            FROM "servicio" s
-            JOIN "mascota" m ON s."MascotaID" = m."MascotaID"
+                TO_CHAR((s."FechaHoraInicio"), 'YYYY-MM-DD HH24:MI:SS') AS "HoraInicio",
+                m."Nombre" as "Mascota"
+            FROM servicio s
+            INNER JOIN mascota m ON s."MascotaID" = m."MascotaID"
+            LEFT JOIN consultamedica c ON s."ServicioID" = c."ServicioID"
+            LEFT JOIN internacion i ON s."ServicioID" = i."ServicioID"
+            LEFT JOIN cirugia cir ON s."ServicioID" = cir."ServicioID"
+            LEFT JOIN peluqueria pel ON s."ServicioID" = pel."ServicioID"
             WHERE s."Estado" = 'En Proceso'
-            ORDER BY s."FechaHoraInicio" ASC;
+            ORDER BY s."ServicioID" DESC;
         `;
     }
 
