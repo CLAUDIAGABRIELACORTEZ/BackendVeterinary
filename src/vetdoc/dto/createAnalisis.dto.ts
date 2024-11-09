@@ -18,7 +18,7 @@ export class CreateAnalisisDto {
     @IsEnum(AnalisisResultado, { message: 'El resultado debe ser uno de: Normal, Bajo, Elevado, Bueno, Critico' })
     Resultado: AnalisisResultado;
 
-    ConsultaID: number;
+    ConsultaID: number | null;
 
-    InternacionID: number;
+    InternacionID: number | null;
 }

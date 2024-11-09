@@ -17,9 +17,7 @@ export class CreateRecetaDto {
     @MaxLength(200, { message: 'Las indicaciones no pueden exceder los 200 caracteres' })
     Indicaciones: string;
 
-    @IsNumber()
     ConsultaID: number | null;
 
-    @IsNumber()
     InternacionID: number | null;
 }
