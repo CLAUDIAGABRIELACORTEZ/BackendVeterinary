@@ -179,10 +179,6 @@ export class VetdocService {
     }
 
     async createServInternacion(dto: CreateInternacionDto, userId: number, ipDir: string) {
-        await this.prisma.servicio.update({
-            where: { ServicioID: dto.ServicioID },
-            data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
-        });
         const servicio = await this.prisma.servicio.create({
             data: {
                 TipoServicio: 'Internacion',
@@ -206,11 +202,6 @@ export class VetdocService {
             ServicioID: servicio.ServicioID,
             InternacionID: internacion.ID
         }
-    }
-
-    async leerConsulta() {
-        // TODO
-        // Para ver contenido de consulta terminada
     }
 
     async createReceta(dto: CreateRecetaDto, userId: number, ipDir: string) {
@@ -340,12 +331,12 @@ export class VetdocService {
         `;
     }
 
-    async getConsultasEnProceso(userId: number, ipDir: string) {
+    async getConsultasCompletadas(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioConsulta, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 s."ServicioID",
-                TO_CHAR((s."FechaHoraInicio"), 'YYYY-MM-DD HH24:MI:SS') AS "Hora de inicio",
+                TO_CHAR((s."FechaHoraFin"), 'YYYY-MM-DD HH24:MI:SS') AS "Hora terminada",
                 m."MascotaID",
                 m."Nombre" as "Mascota",
                 c."Peso",
@@ -354,7 +345,8 @@ export class VetdocService {
             INNER JOIN consultamedica c ON c."ServicioID" = s."ServicioID"
             INNER JOIN mascota m ON s."MascotaID" = m."MascotaID"
             WHERE s."TipoServicio" = 'Consulta' 
-            AND s."Estado" = 'En Proceso';
+            AND s."Estado" = 'Completado'
+            ORDER BY c."ID" DESC;
         `;
     }
 

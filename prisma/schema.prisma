@@ -49,6 +49,8 @@ model cargo {
 model cirugia {
   ID                  Int             @id @default(autoincrement())
   TipoDeCirugia       String          @db.VarChar(50)
+  Peso                Decimal         @db.Decimal(6, 2)
+  Temperatura         Decimal         @db.Decimal(6, 2)
   Notas               String          @db.VarChar(500)
   ServicioID          Int   
   servicio            servicio        @relation(fields: [ServicioID], references: [ServicioID])

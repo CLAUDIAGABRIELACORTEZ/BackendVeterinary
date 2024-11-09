@@ -135,8 +135,8 @@ export class VetdocController {
 
     @HttpCode(HttpStatus.OK)
     @Get('servicios/consulta')          // {{local}}/vetdoc/servicios/active
-    getConsultasEnProceso(@Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return this.vetdocService.getConsultasEnProceso(userId, ip);
+    getConsultasCompletadas(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.vetdocService.getConsultasCompletadas(userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
