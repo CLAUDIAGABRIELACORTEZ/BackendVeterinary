@@ -208,15 +208,21 @@ export class VetdocService {
                 r."Medicamento",
                 r."Dosis",
                 r."Indicaciones",
-                TO_CHAR((s."FechaHoraFin"), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha",
+                CASE 
+                    WHEN r."ConsultaID" IS NOT NULL THEN 'Consulta'
+                    WHEN r."InternacionID" IS NOT NULL THEN 'Internacion'
+                END as "TipoServicio",
+                COALESCE(r."ConsultaID", r."InternacionID") as "ServicioID",
+                COALESCE(sc."FechaHoraFin", si."FechaHoraFin") as "Fecha",
                 m."Nombre" as "Mascota",
                 rz."NombreRaza" as "Raza"
             FROM receta r
-            INNER JOIN consultamedica c ON r."ConsultaID" = c."ID"
-            INNER JOIN servicio s ON c."ServicioID" = s."ServicioID"
-            INNER JOIN mascota m ON s."MascotaID" = m."MascotaID"
-            INNER JOIN raza rz ON m."RazaID" = rz."RazaID"
-            WHERE r."ConsultaID" IS NOT NULL
+            LEFT JOIN consultamedica c ON r."ConsultaID" = c."ID"
+            LEFT JOIN servicio sc ON c."ServicioID" = sc."ServicioID"
+            LEFT JOIN internacion i ON r."InternacionID" = i."ID"
+            LEFT JOIN servicio si ON i."ServicioID" = si."ServicioID"
+            LEFT JOIN mascota m ON COALESCE(sc."MascotaID", si."MascotaID") = m."MascotaID"
+            LEFT JOIN raza rz ON m."RazaID" = rz."RazaID"
             ORDER BY r."ID" DESC;
         `;
     }
@@ -252,15 +258,20 @@ export class VetdocService {
                 a."TipoAnalisis",
                 a."FechaAnalisis" as "Fecha",
                 a."Resultado",
-                a."ConsultaID",
+                CASE 
+                    WHEN a."ConsultaID" IS NOT NULL THEN 'Consulta'
+                    WHEN a."InternacionID" IS NOT NULL THEN 'Internacion'
+                END as "Servicio",
+                COALESCE(a."ConsultaID", a."InternacionID") as "ServicioID",
                 m."Nombre" as "Mascota",
                 rz."NombreRaza" as "Raza"
             FROM analisisclinico a
-            INNER JOIN consultamedica c ON a."ConsultaID" = c."ID"
-            INNER JOIN servicio s ON c."ServicioID" = s."ServicioID"
-            INNER JOIN mascota m ON s."MascotaID" = m."MascotaID"
-            INNER JOIN raza rz ON m."RazaID" = rz."RazaID"
-            WHERE a."ConsultaID" IS NOT NULL
+            LEFT JOIN consultamedica c ON a."ConsultaID" = c."ID"
+            LEFT JOIN servicio sc ON c."ServicioID" = sc."ServicioID"
+            LEFT JOIN internacion i ON a."InternacionID" = i."ID"
+            LEFT JOIN servicio si ON i."ServicioID" = si."ServicioID"
+            LEFT JOIN mascota m ON COALESCE(sc."MascotaID", si."MascotaID") = m."MascotaID"
+            LEFT JOIN raza rz ON m."RazaID" = rz."RazaID"
             ORDER BY a."ID" DESC;
         `;
     }
