@@ -202,7 +202,23 @@ export class VetdocService {
 
     async leerReceta(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReceta, ipDir);
-
+        return this.prisma.$queryRaw`
+            SELECT 
+                r."ID",
+                r."Medicamento",
+                r."Dosis",
+                r."Indicaciones",
+                TO_CHAR((s."FechaHoraFin"), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha",
+                m."Nombre" as "Mascota",
+                rz."NombreRaza" as "Raza"
+            FROM receta r
+            INNER JOIN consultamedica c ON r."ConsultaID" = c."ID"
+            INNER JOIN servicio s ON c."ServicioID" = s."ServicioID"
+            INNER JOIN mascota m ON s."MascotaID" = m."MascotaID"
+            INNER JOIN raza rz ON m."RazaID" = rz."RazaID"
+            WHERE r."ConsultaID" IS NOT NULL
+            ORDER BY r."ID" DESC;
+        `;
     }
 
     async updateReceta() {
@@ -230,6 +246,23 @@ export class VetdocService {
 
     async leerAnalisis(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerAnalisis, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                a."ID",
+                a."TipoAnalisis",
+                a."FechaAnalisis" as "Fecha",
+                a."Resultado",
+                a."ConsultaID",
+                m."Nombre" as "Mascota",
+                rz."NombreRaza" as "Raza"
+            FROM analisisclinico a
+            INNER JOIN consultamedica c ON a."ConsultaID" = c."ID"
+            INNER JOIN servicio s ON c."ServicioID" = s."ServicioID"
+            INNER JOIN mascota m ON s."MascotaID" = m."MascotaID"
+            INNER JOIN raza rz ON m."RazaID" = rz."RazaID"
+            WHERE a."ConsultaID" IS NOT NULL
+            ORDER BY a."ID" DESC;
+        `;
     }
 
     async updateAnalisis() {

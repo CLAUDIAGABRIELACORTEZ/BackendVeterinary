@@ -87,7 +87,14 @@ export class VetdocController {
         @Body() dto: CreateRecetaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log({dto});
         return await this.vetdocService.createReceta(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('receta')
+    async leerReceta(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.vetdocService.leerReceta(userId, ip);
     }
     
     @HttpCode(HttpStatus.OK)
@@ -96,7 +103,14 @@ export class VetdocController {
         @Body() dto: CreateAnalisisDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log({dto});
         return await this.vetdocService.createAnalisis(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('analisis')
+    async leerAnalisis(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.vetdocService.leerAnalisis(userId, ip);
     }
 
     // ***************************************************************************************************
