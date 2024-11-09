@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { format, parseISO } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { CreateAnalisisDto, CreateConsultaDto, CreatePeluqueriaDto, CreateRecetaDto, 
+import { CreateAnalisisDto, CreateConsultaDto, CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaDto, 
     CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
 
 
@@ -178,6 +178,36 @@ export class VetdocService {
         }
     }
 
+    async createServInternacion(dto: CreateInternacionDto, userId: number, ipDir: string) {
+        await this.prisma.servicio.update({
+            where: { ServicioID: dto.ServicioID },
+            data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
+        });
+        const servicio = await this.prisma.servicio.create({
+            data: {
+                TipoServicio: 'Internacion',
+                FechaHoraInicio: parseISO(new Date().toISOString()),
+                MascotaID: dto.MascotaID,
+                PersonalID: userId,
+            }
+        });
+        const internacion = await this.prisma.internacion.create({
+            data: {
+                PesoEntrada: dto.PesoEntrada,
+                TemperaturaEntrada: dto.TemperaturaEntrada,
+                NotasProgreso: dto.Notas,
+                CirugiaID: dto.CirugiaID,
+                ServicioID: servicio.ServicioID
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioInternacion, ipDir);
+        return {
+            Message: "Servicio registrado exitosamente",
+            ServicioID: servicio.ServicioID,
+            InternacionID: internacion.ID
+        }
+    }
+
     async leerConsulta() {
         // TODO
         // Para ver contenido de consulta terminada
@@ -213,7 +243,7 @@ export class VetdocService {
                     WHEN r."InternacionID" IS NOT NULL THEN 'Internacion'
                 END as "TipoServicio",
                 COALESCE(r."ConsultaID", r."InternacionID") as "ServicioID",
-                COALESCE(sc."FechaHoraFin", si."FechaHoraFin") as "Fecha",
+                TO_CHAR((COALESCE(sc."FechaHoraFin", si."FechaHoraFin")), 'YYYY-MM-DD') AS "Fecha",
                 m."Nombre" as "Mascota",
                 rz."NombreRaza" as "Raza"
             FROM receta r
@@ -256,7 +286,7 @@ export class VetdocService {
             SELECT 
                 a."ID",
                 a."TipoAnalisis",
-                a."FechaAnalisis" as "Fecha",
+                TO_CHAR((a."FechaAnalisis"), 'YYYY-MM-DD') AS "Fecha",
                 a."Resultado",
                 CASE 
                     WHEN a."ConsultaID" IS NOT NULL THEN 'Consulta'
@@ -297,6 +327,24 @@ export class VetdocService {
             JOIN "mascota" m ON s."MascotaID" = m."MascotaID"
             WHERE s."Estado" = 'En Proceso'
             ORDER BY s."FechaHoraInicio" ASC;
+        `;
+    }
+
+    async getConsultasEnProceso(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioConsulta, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                s."ServicioID",
+                TO_CHAR((s."FechaHoraInicio"), 'YYYY-MM-DD HH24:MI:SS') AS "Hora de inicio",
+                m."MascotaID",
+                m."Nombre" as "Mascota",
+                c."Peso",
+                c."Temperatura"
+            FROM servicio s
+            INNER JOIN consultamedica c ON c."ServicioID" = s."ServicioID"
+            INNER JOIN mascota m ON s."MascotaID" = m."MascotaID"
+            WHERE s."TipoServicio" = 'Consulta' 
+            AND s."Estado" = 'En Proceso';
         `;
     }
 

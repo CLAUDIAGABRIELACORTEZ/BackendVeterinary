@@ -71,7 +71,7 @@ model consultamedica {
   ID              Int             @id @default(autoincrement())
   Peso            Decimal         @db.Decimal(6, 2)
   Temperatura     Decimal         @db.Decimal(6, 2)
-  Diagnostico     String          @db.VarChar(500)
+  Diagnostico     String?         @db.VarChar(500)
   Tratamiento     String?         @db.VarChar(500)
   ServicioID      Int   
   servicio        servicio        @relation(fields: [ServicioID], references: [ServicioID])
@@ -306,26 +306,26 @@ enum tipoaccionbitacora_Accion {
   CrearProfesion
   LeerProfesion
   CrearPersonal
-  ListarPersonal
+  LeerPersonal
   ActualizarPersonal
   CrearCliente
-  ListarClientes
+  LeerClientes
   ActualizarCliente
   CrearRaza
   LeerRaza
   CrearMascota
-  ListarMascotas
+  LeerMascotas
   ActualizarMascota
   CrearReservacion
-  ListarReservacion
+  LeerReservacion
   CancelarReservacion
   CerrarReservacion
   CrearVacuna
-  ListarVacunas
+  LeerVacunas
   CrearRegVac
-  ListarRegVac
+  LeerRegVac
   ActualizarRegVac
-  ListarUsuarios
+  LeerUsuarios
   DesactivarUsuario
   CrearServicioPeluqueria
   LeerServicioPeluqueria
