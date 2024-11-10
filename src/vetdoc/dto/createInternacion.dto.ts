@@ -19,9 +19,5 @@ export class CreateInternacionDto {
     @IsNotEmpty()
     MascotaID: number;
     
-    @IsNumber()
-    @IsNotEmpty()
-    ServicioID: number;
-
-    CirugiaID: number;
+    CirugiaID: number | null;
 }

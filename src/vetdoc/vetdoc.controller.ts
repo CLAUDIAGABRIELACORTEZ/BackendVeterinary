@@ -88,6 +88,7 @@ export class VetdocController {
         @Body() dto: CreateInternacionDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log(dto);
         return await this.vetdocService.createServInternacion(dto, userId, ip);
     }
 
@@ -128,7 +129,7 @@ export class VetdocController {
     // ***************************************************************************************************
 
     @HttpCode(HttpStatus.OK)
-    @Get('servicios/active')          // {{local}}/vetdoc/servicios/active
+    @Get('servicios/active')            // {{local}}/vetdoc/servicios/active
     getServiciosEnProceso(@Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.vetdocService.getServiciosEnProceso(userId, ip);
     }
@@ -140,7 +141,7 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Get('servicios/completed')          // {{local}}/vetdoc/servicios/completed
+    @Get('servicios/completed')         // {{local}}/vetdoc/servicios/completed
     getServiciosCompletados(@Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.vetdocService.getServiciosCompletados(userId, ip);
     }
@@ -155,7 +156,7 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Patch('servicios')       // {{local}}/vetdoc/servicios
+    @Patch('servicios')                 // {{local}}/vetdoc/servicios
     updateServicio(
         @Body() dto: UpdateServicioDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
