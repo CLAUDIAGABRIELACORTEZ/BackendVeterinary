@@ -1,15 +1,24 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
 
 
 export class UpdateInternacionDto {
     @IsNumber()
     @IsNotEmpty()
+    ServicioID: number;
+
+    @IsNumber()
+    @IsNotEmpty()
     InternacionID: number;
 
     @IsString()
-    @MaxLength(1500, { message: 'Las notas no pueden exceder los 500 caracteres.' })
+    @MaxLength(1500, { message: 'Las notas no pueden exceder los 1500 caracteres.' })
     Notas: string;
 
-    @IsEnum(['Completado'])
-    Estado: 'Completado'
+    @IsNumber()
+    @IsNotEmpty()
+    PesoSalida: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    TemperaturaSalida: number;
 }

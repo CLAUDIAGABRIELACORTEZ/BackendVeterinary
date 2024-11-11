@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { format, parseISO } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { CreateAnalisisDto, CreateConsultaDto, CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaDto, 
-    CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
+import { CreateAnalisisConsultaDto, CreateConsultaDto, CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaConsultaDto, 
+    CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
 
 
 @Injectable()
@@ -204,14 +204,32 @@ export class VetdocService {
         }
     }
 
-    async createReceta(dto: CreateRecetaDto, userId: number, ipDir: string) {
+    async updateServInternacion(dto: UpdateInternacionDto, userId: number, ipDir: string) {
+        const servicio = await this.prisma.servicio.update({
+            where: { ServicioID: dto.ServicioID },
+            data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
+        });
+        await this.prisma.internacion.update({
+            where: { ID: dto.InternacionID },
+            data: { 
+                PesoSalida: dto.PesoSalida,
+                TemperaturaSalida: dto.TemperaturaSalida,
+                NotasProgreso: dto.Notas
+            }
+        });
+        return {
+            Respuesta : "Servicio completado",
+            ServicioID : servicio.ServicioID
+        }
+    }
+
+    async createRecetaConsulta(dto: CreateRecetaConsultaDto, userId: number, ipDir: string) {
         const receta = await this.prisma.receta.create({
             data: {
                 Medicamento: dto.Medicamento,
                 Dosis: dto.Dosis,
                 Indicaciones: dto.Indicaciones,
                 ConsultaID: dto.ConsultaID,
-                InternacionID: dto.InternacionID,
             }
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CearReceta, ipDir);
@@ -250,9 +268,10 @@ export class VetdocService {
 
     async updateReceta() {
         // TODO - ¿Valdrá la pena?
+
     }
 
-    async createAnalisis(dto: CreateAnalisisDto, userId: number, ipDir: string) {
+    async createAnalisis(dto: CreateAnalisisConsultaDto, userId: number, ipDir: string) {
         const fechaActual = new Date();
         const fechaModficada = format(fechaActual, 'yyyy-MM-dd');
         const analisis = await this.prisma.analisisclinico.create({
@@ -261,7 +280,6 @@ export class VetdocService {
                 FechaAnalisis: parseISO(fechaModficada),
                 Resultado: dto.Resultado,
                 ConsultaID: dto.ConsultaID,
-                InternacionID: dto.InternacionID,
             }
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearAnalisis, ipDir);
@@ -369,6 +387,18 @@ export class VetdocService {
             data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.FinalizarServicioPeluqueria, ipDir);
+        return {
+            Respuesta : "Servicio completado",
+            ServicioID : servicio.ServicioID
+        }
+    }
+
+    async updateConsulta (dto: UpdateConsultaDto, userId: number, ipDir: string) {
+        const servicio = await this.prisma.servicio.update({
+            where: { ServicioID: dto.ServicioID },
+            data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.FinalizarServicioConsulta, ipDir);
         return {
             Respuesta : "Servicio completado",
             ServicioID : servicio.ServicioID

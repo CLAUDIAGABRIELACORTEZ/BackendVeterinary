@@ -183,6 +183,8 @@ export class AdminService {
         });
     }
 
+    // adolfomendozaribera400@gmail.com
+
     async getPersonal(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);
         return this.prisma.$queryRaw`
@@ -326,7 +328,6 @@ export class AdminService {
             };
         });
     }
-    
 
     async getUsuarios(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);

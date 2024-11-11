@@ -2,8 +2,8 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGua
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { CreateAnalisisDto, CreateConsultaDto, CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaDto, 
-    CreateRegvacDto, CreateVacunaDto, UpdateServicioDto } from './dto';
+import { CreateAnalisisConsultaDto, CreateConsultaDto, CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaConsultaDto, 
+    CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -78,28 +78,63 @@ export class VetdocController {
         @Body() dto: CreateConsultaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log("****************************************************");
+        console.log("CREAR CONSULTA:");
         console.log({dto});
+        console.log("****************************************************");
         return await this.vetdocService.createServConsulta(dto, userId, ip);
     }
-
+    
+    @HttpCode(HttpStatus.OK)
+    @Patch('servicios/consulta')
+    async updateConsulta(
+        @Body() dto: UpdateConsultaDto,
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        console.log("****************************************************");
+        console.log("FINALIZAR CONSULTA:");
+        console.log({dto});
+        console.log("****************************************************");
+        return await this.vetdocService.updateConsulta(dto, userId, ip);
+    }
+    
     @HttpCode(HttpStatus.OK)
     @Post('servicios/internacion')
     async createServInternacion(
         @Body() dto: CreateInternacionDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
-        console.log(dto);
+        console.log("****************************************************");
+        console.log("CREAR INTERNACION:");
+        console.log({dto});
+        console.log("****************************************************");
         return await this.vetdocService.createServInternacion(dto, userId, ip);
+    }
+    
+    @HttpCode(HttpStatus.OK)
+    @Patch('servicios/internacion')
+    async updateServInternacion(
+        @Body() dto: UpdateInternacionDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        console.log("****************************************************");
+        console.log("FINALIZAR INTERNACION:");
+        console.log({dto});
+        console.log("****************************************************");
+        return await this.vetdocService.updateServInternacion(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
-    @Post('receta')
+    @Post('receta/consulta')
     async createReceta(
-        @Body() dto: CreateRecetaDto,
+        @Body() dto: CreateRecetaConsultaDto,
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log("****************************************************");
+        console.log("CREAR RECETA-CONSULTA:");
         console.log({dto});
-        return await this.vetdocService.createReceta(dto, userId, ip);
+        console.log("****************************************************");
+        return await this.vetdocService.createRecetaConsulta(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -109,12 +144,15 @@ export class VetdocController {
     }
     
     @HttpCode(HttpStatus.OK)
-    @Post('analisis')
+    @Post('analisis/consulta')
     async createAnalisis(
-        @Body() dto: CreateAnalisisDto, 
+        @Body() dto: CreateAnalisisConsultaDto, 
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log("****************************************************");
+        console.log("CREAR ANALISIS-CONSULTA:");
         console.log({dto});
+        console.log("****************************************************");
         return await this.vetdocService.createAnalisis(dto, userId, ip);
     }
 
@@ -124,9 +162,11 @@ export class VetdocController {
         return this.vetdocService.leerAnalisis(userId, ip);
     }
 
+
     // ***************************************************************************************************
     // ***************************************************************************************************
     // ***************************************************************************************************
+
 
     @HttpCode(HttpStatus.OK)
     @Get('servicios/active')            // {{local}}/vetdoc/servicios/active

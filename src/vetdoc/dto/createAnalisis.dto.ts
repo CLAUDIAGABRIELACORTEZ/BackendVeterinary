@@ -1,9 +1,9 @@
 import { Type } from "class-transformer";
 import { AnalisisResultado } from "src/utils/index.utils";
-import { IsDate, IsEnum, IsNotEmpty, IsString, MaxLength } from "class-validator";
+import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
 
 
-export class CreateAnalisisDto {
+export class CreateAnalisisConsultaDto {
     @IsNotEmpty()
     @IsString()
     @MaxLength(100, { message: 'El tipo de análisis no puede exceder los 80 caracteres' })
@@ -18,7 +18,7 @@ export class CreateAnalisisDto {
     @IsEnum(AnalisisResultado, { message: 'El resultado debe ser uno de: Normal, Bajo, Elevado, Bueno, Critico' })
     Resultado: AnalisisResultado;
 
-    ConsultaID: number | null;
-
-    InternacionID: number | null;
+    @IsNumber()
+    @IsNotEmpty()
+    ConsultaID: number;
 }

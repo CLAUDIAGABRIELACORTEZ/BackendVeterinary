@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
 
 
-export class CreateRecetaDto {
+export class CreateRecetaConsultaDto {
     @IsNotEmpty()
     @IsString()
     @MaxLength(100, { message: 'El medicamento no puede exceder los 80 caracteres' })
@@ -17,7 +17,7 @@ export class CreateRecetaDto {
     @MaxLength(200, { message: 'Las indicaciones no pueden exceder los 200 caracteres' })
     Indicaciones: string;
 
-    ConsultaID: number | null;
-
-    InternacionID: number | null;
+    @IsNumber()
+    @IsNotEmpty()
+    ConsultaID: number;
 }
