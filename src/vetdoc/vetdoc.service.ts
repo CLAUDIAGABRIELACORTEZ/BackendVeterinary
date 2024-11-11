@@ -4,6 +4,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { CreateAnalisisConsultaDto, CreateConsultaDto, CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaConsultaDto, 
     CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
+import { CreateRecetaInternacionDto } from './dto/createRecetaInternacion.dto';
+import { CreateAnalisisInternacionDto } from './dto/createAnalisisInternacion.dto';
 
 
 @Injectable()
@@ -239,6 +241,22 @@ export class VetdocService {
         }
     }
 
+    async createRecetaInternacion(dto: CreateRecetaInternacionDto, userId: number, ipDir: string) {
+        const receta = await this.prisma.receta.create({
+            data: {
+                Medicamento: dto.Medicamento,
+                Dosis: dto.Dosis,
+                Indicaciones: dto.Indicaciones,
+                InternacionID: dto.InternacionID,
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CearReceta, ipDir);
+        return {
+            Message: "Receta registrada exitosamente",
+            RecetaID: receta.ID
+        }
+    }
+
     async leerReceta(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReceta, ipDir);
         return this.prisma.$queryRaw`
@@ -271,7 +289,7 @@ export class VetdocService {
 
     }
 
-    async createAnalisis(dto: CreateAnalisisConsultaDto, userId: number, ipDir: string) {
+    async createAnalisisConsulta(dto: CreateAnalisisConsultaDto, userId: number, ipDir: string) {
         const fechaActual = new Date();
         const fechaModficada = format(fechaActual, 'yyyy-MM-dd');
         const analisis = await this.prisma.analisisclinico.create({
@@ -280,6 +298,24 @@ export class VetdocService {
                 FechaAnalisis: parseISO(fechaModficada),
                 Resultado: dto.Resultado,
                 ConsultaID: dto.ConsultaID,
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearAnalisis, ipDir);
+        return {
+            Message: "Análisis registrada exitosamente",
+            RecetaID: analisis.ID
+        }
+    }
+
+    async createAnalisisInternacion(dto: CreateAnalisisInternacionDto, userId: number, ipDir: string) {
+        const fechaActual = new Date();
+        const fechaModficada = format(fechaActual, 'yyyy-MM-dd');
+        const analisis = await this.prisma.analisisclinico.create({
+            data: {
+                TipoAnalisis: dto.TipoAnalisis,
+                FechaAnalisis: parseISO(fechaModficada),
+                Resultado: dto.Resultado,
+                InternacionID: dto.InternacionID,
             }
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearAnalisis, ipDir);
