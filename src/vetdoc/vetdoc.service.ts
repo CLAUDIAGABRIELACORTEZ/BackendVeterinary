@@ -5,8 +5,8 @@ import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { CreateRecetaInternacionDto } from './dto/createRecetaInternacion.dto';
 import { CreateAnalisisInternacionDto } from './dto/createAnalisisInternacion.dto';
 import { CreateAnalisisConsultaDto, CreateCirugiaDto, CreateConsultaDto, CreateInternacionDto, 
-    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRegvacDto, CreateVacunaDto, UpdateCirugiaDto, UpdateConsultaDto, 
-    UpdateInternacionDto, UpdateServicioDto } from './dto';
+    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRegvacDto, CreateVacunaDto, UpdateCirugiaDto, 
+    UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
 
 
 @Injectable()
@@ -122,31 +122,41 @@ export class VetdocService {
     }
 
     async createServPeluqueria(dto: CreatePeluqueriaDto, userId: number, ipDir: string) {
-        await this.prisma.reservacion.update({
-            where: { ReservacionID: dto.ReservacionID },
-            data: { Estado: 'Realizada' }
-        });
-        const servicio = await this.prisma.servicio.create({
-            data: {
-                TipoServicio: 'Peluqueria',
-                FechaHoraInicio: parseISO(new Date().toISOString()),
-                MascotaID: dto.MascotaID,
-                PersonalID: userId,
-                ReservacionID: dto.ReservacionID
-            }
-        });
-        const peluqueria = await this.prisma.peluqueria.create({
-            data: {
-                TipoCorte: dto.TipoCorte,
-                Lavado: dto.Lavado,
-                ServicioID: servicio.ServicioID
-            }
-        });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServPeluqueria, ipDir);
-        return {
-            Message: "Peluquería registrada exitosamente",
-            ServicioID: servicio.ServicioID,
-            PeluqueriaID: peluqueria.ID
+        try {
+            const result = await this.prisma.$transaction(async (prisma) => {
+                await prisma.reservacion.update({
+                    where: { ReservacionID: dto.ReservacionID },
+                    data: { Estado: 'Realizada' }
+                });
+                const servicio = await prisma.servicio.create({
+                    data: {
+                        TipoServicio: 'Peluqueria',
+                        FechaHoraInicio: parseISO(new Date().toISOString()),
+                        MascotaID: dto.MascotaID,
+                        PersonalID: userId,
+                        ReservacionID: dto.ReservacionID
+                    }
+                });
+                const peluqueria = await prisma.peluqueria.create({
+                    data: {
+                        TipoCorte: dto.TipoCorte,
+                        Lavado: dto.Lavado,
+                        ServicioID: servicio.ServicioID
+                    }
+                });
+                await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServPeluqueria, ipDir);
+                return {
+                    servicio,
+                    peluqueria
+                };
+            });
+            return {
+                Message: "Peluquería registrada exitosamente",
+                ServicioID: result.servicio.ServicioID,
+                PeluqueriaID: result.peluqueria.ID
+            };
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -207,6 +217,26 @@ export class VetdocService {
         }
     }
 
+    async updateServInternacion(dto: UpdateInternacionDto, userId: number, ipDir: string) {
+        const servicio = await this.prisma.servicio.update({
+            where: { ServicioID: dto.ServicioID },
+            data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
+        });
+        await this.prisma.internacion.update({
+            where: { ID: dto.InternacionID },
+            data: { 
+                PesoSalida: dto.PesoSalida,
+                TemperaturaSalida: dto.TemperaturaSalida,
+                NotasProgreso: dto.Notas
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarServicioInternacion, ipDir);
+        return {
+            Respuesta : "Servicio completado",
+            ServicioID : servicio.ServicioID
+        }
+    }
+
     async createServCirugia(dto: CreateCirugiaDto, userId: number, ipDir: string) {
         await this.prisma.reservacion.update({
             where: { ReservacionID: dto.ReservacionID },
@@ -235,26 +265,6 @@ export class VetdocService {
             Message: "Cirugía registrada exitosamente",
             ServicioID: servicio.ServicioID,
             CirugiaID: cirugia.ID
-        }
-    }
-
-    async updateServInternacion(dto: UpdateInternacionDto, userId: number, ipDir: string) {
-        const servicio = await this.prisma.servicio.update({
-            where: { ServicioID: dto.ServicioID },
-            data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
-        });
-        await this.prisma.internacion.update({
-            where: { ID: dto.InternacionID },
-            data: { 
-                PesoSalida: dto.PesoSalida,
-                TemperaturaSalida: dto.TemperaturaSalida,
-                NotasProgreso: dto.Notas
-            }
-        });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarServicioInternacion, ipDir);
-        return {
-            Respuesta : "Servicio completado",
-            ServicioID : servicio.ServicioID
         }
     }
 
