@@ -2,10 +2,11 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGua
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { CreateAnalisisConsultaDto, CreateConsultaDto, CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaConsultaDto, 
-    CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
 import { CreateRecetaInternacionDto } from './dto/createRecetaInternacion.dto';
 import { CreateAnalisisInternacionDto } from './dto/createAnalisisInternacion.dto';
+import { CreateAnalisisConsultaDto, CreateCirugiaDto, CreateConsultaDto, CreateInternacionDto, 
+    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, 
+    UpdateInternacionDto, UpdateServicioDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -88,7 +89,7 @@ export class VetdocController {
     }
     
     @HttpCode(HttpStatus.OK)
-    @Patch('servicios/consulta')
+    @Patch('servicios')
     async updateConsulta(
         @Body() dto: UpdateConsultaDto,
         @Usuario() { userId, ip }: { userId: number; ip: string }
@@ -127,6 +128,19 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Post('servicios/cirugia')
+    async createServCirugia(
+        @Body() dto: CreateCirugiaDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        console.log("****************************************************");
+        console.log("CREAR CIRUGIA:");
+        console.log({dto});
+        console.log("****************************************************");
+        return await this.vetdocService.createServCirugia(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Post('receta/consulta')
     async createRecetaConsulta(
         @Body() dto: CreateRecetaConsultaDto,
@@ -157,19 +171,6 @@ export class VetdocController {
     async leerReceta(@Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.vetdocService.leerReceta(userId, ip);
     }
-    
-    @HttpCode(HttpStatus.OK)
-    @Post('analisis/consulta')
-    async createAnalisisConsulta(
-        @Body() dto: CreateAnalisisConsultaDto, 
-        @Usuario() { userId, ip }: { userId: number; ip: string }
-    ) {
-        console.log("****************************************************");
-        console.log("CREAR ANALISIS-CONSULTA:");
-        console.log({dto});
-        console.log("****************************************************");
-        return await this.vetdocService.createAnalisisConsulta(dto, userId, ip);
-    }
 
     @HttpCode(HttpStatus.OK)
     @Post('analisis/internacion')
@@ -182,6 +183,19 @@ export class VetdocController {
         console.log({dto});
         console.log("****************************************************");
         return await this.vetdocService.createAnalisisInternacion(dto, userId, ip);
+    }
+    
+    @HttpCode(HttpStatus.OK)
+    @Post('analisis/consulta')
+    async createAnalisisConsulta(
+        @Body() dto: CreateAnalisisConsultaDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        console.log("****************************************************");
+        console.log("CREAR ANALISIS-CONSULTA:");
+        console.log({dto});
+        console.log("****************************************************");
+        return await this.vetdocService.createAnalisisConsulta(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -224,11 +238,11 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Patch('servicios')                 // {{local}}/vetdoc/servicios
-    updateServicio(
+    @Patch('servicios/peluqueria')      // {{local}}/vetdoc/servicios
+    updatePeluqueria(
         @Body() dto: UpdateServicioDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
         console.log({dto});
-        return this.vetdocService.updateServicio(dto, userId, ip);
+        return this.vetdocService.updatePeluqueria(dto, userId, ip);
     }
 }

@@ -47,14 +47,16 @@ model cargo {
 }
 
 model cirugia {
-  ID                  Int             @id @default(autoincrement())
-  TipoDeCirugia       String          @db.VarChar(50)
-  Peso                Decimal         @db.Decimal(6, 2)
-  Temperatura         Decimal         @db.Decimal(6, 2)
-  Notas               String          @db.VarChar(500)
-  ServicioID          Int   
-  servicio            servicio        @relation(fields: [ServicioID], references: [ServicioID])
-  internaciones       internacion[]
+  ID                     Int             @id @default(autoincrement())
+  TipoDeCirugia          String          @db.VarChar(50)
+  PesoEntrada            Decimal         @db.Decimal(6, 2)
+  TemperaturaEntrada     Decimal         @db.Decimal(6, 2)
+  PesoSalida             Decimal?        @db.Decimal(6, 2)
+  TemperaturaSalida      Decimal?        @db.Decimal(6, 2)
+  Notas                  String          @db.VarChar(500)
+  ServicioID             Int   
+  servicio               servicio        @relation(fields: [ServicioID], references: [ServicioID])
+  internaciones          internacion[]
 
   @@index([ServicioID], map: "cirugia_ServicioID")
 }
@@ -73,8 +75,8 @@ model consultamedica {
   ID              Int             @id @default(autoincrement())
   Peso            Decimal         @db.Decimal(6, 2)
   Temperatura     Decimal         @db.Decimal(6, 2)
-  Diagnostico     String?         @db.VarChar(500)
-  Tratamiento     String?         @db.VarChar(500)
+  Diagnostico     String?         @db.VarChar(200)
+  Tratamiento     String?         @db.VarChar(200)
   ServicioID      Int   
   servicio        servicio        @relation(fields: [ServicioID], references: [ServicioID])
   analisis        analisisclinico[]
@@ -104,18 +106,18 @@ model especie {
 }
 
 model internacion {
-  ID                    Int                  @id @default(autoincrement())
-  NotasProgreso         String               @db.VarChar(1500)
-  PesoEntrada           Decimal              @db.Decimal(6, 2)
-  TemperaturaEntrada    Decimal              @db.Decimal(6, 2)
-  PesoSalida            Decimal?             @db.Decimal(6, 2)
-  TemperaturaSalida     Decimal?             @db.Decimal(6, 2)
-  ServicioID            Int?     
-  servicio              servicio?            @relation(fields: [ServicioID], references: [ServicioID])
-  CirugiaID             Int?
-  cirugia               cirugia?             @relation(fields: [CirugiaID], references: [ID])
-  analisis              analisisclinico[]
-  recetas               receta[]
+  ID                     Int                  @id @default(autoincrement())
+  NotasProgreso          String               @db.VarChar(1500)
+  PesoEntrada            Decimal              @db.Decimal(6, 2)
+  TemperaturaEntrada     Decimal              @db.Decimal(6, 2)
+  PesoSalida             Decimal?             @db.Decimal(6, 2)
+  TemperaturaSalida      Decimal?             @db.Decimal(6, 2)
+  ServicioID             Int?     
+  servicio               servicio?            @relation(fields: [ServicioID], references: [ServicioID])
+  CirugiaID              Int?
+  cirugia                cirugia?             @relation(fields: [CirugiaID], references: [ID])
+  analisis               analisisclinico[]
+  recetas                receta[]
 
   @@index([CirugiaID], map: "CirugiaID")
   @@index([ServicioID], map: "internacion_ServicioID")
@@ -139,8 +141,8 @@ model mascota {
 }
 
 model peluqueria {
-  ID              Int         @id @default(autoincrement())
-  TipoCorte       String      @db.VarChar(50)
+  ID              Int                        @id @default(autoincrement())
+  TipoCorte       peluqueria_TipoCorte?      @default(Medio)
   Lavado          Boolean
   ServicioID      Int
   servicio        servicio    @relation(fields: [ServicioID], references: [ServicioID])
@@ -311,33 +313,34 @@ enum tipoaccionbitacora_Accion {
   LeerPersonal
   ActualizarPersonal
   CrearCliente
-  LeerClientes
+  LeerCliente
   ActualizarCliente
   CrearRaza
   LeerRaza
   CrearMascota
-  LeerMascotas
+  LeerMascota
   ActualizarMascota
   CrearReservacion
   LeerReservacion
   CancelarReservacion
   CerrarReservacion
   CrearVacuna
-  LeerVacunas
+  LeerVacuna
   CrearRegVac
   LeerRegVac
   ActualizarRegVac
-  LeerUsuarios
+  LeerUsuario
   DesactivarUsuario
-  CrearServicioPeluqueria
-  LeerServicioPeluqueria
-  FinalizarServicioPeluqueria
-  CearReceta
-  LeerReceta
-  ActualizarReceta
+  RehabilitarUsuario
   CrearAnalisis
   LeerAnalisis
   ActualizarAnalisis
+  LeerReceta
+  CearReceta
+  ActualizarReceta
+  CrearServPeluqueria
+  LeerServPeluqueria
+  FinalizarServPeluqueria
   CrearServicioConsulta
   LeerServicioConsulta
   ActualizarServicioConsulta
@@ -357,7 +360,6 @@ enum tipoaccionbitacora_Accion {
   LeerDetalleRecibo
   ActualizarDetalleRecibo
   LeerServiciosEnProceso
-  FinalizarServicio
   LeerServiciosTerminados
 }
 
@@ -390,6 +392,13 @@ enum analisisclinico_Resultado {
   Bueno
   Estable
   Critico
+}
+
+enum peluqueria_TipoCorte {
+  Medio
+  Bajo
+  Alto
+  Especial
 }
 
 enum vacuna_Tipo {

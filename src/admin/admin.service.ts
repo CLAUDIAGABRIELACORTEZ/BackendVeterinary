@@ -2,20 +2,16 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as argon from 'argon2';
 import { parseISO } from 'date-fns';
 import { ConfigService } from '@nestjs/config';
+import { UpdateReservacionDto } from 'src/client/dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
-        UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
-        UpdateUsuarioDto,
-        CreateRazaDto} from './dto';
-        import { UpdateReservacionDto } from 'src/client/dto';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
+import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
+    UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, UpdateUsuarioDto, CreateRazaDto} from './dto';
 
 
 @Injectable()
 export class AdminService {
-    constructor(private prisma: PrismaService, 
-                private config: ConfigService) {}
-
+    constructor( private prisma: PrismaService, private config: ConfigService ) { }
 
     private async logAccion(userId: number, actionId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, actionId, ipDir);
@@ -186,7 +182,7 @@ export class AdminService {
     // adolfomendozaribera400@gmail.com
 
     async getPersonal(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerPersonal, ipDir);
         return this.prisma.$queryRaw`
             SELECT
                 p."PersonalID" AS "ID",
@@ -206,7 +202,7 @@ export class AdminService {
     }
 
     async getClientes(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarClientes, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerCliente, ipDir);
         return await this.prisma.$queryRaw`
             SELECT
                 c."ClienteID" AS "ClienteID",
@@ -220,7 +216,7 @@ export class AdminService {
     }
 
     async getMascotas(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerMascota, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID" AS "ID",
@@ -330,7 +326,7 @@ export class AdminService {
     }
 
     async getUsuarios(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerPersonal, ipDir);
         return this.prisma.$queryRaw`
             SELECT
                 "UsuarioID",
@@ -360,7 +356,7 @@ export class AdminService {
     
 
     async getReservacionesGral(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReservacion, ipDir);
         return this.prisma.$queryRaw`
             SELECT
                 r."ReservacionID",

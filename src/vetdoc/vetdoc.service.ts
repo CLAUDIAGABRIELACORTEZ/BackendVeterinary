@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { format, parseISO } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
-import { CreateAnalisisConsultaDto, CreateConsultaDto, CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaConsultaDto, 
-    CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
 import { CreateRecetaInternacionDto } from './dto/createRecetaInternacion.dto';
 import { CreateAnalisisInternacionDto } from './dto/createAnalisisInternacion.dto';
+import { CreateAnalisisConsultaDto, CreateCirugiaDto, CreateConsultaDto, CreateInternacionDto, 
+    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, 
+    UpdateInternacionDto, UpdateServicioDto } from './dto';
 
 
 @Injectable()
@@ -33,7 +34,7 @@ export class VetdocService {
     }
 
     async getVacunas(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarVacunas, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerVacuna, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 "VacunaID" AS "ID",
@@ -68,7 +69,7 @@ export class VetdocService {
 
     async leerRegVac(userId: number, ipDir: string) {
         // muestra todas las vacunaciones
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarRegVac, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRegVac, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID",
@@ -86,7 +87,7 @@ export class VetdocService {
 
     async leerRegVacMascota(mascotaID: number, userId: number, ipDir: string) {
         // muestra las vacunaciones de una mascota, falta implementar
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarRegVac, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRegVac, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."Nombre" AS "Nombre",
@@ -103,7 +104,7 @@ export class VetdocService {
     }
 
     async getReservacionesGral(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReservacion, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 reservacion."ReservacionID",
@@ -141,9 +142,9 @@ export class VetdocService {
                 ServicioID: servicio.ServicioID
             }
         });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioPeluqueria, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServPeluqueria, ipDir);
         return {
-            Message: "Servicio registrado exitosamente",
+            Message: "Peluquería registrada exitosamente",
             ServicioID: servicio.ServicioID,
             PeluqueriaID: peluqueria.ID
         }
@@ -174,7 +175,7 @@ export class VetdocService {
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioConsulta, ipDir);
         return {
-            Message: "Servicio registrado exitosamente",
+            Message: "Consulta registrada exitosamente",
             ServicioID: servicio.ServicioID,
             ConsultaID: consulta.ID
         }
@@ -200,9 +201,40 @@ export class VetdocService {
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioInternacion, ipDir);
         return {
-            Message: "Servicio registrado exitosamente",
+            Message: "Internación registrada exitosamente",
             ServicioID: servicio.ServicioID,
             InternacionID: internacion.ID
+        }
+    }
+
+    async createServCirugia(dto: CreateCirugiaDto, userId: number, ipDir: string) {
+        await this.prisma.reservacion.update({
+            where: { ReservacionID: dto.ReservacionID },
+            data: { Estado: 'Realizada' }
+        });
+        const servicio = await this.prisma.servicio.create({
+            data: {
+                TipoServicio: 'Internacion',
+                FechaHoraInicio: parseISO(new Date().toISOString()),
+                MascotaID: dto.MascotaID,
+                PersonalID: userId,
+                ReservacionID: dto.ReservacionID
+            }
+        });
+        const cirugia = await this.prisma.cirugia.create({
+            data: {
+                Notas: dto.Notas,
+                TipoDeCirugia: dto.TipoDeCirugia,
+                PesoEntrada: dto.Peso,
+                TemperaturaEntrada: dto.Temperatura,
+                ServicioID: servicio.ServicioID
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioCirugia, ipDir);
+        return {
+            Message: "Cirugía registrada exitosamente",
+            ServicioID: servicio.ServicioID,
+            CirugiaID: cirugia.ID
         }
     }
 
@@ -360,7 +392,7 @@ export class VetdocService {
     // ***************************************************************************************************
 
     async getServiciosEnProceso(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioPeluqueria, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServPeluqueria, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 s."ServicioID",
@@ -405,7 +437,7 @@ export class VetdocService {
     }
 
     async getMascotasCli(ClienteID: number, userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerMascota, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID",
@@ -417,12 +449,12 @@ export class VetdocService {
         `;
     }
 
-    async updateServicio(dto: UpdateServicioDto, userId: number, ipDir: string) {
+    async updatePeluqueria(dto: UpdateServicioDto, userId: number, ipDir: string) {
         const servicio = await this.prisma.servicio.update({
             where: { ServicioID: dto.ServicioID },
             data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
         });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.FinalizarServicioPeluqueria, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.FinalizarServPeluqueria, ipDir);
         return {
             Respuesta : "Servicio completado",
             ServicioID : servicio.ServicioID
@@ -442,7 +474,7 @@ export class VetdocService {
     }
 
     async getServiciosCompletados(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioPeluqueria, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServiciosTerminados, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 s."ServicioID",

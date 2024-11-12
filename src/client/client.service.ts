@@ -34,7 +34,7 @@ export class ClientService {
                 ClienteID: usuario.ClienteID
             }
         });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerMascota, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID" AS "ID",
@@ -65,7 +65,7 @@ export class ClientService {
     }
 
     async getReservacionesCli(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReservacion, ipDir);
         return this.prisma.$queryRaw`
             SELECT
                 "ReservacionID",

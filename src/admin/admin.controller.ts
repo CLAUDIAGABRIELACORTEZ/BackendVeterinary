@@ -25,7 +25,7 @@ export class AdminController {
     updateReservacion(
         @Body() dto: UpdateReservacionDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
-        console.log({userId, ip});
+        // console.log({userId, ip});
         return this.admService.updateReservacion(dto, userId, ip);
     }
 
@@ -54,7 +54,7 @@ export class AdminController {
         if (!serviceMetodo) {
             throw new BadRequestException(`Tipo de entidad inválido: ${tipoDeEntidad}`);
         }
-        console.log({dto});
+        // console.log({dto});
         return await serviceMetodo.call(this.admService, dto, userId, ip);
     }
 
@@ -77,7 +77,7 @@ export class AdminController {
         if (!serviceMetodo) {
             throw new BadRequestException(`Tipo de entidad inválido: ${tipoDeEntidad}`);
         }
-        console.log({userId, ip});
+        // console.log({userId, ip});
         return await serviceMetodo.call(this.admService, userId, ip);
     }
 

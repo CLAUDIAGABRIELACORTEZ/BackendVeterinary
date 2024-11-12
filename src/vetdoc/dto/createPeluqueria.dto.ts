@@ -1,11 +1,11 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
+import { TipoCorte } from "src/utils/index.utils";
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber } from "class-validator";
 
 
 export class CreatePeluqueriaDto {
     @IsNotEmpty()
-    @IsString()
-    @MaxLength(50, { message: 'La descripción del corte no puede exceder los 50 caracteres' })
-    TipoCorte: string;
+    @IsEnum(TipoCorte)
+    TipoCorte: TipoCorte;
     
     @IsNotEmpty()
     @IsBoolean()
