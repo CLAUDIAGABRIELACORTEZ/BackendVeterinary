@@ -5,7 +5,7 @@ import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { CreateRecetaInternacionDto } from './dto/createRecetaInternacion.dto';
 import { CreateAnalisisInternacionDto } from './dto/createAnalisisInternacion.dto';
 import { CreateAnalisisConsultaDto, CreateCirugiaDto, CreateConsultaDto, CreateInternacionDto, 
-    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, 
+    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRegvacDto, CreateVacunaDto, UpdateCirugiaDto, UpdateConsultaDto, 
     UpdateInternacionDto, UpdateServicioDto } from './dto';
 
 
@@ -214,7 +214,7 @@ export class VetdocService {
         });
         const servicio = await this.prisma.servicio.create({
             data: {
-                TipoServicio: 'Internacion',
+                TipoServicio: 'Cirugia',
                 FechaHoraInicio: parseISO(new Date().toISOString()),
                 MascotaID: dto.MascotaID,
                 PersonalID: userId,
@@ -223,10 +223,10 @@ export class VetdocService {
         });
         const cirugia = await this.prisma.cirugia.create({
             data: {
-                Notas: dto.Notas,
-                TipoDeCirugia: dto.TipoDeCirugia,
                 PesoEntrada: dto.Peso,
                 TemperaturaEntrada: dto.Temperatura,
+                TipoDeCirugia: dto.TipoDeCirugia,
+                Notas: dto.Notas,
                 ServicioID: servicio.ServicioID
             }
         });
@@ -251,6 +251,36 @@ export class VetdocService {
                 NotasProgreso: dto.Notas
             }
         });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarServicioInternacion, ipDir);
+        return {
+            Respuesta : "Servicio completado",
+            ServicioID : servicio.ServicioID
+        }
+    }
+
+    async updateServCirugia(dto: UpdateCirugiaDto, userId: number, ipDir: string) {
+        const servicio = await this.prisma.servicio.update({
+            where: { ServicioID: dto.ServicioID },
+            data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
+        });
+        await this.prisma.cirugia.update({
+            where: { ID: dto.CirugiaID },
+            data: {
+                PesoSalida: dto.PesoSalida,
+                TemperaturaSalida: dto.TemperaturaSalida,
+                Notas: dto.Notas
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarServicioCirugia, ipDir);
+        await this.prisma.internacion.create({
+            data: {
+                PesoEntrada: dto.PesoSalida,
+                TemperaturaEntrada: dto.TemperaturaSalida,
+                NotasProgreso: dto.Notas,
+                CirugiaID: dto.CirugiaID
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioInternacion, ipDir);
         return {
             Respuesta : "Servicio completado",
             ServicioID : servicio.ServicioID

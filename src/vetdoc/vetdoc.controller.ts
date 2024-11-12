@@ -5,7 +5,7 @@ import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { CreateRecetaInternacionDto } from './dto/createRecetaInternacion.dto';
 import { CreateAnalisisInternacionDto } from './dto/createAnalisisInternacion.dto';
 import { CreateAnalisisConsultaDto, CreateCirugiaDto, CreateConsultaDto, CreateInternacionDto, 
-    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRegvacDto, CreateVacunaDto, UpdateConsultaDto, 
+    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRegvacDto, CreateVacunaDto, UpdateCirugiaDto, UpdateConsultaDto, 
     UpdateInternacionDto, UpdateServicioDto } from './dto';
 
 
@@ -138,6 +138,19 @@ export class VetdocController {
         console.log({dto});
         console.log("****************************************************");
         return await this.vetdocService.createServCirugia(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Patch('servicios/cirugia')
+    async updateServCirugia(
+        @Body() dto: UpdateCirugiaDto, 
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        console.log("****************************************************");
+        console.log("UPDATE CIRUGIA:");
+        console.log({dto});
+        console.log("****************************************************");
+        return await this.vetdocService.updateServCirugia(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
