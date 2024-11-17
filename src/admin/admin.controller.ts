@@ -71,7 +71,8 @@ export class AdminController {
             logs: this.admService.getBitacoraLogs,
             reservacion: this.admService.getReservacionesGral,
             usuarios: this.admService.getUsuarios,
-            raza: this.admService.getRazas
+            raza: this.admService.getRazas,
+            especie: this.admService.getEspecie
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {

@@ -315,6 +315,7 @@ enum tipoaccionbitacora_Accion {
   CrearCliente
   LeerCliente
   ActualizarCliente
+  LeerEspecie
   CrearRaza
   LeerRaza
   CrearMascota

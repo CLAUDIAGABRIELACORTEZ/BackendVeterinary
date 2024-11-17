@@ -129,6 +129,16 @@ export class AdminService {
         }
     }
 
+    async getEspecie(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRaza, ipDir);
+        return await this.prisma.$queryRaw`
+            SELECT 
+                especie."EspecieID",
+                especie."NombreEspecie"
+            FROM especie
+        `;
+    }
+
     async getRazas(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRaza, ipDir);
         return await this.prisma.$queryRaw`
