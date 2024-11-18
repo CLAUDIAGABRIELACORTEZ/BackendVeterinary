@@ -65,6 +65,7 @@ model cliente {
   ClienteID         Int           @id @default(autoincrement()) @db.SmallInt
   NombreCompleto    String        @db.VarChar(60)
   Telefono          String        @db.VarChar(30)
+  NumeroCI          Int           @db.Integer
   Direccion         String?       @db.VarChar(100)
   Email             String        @unique(map: "UniqueClienteEmail") @db.VarChar(50)
   mascotas          mascota[]
@@ -72,15 +73,16 @@ model cliente {
 }
 
 model consultamedica {
-  ID              Int             @id @default(autoincrement())
-  Peso            Decimal         @db.Decimal(6, 2)
-  Temperatura     Decimal         @db.Decimal(6, 2)
-  Diagnostico     String?         @db.VarChar(200)
-  Tratamiento     String?         @db.VarChar(200)
-  ServicioID      Int   
-  servicio        servicio        @relation(fields: [ServicioID], references: [ServicioID])
+  ID              Int                   @id @default(autoincrement())
+  Peso            Decimal               @db.Decimal(6, 2)
+  Temperatura     Decimal               @db.Decimal(6, 2)
+  Diagnostico     String?               @db.VarChar(200)
+  Tratamiento     String?               @db.VarChar(200)
+  ServicioID      Int         
+  servicio        servicio              @relation(fields: [ServicioID], references: [ServicioID])
   analisis        analisisclinico[]
   recetas         receta[]
+  internaciones   internacion[]
 
   @@index([ServicioID], map: "consultamedica_ServicioID")
 }
@@ -112,10 +114,12 @@ model internacion {
   TemperaturaEntrada     Decimal              @db.Decimal(6, 2)
   PesoSalida             Decimal?             @db.Decimal(6, 2)
   TemperaturaSalida      Decimal?             @db.Decimal(6, 2)
-  ServicioID             Int?     
-  servicio               servicio?            @relation(fields: [ServicioID], references: [ServicioID])
+  ServicioID             Int     
+  servicio               servicio             @relation(fields: [ServicioID], references: [ServicioID])
   CirugiaID              Int?
   cirugia                cirugia?             @relation(fields: [CirugiaID], references: [ID])
+  ConsultaID             Int?
+  consulta               consultamedica?      @relation(fields: [ConsultaID], references: [ID])
   analisis               analisisclinico[]
   recetas                receta[]
 
@@ -153,6 +157,7 @@ model peluqueria {
 model personal {
   PersonalID            Int           @id @default(autoincrement()) @db.SmallInt
   NombreCompleto        String        @db.VarChar(60)
+  NumeroCI              Int           @db.Integer
   Telefono              String        @db.VarChar(30)
   Direccion             String        @db.VarChar(100)
   FechaContratacion     DateTime      @db.Date
