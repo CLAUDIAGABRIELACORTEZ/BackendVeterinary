@@ -335,20 +335,45 @@ export class AdminService {
         });
     }
 
-    async getUsuarios(userId: number, ipDir: string) {
+    async getUsuariosActivos(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerPersonal, ipDir);
         return this.prisma.$queryRaw`
-            SELECT
-                "UsuarioID",
-                "Rol",
-                "Estado"
-            FROM usuario
-            WHERE "Estado" = 'Activo'
-            ORDER BY "UsuarioID" ASC;
+            SELECT 
+                u."UsuarioID",
+                u."Rol",
+                CASE 
+                    WHEN u."PersonalID" IS NOT NULL THEN p."NombreCompleto"
+                    WHEN u."ClienteID" IS NOT NULL THEN c."NombreCompleto"
+                END as "Nombre",
+                u."Estado"
+            FROM usuario u
+            LEFT JOIN personal p ON u."PersonalID" = p."PersonalID"
+            LEFT JOIN cliente c ON u."ClienteID" = c."ClienteID"
+            WHERE u."Estado" = 'Activo'
+            ORDER BY u."UsuarioID" ASC;
         `;
     }
 
-    async updateUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
+    async getUsuariosInactivos(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerPersonal, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                u."UsuarioID",
+                u."Rol",
+                CASE 
+                    WHEN u."PersonalID" IS NOT NULL THEN p."NombreCompleto"
+                    WHEN u."ClienteID" IS NOT NULL THEN c."NombreCompleto"
+                END as "Nombre",
+                u."Estado"
+            FROM usuario u
+            LEFT JOIN personal p ON u."PersonalID" = p."PersonalID"
+            LEFT JOIN cliente c ON u."ClienteID" = c."ClienteID"
+            WHERE u."Estado" = 'Inactivo'
+            ORDER BY u."UsuarioID" ASC;
+        `;
+    }
+
+    async inhabilitarUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
         return await this.prisma.$transaction(async (prisma) => {
             const usuario = await prisma.usuario.update({
                 where: { UsuarioID: dto.UsuarioID },
@@ -363,7 +388,22 @@ export class AdminService {
             };
         });
     }
+
+    async habilitarUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
+        return await this.prisma.$transaction(async (prisma) => {
+            const usuario = await prisma.usuario.update({
+                where: { UsuarioID: dto.UsuarioID },
+                data: { Estado: 'Activo' },
+            });
     
+            await this.logAccion(userId, BitacoraAccion.RehabilitarUsuario, ipDir);
+    
+            return {
+                Respuesta: "Usuario activado exitosamente",
+                UsuarioID: usuario.UsuarioID,
+            };
+        });
+    }
 
     async getReservacionesGral(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReservacion, ipDir);

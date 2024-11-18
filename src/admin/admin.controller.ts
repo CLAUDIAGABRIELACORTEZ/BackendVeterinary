@@ -1,11 +1,11 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, 
         HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { CreatePersonalDto, CreateClienteDto, CreateRazaDto, CreateMascotaDto, 
-    UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, UpdateUsuarioDto } from './dto';
 import { AdminService } from './admin.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { UpdateReservacionDto } from 'src/client/dto';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
+import { CreatePersonalDto, CreateClienteDto, CreateRazaDto, CreateMascotaDto, 
+    UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, UpdateUsuarioDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -27,14 +27,6 @@ export class AdminController {
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
         // console.log({userId, ip});
         return this.admService.updateReservacion(dto, userId, ip);
-    }
-
-    @HttpCode(HttpStatus.OK)
-    @Patch('usuarios')       // {{local}}/admin/usuarios
-    updateUsuario(
-        @Body() dto: UpdateUsuarioDto,
-        @Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return this.admService.updateUsuario(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -70,7 +62,8 @@ export class AdminController {
             mascotas: this.admService.getMascotas,
             logs: this.admService.getBitacoraLogs,
             reservacion: this.admService.getReservacionesGral,
-            usuarios: this.admService.getUsuarios,
+            usuarios: this.admService.getUsuariosActivos,
+            usuariosInactivos: this.admService.getUsuariosInactivos,
             raza: this.admService.getRazas,
             especie: this.admService.getEspecie
         }[tipoDeEntidad];
@@ -85,7 +78,7 @@ export class AdminController {
     @HttpCode(HttpStatus.OK)
     @Patch(':tipoDeEntidad')
     async actualizarEntidad(
-        @Body() dto: UpdatePersonalDto | UpdateClienteDto | UpdateMascotaDto | UpdateUsuarioDto,
+        @Body() dto: UpdatePersonalDto | UpdateClienteDto | UpdateMascotaDto | UpdateUsuarioDto | UpdateUsuarioDto,
         @Usuario() { userId, ip }: { userId: number; ip: string },
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
@@ -93,12 +86,14 @@ export class AdminController {
             personal: this.admService.updatePersonal, // {{local}}/admin/personal
             clientes: this.admService.updateCliente, // {{local}}/admin/clientes
             mascotas: this.admService.updateMascota, // {{local}}/admin/mascotas
-            usuarios: this.admService.updateUsuario, // {{local}}/admin/usuarios
+            usuarios: this.admService.inhabilitarUsuario, // {{local}}/admin/usuarios
+            usuariosInactivos: this.admService.habilitarUsuario, // {{local}}/admin/usuariosInactivos
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
             throw new BadRequestException(`Tipo de entidad inválido: ${tipoDeEntidad}`);
         }
+        console.log({dto});
         return await serviceMetodo.call(this.admService, dto, userId, ip);
     }
 }
