@@ -15,6 +15,10 @@ export class CreatePersonalDto {
     @IsNotEmpty()
     Direccion: string;
 
+    @IsNotEmpty()
+    @IsNumber()
+    NumeroCI: number;
+
     @IsEmail()
     @IsNotEmpty()
     Email: string;

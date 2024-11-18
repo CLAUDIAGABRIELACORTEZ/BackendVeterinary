@@ -115,7 +115,7 @@ export class VetdocService {
             FROM reservacion
             JOIN usuario ON reservacion."UsuarioID" = usuario."UsuarioID"
             JOIN cliente ON usuario."ClienteID" = cliente."ClienteID"
-            WHERE reservacion."FechaHoraReservada" <= CURRENT_DATE 
+            WHERE reservacion."FechaHoraReservada" <= CURRENT_TIMESTAMP
             AND reservacion."Estado" = 'Pendiente'
             ORDER BY reservacion."FechaHoraReservada" DESC;
         `;
@@ -282,12 +282,21 @@ export class VetdocService {
             }
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarServicioCirugia, ipDir);
+        const nuevaInternacion = await this.prisma.servicio.create({
+            data: {
+                TipoServicio: 'Internacion',
+                FechaHoraInicio: parseISO(new Date().toISOString()),
+                MascotaID: dto.MascotaID,
+                PersonalID: userId,
+            }
+        });
         await this.prisma.internacion.create({
             data: {
                 PesoEntrada: dto.PesoSalida,
                 TemperaturaEntrada: dto.TemperaturaSalida,
                 NotasProgreso: dto.Notas,
-                CirugiaID: dto.CirugiaID
+                CirugiaID: dto.CirugiaID,
+                ServicioID: nuevaInternacion.ServicioID
             }
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioInternacion, ipDir);

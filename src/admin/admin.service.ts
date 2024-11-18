@@ -52,6 +52,7 @@ export class AdminService {
                     NombreCompleto: dto.NombreCompleto,
                     Telefono: dto.Telefono,
                     Direccion: dto.Direccion,
+                    NumeroCI: dto.NumeroCI,
                     Email: dto.Email,
                     FechaContratacion: parseISO(dto.FechaContratacion.toString()),
                     CargoID: dto.CargoID,
@@ -85,6 +86,7 @@ export class AdminService {
                 data: {
                     NombreCompleto: dto.NombreCompleto,
                     Telefono: dto.Telefono,
+                    NumeroCI: dto.NumeroCI,
                     Direccion: dto.Direccion,
                     Email: dto.Email
                 }
