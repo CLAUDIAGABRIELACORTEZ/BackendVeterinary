@@ -178,8 +178,8 @@ export class VetdocService {
             data: {
                 Peso: dto.Peso,
                 Temperatura: dto.Temperatura,
-                Diagnostico: dto.Diagnostico,
-                Tratamiento: dto.Tratamiento,
+                // Diagnostico: dto.Diagnostico,
+                // Tratamiento: dto.Tratamiento,
                 ServicioID: servicio.ServicioID
             }
         });
@@ -515,6 +515,13 @@ export class VetdocService {
             where: { ServicioID: dto.ServicioID },
             data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }
         });
+        await this.prisma.consultamedica.update({
+            where: {ID: dto.ConsultaID},
+            data: {
+                Diagnostico: dto.Diagnostico,
+                Tratamiento: dto.Tratamiento
+            }
+        })
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.FinalizarServicioConsulta, ipDir);
         return {
             Respuesta : "Servicio completado",

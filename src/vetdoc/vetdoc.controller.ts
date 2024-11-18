@@ -89,7 +89,7 @@ export class VetdocController {
     }
     
     @HttpCode(HttpStatus.OK)
-    @Patch('servicios')
+    @Patch('servicios/consulta')
     async updateConsulta(
         @Body() dto: UpdateConsultaDto,
         @Usuario() { userId, ip }: { userId: number; ip: string }
