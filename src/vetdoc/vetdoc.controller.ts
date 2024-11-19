@@ -16,12 +16,6 @@ export class VetdocController {
     constructor(private readonly vetdocService: VetdocService) {}
 
     @HttpCode(HttpStatus.OK)
-    @Get('testing')                     // {{local}}/vetdoc/testing
-    async getGreetings() {
-        return '¡Saludos, desde la zona del matasanos!';
-    }
-
-    @HttpCode(HttpStatus.OK)
     @Post('vacunas')                    // {{local}}/vetdoc/vacunas
     async registrarVacuna(
         @Body() dto: CreateVacunaDto, 
@@ -86,6 +80,12 @@ export class VetdocController {
         console.log({dto});
         console.log("****************************************************");
         return await this.vetdocService.createServConsulta(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('servicios/consulta')
+    getConsultasCompletadas(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.vetdocService.getConsultasCompletadas(userId, ip);
     }
     
     @HttpCode(HttpStatus.OK)
@@ -217,22 +217,10 @@ export class VetdocController {
         return this.vetdocService.leerAnalisis(userId, ip);
     }
 
-
-    // ***************************************************************************************************
-    // ***************************************************************************************************
-    // ***************************************************************************************************
-
-
     @HttpCode(HttpStatus.OK)
     @Get('servicios/active')            // {{local}}/vetdoc/servicios/active
     getServiciosEnProceso(@Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.vetdocService.getServiciosEnProceso(userId, ip);
-    }
-
-    @HttpCode(HttpStatus.OK)
-    @Get('servicios/consulta')          // {{local}}/vetdoc/servicios/active
-    getConsultasCompletadas(@Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return this.vetdocService.getConsultasCompletadas(userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -251,7 +239,7 @@ export class VetdocController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Patch('servicios/peluqueria')      // {{local}}/vetdoc/servicios
+    @Patch('servicios/peluqueria')      // {{local}}/vetdoc/servicios/peluqueria
     updatePeluqueria(
         @Body() dto: UpdateServicioDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {

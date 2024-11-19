@@ -67,8 +67,8 @@ export class VetdocService {
         };
     }
 
+    // muestra todas las vacunaciones
     async leerRegVac(userId: number, ipDir: string) {
-        // muestra todas las vacunaciones
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRegVac, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
@@ -85,8 +85,8 @@ export class VetdocService {
         `;
     }
 
+    // muestra las vacunaciones de una mascota en específico
     async leerRegVacMascota(mascotaID: number, userId: number, ipDir: string) {
-        // muestra las vacunaciones de una mascota, falta implementar
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRegVac, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
@@ -103,12 +103,14 @@ export class VetdocService {
         `;
     }
 
+    // muestra las reservaciones pendiente para atender
     async getReservacionesGral(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReservacion, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 reservacion."ReservacionID",
                 reservacion."Estado",
+                reservacion."Motivo",
                 TO_CHAR((reservacion."FechaHoraReservada"), 'YYYY-MM-DD HH24:MI:SS') AS "Hora",
                 cliente."NombreCompleto" AS "Cliente",
                 cliente."ClienteID" AS "ClienteID"
@@ -205,8 +207,8 @@ export class VetdocService {
                 PesoEntrada: dto.PesoEntrada,
                 TemperaturaEntrada: dto.TemperaturaEntrada,
                 NotasProgreso: dto.Notas,
-                CirugiaID: dto.CirugiaID,
-                ServicioID: servicio.ServicioID
+                ServicioID: servicio.ServicioID,
+                ConsultaID: dto.ConsultaID
             }
         });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioInternacion, ipDir);
@@ -436,10 +438,7 @@ export class VetdocService {
         // TODO - ¿Valdrá la pena?
     }
 
-    // ***************************************************************************************************
-    // ***************************************************************************************************
-    // ***************************************************************************************************
-
+    // muestra los servicios que están en proceso de atención
     async getServiciosEnProceso(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServPeluqueria, ipDir);
         return this.prisma.$queryRaw`
@@ -466,11 +465,13 @@ export class VetdocService {
         `;
     }
 
+    // muestra las consultas médicas terminadas para ser selecciondas a internacion:
     async getConsultasCompletadas(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioConsulta, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 s."ServicioID",
+                c."ID" as "ConsultaID",
                 TO_CHAR((s."FechaHoraFin"), 'YYYY-MM-DD HH24:MI:SS') AS "Hora terminada",
                 m."MascotaID",
                 m."Nombre" as "Mascota",
@@ -479,8 +480,10 @@ export class VetdocService {
             FROM servicio s
             INNER JOIN consultamedica c ON c."ServicioID" = s."ServicioID"
             INNER JOIN mascota m ON s."MascotaID" = m."MascotaID"
+            LEFT JOIN internacion i ON i."ConsultaID" = c."ID"
             WHERE s."TipoServicio" = 'Consulta' 
             AND s."Estado" = 'Completado'
+            AND i."ID" IS NULL
             ORDER BY c."ID" DESC;
         `;
     }
