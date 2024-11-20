@@ -21,14 +21,6 @@ export class AdminController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Patch('reservacion')
-    updateReservacion(
-        @Body() dto: UpdateReservacionDto,
-        @Usuario() { userId, ip }: { userId: number, ip: string }) {
-        return this.admService.updateReservacion(dto, userId, ip);
-    }
-
-    @HttpCode(HttpStatus.OK)
     @Post(':tipoDeEntidad')
     async crearEntidad(
         @Body() dto: CreatePersonalDto | CreateClienteDto | CreateMascotaDto | CreateRazaDto,
@@ -70,6 +62,14 @@ export class AdminController {
             throw new BadRequestException(`Tipo de entidad inválido: ${tipoDeEntidad}`);
         }
         return await serviceMetodo.call(this.admService, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Patch('reservacion')
+    updateReservacion(
+        @Body() dto: UpdateReservacionDto,
+        @Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.admService.updateReservacion(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
