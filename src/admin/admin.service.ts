@@ -153,6 +153,35 @@ export class AdminService {
         `;
     }
 
+    async leerReporteBitacora(clienteCI: number, userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServiciosTerminados, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT b."FechaHora", b."IPDir", t."Accion"
+            FROM bitacora b
+            JOIN usuario u ON b."UsuarioID" = u."UsuarioID"
+            JOIN cliente c ON u."ClienteID" = c."ClienteID" 
+            JOIN tipoaccionbitacora t ON b."TipoAccionBitacoraID" = t."TipoAccionBitacoraID"
+            WHERE c."NumeroCI" = ${clienteCI}
+            AND b."FechaHora" >= CURRENT_TIMESTAMP - INTERVAL '24 hours'
+            ORDER BY b."FechaHora" DESC;
+        `;
+    }
+
+    async leerReporteServicios(clienteCI: number, userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServiciosTerminados, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+               s."TipoServicio",
+               CAST(COUNT(*) AS INTEGER) as "Total Servicios"
+            FROM servicio s
+            JOIN mascota m ON s."MascotaID" = m."MascotaID"
+            JOIN cliente c ON m."ClienteID" = c."ClienteID"
+            WHERE c."NumeroCI" = ${clienteCI}
+            AND s."Estado" = 'Completado'
+            GROUP BY s."TipoServicio";
+        `;
+    }
+
     async crearMascota(dto: CreateMascotaDto, userId: number, ipDir: string) {
         try {
             const result = await this.prisma.$transaction(async (prisma) => {

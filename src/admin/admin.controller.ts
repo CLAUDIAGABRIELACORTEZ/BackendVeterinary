@@ -65,6 +65,24 @@ export class AdminController {
     }
 
     @HttpCode(HttpStatus.OK)
+    @Get('report/bitacora/:clienteCI')
+    async leerReporteBitacora(
+        @Param('clienteCI') clienteCI: number,
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        return await this.admService.leerReporteBitacora(clienteCI, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('report/servicios/:clienteCI')
+    async leerReporteServicios(
+        @Param('clienteCI') clienteCI: number,
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        return await this.admService.leerReporteServicios(clienteCI, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
     @Patch('reservacion')
     updateReservacion(
         @Body() dto: UpdateReservacionDto,
