@@ -52,6 +52,7 @@ export class AdminService {
                     NombreCompleto: dto.NombreCompleto,
                     Telefono: dto.Telefono,
                     Direccion: dto.Direccion,
+                    NumeroCI: dto.NumeroCI,
                     Email: dto.Email,
                     FechaContratacion: parseISO(dto.FechaContratacion.toString()),
                     CargoID: dto.CargoID,
@@ -85,6 +86,7 @@ export class AdminService {
                 data: {
                     NombreCompleto: dto.NombreCompleto,
                     Telefono: dto.Telefono,
+                    NumeroCI: dto.NumeroCI,
                     Direccion: dto.Direccion,
                     Email: dto.Email
                 }
@@ -154,6 +156,9 @@ export class AdminService {
     async crearMascota(dto: CreateMascotaDto, userId: number, ipDir: string) {
         try {
             const result = await this.prisma.$transaction(async (prisma) => {
+                const cliente = await prisma.cliente.findFirst({
+                    where: { NumeroCI: dto.ClienteCI }
+                });
                 const mascota = await prisma.mascota.create({
                     data: {
                         Nombre: dto.Nombre,
@@ -161,7 +166,7 @@ export class AdminService {
                         FechaNacimiento: parseISO(dto.FechaDeNacimiento.toString()),
                         Observaciones: dto.Observaciones,
                         RazaID: dto.RazaID,
-                        ClienteID: dto.ClienteID
+                        ClienteID: cliente.ClienteID
                     },
                 });
       
@@ -217,6 +222,7 @@ export class AdminService {
             SELECT
                 c."ClienteID" AS "ClienteID",
                 c."NombreCompleto" AS "NombreCompleto",
+                c."NumeroCI" AS "CI",
                 c."Telefono" AS "Telefono",
                 c."Direccion" AS "Direccion",
                 c."Email" AS "Email"

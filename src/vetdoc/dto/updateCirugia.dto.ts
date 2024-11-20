@@ -10,6 +10,10 @@ export class UpdateCirugiaDto {
     @IsNotEmpty()
     CirugiaID: number;
 
+    @IsNumber()
+    @IsNotEmpty()
+    MascotaID: number;
+
     @IsString()
     @MaxLength(500, { message: 'Las notas no pueden exceder los 500 caracteres.' })
     Notas: string;
@@ -21,4 +25,6 @@ export class UpdateCirugiaDto {
     @IsNumber()
     @IsNotEmpty()
     TemperaturaSalida: number;
+
+    ConsultaID: number | null;
 }
