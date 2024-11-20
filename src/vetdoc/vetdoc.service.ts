@@ -4,9 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { CreateAnalisisConsultaDto, CreateAnalisisInternacionDto, CreateCirugiaDto, CreateConsultaDto, 
     CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRecetaInternacionDto, CreateRegvacDto, 
-    CreateReservacionCirugiaDto, 
-    CreateVacunaDto, UpdateCirugiaDto, UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
-import { CreateReservacionDto } from 'src/client/dto';
+    CreateReservacionCirugiaDto, CreateVacunaDto, UpdateCirugiaDto, UpdateConsultaDto, UpdateInternacionDto, UpdatePeluqeriaDto } from './dto';
 
 
 @Injectable()
@@ -481,7 +479,7 @@ export class VetdocService {
         `;
     }
 
-    async updatePeluqueria(dto: UpdateServicioDto, userId: number, ipDir: string) {
+    async updatePeluqueria(dto: UpdatePeluqeriaDto, userId: number, ipDir: string) {
         const servicio = await this.prisma.servicio.update({
             where: { ServicioID: dto.ServicioID },
             data: { Estado: 'Completado', FechaHoraFin: parseISO(new Date().toISOString()) }

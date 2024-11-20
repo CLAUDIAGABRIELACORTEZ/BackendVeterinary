@@ -13,4 +13,4 @@ export * from './createVacuna.dto';
 export * from './updateCirugia.dto';
 export * from './updateConsulta.dto';
 export * from './updateInternacion.dto';
-export * from './UpdateServicio.dto';
+export * from './updatePeluqueria.dto';
