@@ -4,7 +4,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { CreateAnalisisConsultaDto, CreateAnalisisInternacionDto, CreateCirugiaDto, CreateConsultaDto, 
     CreateInternacionDto, CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRecetaInternacionDto, CreateRegvacDto, 
+    CreateReservacionCirugiaDto, 
     CreateVacunaDto, UpdateCirugiaDto, UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
+import { CreateReservacionDto } from 'src/client/dto';
 
 
 @Injectable()
@@ -244,6 +246,24 @@ export class VetdocService {
         return {
             Message: "Receta registrada exitosamente",
             RecetaID: receta.ID
+        }
+    }
+
+    async createReservacionCirugia(dto: CreateReservacionCirugiaDto, userId: number, ipDir: string) {
+        const cliente = await this.prisma.cliente.findFirst({
+            where: { NumeroCI: dto.CI }
+        });
+        const reserva = this.prisma.reservacion.create({
+            data: {
+                Motivo: "Cirugía",
+                UsuarioID: cliente.ClienteID,
+                FechaHoraReservada: dto.FechaHoraReservada
+            }
+        });
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearReservacion, ipDir);
+        return {
+            Mensaje: "Reservación registrada exitosamente.",
+            ReservaID: (await reserva).ReservacionID
         }
     }
 

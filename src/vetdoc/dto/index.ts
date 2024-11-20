@@ -7,6 +7,7 @@ export * from './createPeluqueria.dto';
 export * from './createRecetaConsulta.dto';
 export * from './createRecetaInternacion.dto';
 export * from './createRegVac.dto';
+export * from './createReservacionCirugia.dto';
 export * from './createVacuna.dto';
 
 export * from './updateCirugia.dto';

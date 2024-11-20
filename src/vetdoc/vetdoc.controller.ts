@@ -2,8 +2,9 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGua
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
+import { CreateReservacionDto } from 'src/client/dto';
 import { CreateAnalisisConsultaDto, CreateAnalisisInternacionDto, CreateCirugiaDto, CreateConsultaDto, CreateInternacionDto, 
-    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRecetaInternacionDto, CreateRegvacDto, CreateVacunaDto, UpdateCirugiaDto, 
+    CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRecetaInternacionDto, CreateRegvacDto, CreateReservacionCirugiaDto, CreateVacunaDto, UpdateCirugiaDto, 
     UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
 
 
@@ -101,6 +102,15 @@ export class VetdocController {
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
         return await this.vetdocService.createRecetaInternacion(dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('reservacion')
+    async createReservacionCirugia(
+        @Body() dto: CreateReservacionCirugiaDto,
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        return await this.vetdocService.createReservacionCirugia(dto, userId, ip);
     }
 
     @HttpCode(HttpStatus.OK)
