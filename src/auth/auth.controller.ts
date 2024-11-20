@@ -31,6 +31,9 @@ export class AuthController {
         return await this.authService.updateHash(dto);
     }
 
+
+    // opción para cambiar contraseña dentro del perfil:
+
     // @HttpCode(HttpStatus.OK)
     // @UseGuards(JwtGuard, RolesGuard)
     // @Roles(Role.ADMIN, Role.CLIENT, Role.VETDOC)

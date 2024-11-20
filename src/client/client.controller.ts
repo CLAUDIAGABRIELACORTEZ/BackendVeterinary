@@ -6,9 +6,9 @@ import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { UpdateReservacionDto } from './dto/updateReservacion.dto';
 
 
-@Controller('cliente')
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.CLIENT)
+@Controller('cliente')
 export class ClientController {
     constructor(private readonly clientService: ClientService) {}
     

@@ -5,7 +5,7 @@ CREATE TYPE "cargo_Cargo" AS ENUM ('Administrador', 'Medico', 'Laboratorista', '
 CREATE TYPE "servicio_TipoServicio" AS ENUM ('Consulta', 'Peluqueria', 'Internacion', 'Cirugia');
 
 -- CreateEnum
-CREATE TYPE "tipoaccionbitacora_Accion" AS ENUM ('Login', 'Logout', 'CrearPersonal', 'ReadPersonal', 'UpdatePersonal', 'CrearCliente', 'ReadCliente', 'UpdateCliente', 'CrearMascota', 'ReadMascota', 'UpdateMascota', 'CrearReservacion', 'ReadReservacion', 'UpdateReservacion');
+CREATE TYPE "tipoaccionbitacora_Accion" AS ENUM ('Login', 'Logout', 'CrearProfesion', 'LeerProfesion', 'CrearPersonal', 'LeerPersonal', 'ActualizarPersonal', 'CrearCliente', 'LeerCliente', 'ActualizarCliente', 'LeerEspecie', 'CrearRaza', 'LeerRaza', 'CrearMascota', 'LeerMascota', 'ActualizarMascota', 'CrearReservacion', 'LeerReservacion', 'CancelarReservacion', 'CerrarReservacion', 'CrearVacuna', 'LeerVacuna', 'CrearRegVac', 'LeerRegVac', 'ActualizarRegVac', 'LeerUsuario', 'DesactivarUsuario', 'RehabilitarUsuario', 'CrearAnalisis', 'LeerAnalisis', 'ActualizarAnalisis', 'LeerReceta', 'CearReceta', 'ActualizarReceta', 'CrearServPeluqueria', 'LeerServPeluqueria', 'FinalizarServPeluqueria', 'CrearServicioConsulta', 'LeerServicioConsulta', 'ActualizarServicioConsulta', 'FinalizarServicioConsulta', 'CrearServicioCirugia', 'LeerServicioCirugia', 'ActualizarServicioCirugia', 'FinalizarCirugia', 'CrearServicioInternacion', 'LeerServicioInternacion', 'ActualizarServicioInternacion', 'FinalizarServicioInternacion', 'CrearRecibo', 'LeerRecibo', 'ActualizarRecibo', 'CrearDetalleRecibo', 'LeerDetalleRecibo', 'ActualizarDetalleRecibo', 'LeerServiciosEnProceso', 'LeerServiciosTerminados');
 
 -- CreateEnum
 CREATE TYPE "usuario_Rol" AS ENUM ('Administrador', 'Veterinario', 'Cliente');
@@ -20,22 +20,24 @@ CREATE TYPE "usuario_Estado" AS ENUM ('Activo', 'Inactivo');
 CREATE TYPE "reservacion_Estado" AS ENUM ('Pendiente', 'Cancelada', 'Realizada');
 
 -- CreateEnum
-CREATE TYPE "analisisclinico_Resultado" AS ENUM ('Normal', 'Bajo', 'Elevado', 'Bueno', 'Critico');
+CREATE TYPE "analisisclinico_Resultado" AS ENUM ('Normal', 'Bajo', 'Elevado', 'Bueno', 'Estable', 'Critico');
 
 -- CreateEnum
-CREATE TYPE "vacuna_Tipo" AS ENUM ('Canina', 'Felina', 'General');
+CREATE TYPE "peluqueria_TipoCorte" AS ENUM ('Medio', 'Bajo', 'Alto', 'Especial');
+
+-- CreateEnum
+CREATE TYPE "vacuna_Tipo" AS ENUM ('Canina', 'Felina', 'Roedores', 'General');
 
 -- CreateTable
 CREATE TABLE "analisisclinico" (
-    "AnalisisID" SERIAL NOT NULL,
+    "ID" SERIAL NOT NULL,
     "TipoAnalisis" VARCHAR(100) NOT NULL,
-    "FechaSolicitud" DATE NOT NULL,
-    "FechaResultado" DATE,
+    "FechaAnalisis" DATE NOT NULL,
     "Resultado" "analisisclinico_Resultado" DEFAULT 'Normal',
     "InternacionID" INTEGER,
     "ConsultaID" INTEGER,
 
-    CONSTRAINT "analisisclinico_pkey" PRIMARY KEY ("AnalisisID")
+    CONSTRAINT "analisisclinico_pkey" PRIMARY KEY ("ID")
 );
 
 -- CreateTable
@@ -59,13 +61,16 @@ CREATE TABLE "cargo" (
 
 -- CreateTable
 CREATE TABLE "cirugia" (
-    "CirugiaID" SERIAL NOT NULL,
+    "ID" SERIAL NOT NULL,
     "TipoDeCirugia" VARCHAR(50) NOT NULL,
-    "FechaHoraTermino" TIMESTAMP(0),
-    "Notas" TEXT,
+    "PesoEntrada" DECIMAL(6,2) NOT NULL,
+    "TemperaturaEntrada" DECIMAL(6,2) NOT NULL,
+    "PesoSalida" DECIMAL(6,2),
+    "TemperaturaSalida" DECIMAL(6,2),
+    "Notas" VARCHAR(500) NOT NULL,
     "ServicioID" INTEGER NOT NULL,
 
-    CONSTRAINT "cirugia_pkey" PRIMARY KEY ("CirugiaID")
+    CONSTRAINT "cirugia_pkey" PRIMARY KEY ("ID")
 );
 
 -- CreateTable
@@ -73,6 +78,7 @@ CREATE TABLE "cliente" (
     "ClienteID" SMALLSERIAL NOT NULL,
     "NombreCompleto" VARCHAR(60) NOT NULL,
     "Telefono" VARCHAR(30) NOT NULL,
+    "NumeroCI" INTEGER NOT NULL,
     "Direccion" VARCHAR(100),
     "Email" VARCHAR(50) NOT NULL,
 
@@ -81,26 +87,26 @@ CREATE TABLE "cliente" (
 
 -- CreateTable
 CREATE TABLE "consultamedica" (
-    "ConsultaID" SERIAL NOT NULL,
+    "ID" SERIAL NOT NULL,
     "Peso" DECIMAL(6,2) NOT NULL,
     "Temperatura" DECIMAL(6,2) NOT NULL,
-    "Diagnostico" TEXT NOT NULL,
-    "Tratamiento" TEXT,
+    "Diagnostico" VARCHAR(200),
+    "Tratamiento" VARCHAR(200),
     "ServicioID" INTEGER NOT NULL,
 
-    CONSTRAINT "consultamedica_pkey" PRIMARY KEY ("ConsultaID")
+    CONSTRAINT "consultamedica_pkey" PRIMARY KEY ("ID")
 );
 
 -- CreateTable
 CREATE TABLE "detallerecibo" (
-    "DetalleReciboID" SERIAL NOT NULL,
+    "ID" SERIAL NOT NULL,
     "ReciboID" INTEGER NOT NULL,
-    "ServicioID" INTEGER NOT NULL,
+    "ServicioID" INTEGER,
     "Cantidad" INTEGER NOT NULL DEFAULT 1,
     "PrecioUnitario" DECIMAL(6,2) NOT NULL,
     "Subtotal" DECIMAL(8,2) NOT NULL,
 
-    CONSTRAINT "detallerecibo_pkey" PRIMARY KEY ("DetalleReciboID")
+    CONSTRAINT "detallerecibo_pkey" PRIMARY KEY ("ID")
 );
 
 -- CreateTable
@@ -113,17 +119,17 @@ CREATE TABLE "especie" (
 
 -- CreateTable
 CREATE TABLE "internacion" (
-    "InternacionID" SERIAL NOT NULL,
-    "MotivoPrincipal" VARCHAR(200) NOT NULL,
+    "ID" SERIAL NOT NULL,
+    "NotasProgreso" VARCHAR(1500) NOT NULL,
     "PesoEntrada" DECIMAL(6,2) NOT NULL,
     "TemperaturaEntrada" DECIMAL(6,2) NOT NULL,
     "PesoSalida" DECIMAL(6,2),
     "TemperaturaSalida" DECIMAL(6,2),
-    "FechaHoraSalida" TIMESTAMP,
     "ServicioID" INTEGER NOT NULL,
     "CirugiaID" INTEGER,
+    "ConsultaID" INTEGER,
 
-    CONSTRAINT "internacion_pkey" PRIMARY KEY ("InternacionID")
+    CONSTRAINT "internacion_pkey" PRIMARY KEY ("ID")
 );
 
 -- CreateTable
@@ -141,18 +147,19 @@ CREATE TABLE "mascota" (
 
 -- CreateTable
 CREATE TABLE "peluqueria" (
-    "PeluqueriaID" SERIAL NOT NULL,
-    "TipoCorte" VARCHAR(50) NOT NULL,
+    "ID" SERIAL NOT NULL,
+    "TipoCorte" "peluqueria_TipoCorte" DEFAULT 'Medio',
     "Lavado" BOOLEAN NOT NULL,
     "ServicioID" INTEGER NOT NULL,
 
-    CONSTRAINT "peluqueria_pkey" PRIMARY KEY ("PeluqueriaID")
+    CONSTRAINT "peluqueria_pkey" PRIMARY KEY ("ID")
 );
 
 -- CreateTable
 CREATE TABLE "personal" (
     "PersonalID" SMALLSERIAL NOT NULL,
     "NombreCompleto" VARCHAR(60) NOT NULL,
+    "NumeroCI" INTEGER NOT NULL,
     "Telefono" VARCHAR(30) NOT NULL,
     "Direccion" VARCHAR(100) NOT NULL,
     "FechaContratacion" DATE NOT NULL,
@@ -183,30 +190,30 @@ CREATE TABLE "raza" (
 
 -- CreateTable
 CREATE TABLE "receta" (
-    "RecetaID" SERIAL NOT NULL,
+    "ID" SERIAL NOT NULL,
     "Medicamento" VARCHAR(100) NOT NULL,
     "Dosis" VARCHAR(50) NOT NULL,
     "Indicaciones" VARCHAR(200) NOT NULL,
     "InternacionID" INTEGER,
     "ConsultaID" INTEGER,
 
-    CONSTRAINT "receta_pkey" PRIMARY KEY ("RecetaID")
+    CONSTRAINT "receta_pkey" PRIMARY KEY ("ID")
 );
 
 -- CreateTable
 CREATE TABLE "recibo" (
-    "ReciboID" SERIAL NOT NULL,
+    "ID" SERIAL NOT NULL,
     "FechaEmision" TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "Total" DECIMAL(10,2) NOT NULL,
 
-    CONSTRAINT "recibo_pkey" PRIMARY KEY ("ReciboID")
+    CONSTRAINT "recibo_pkey" PRIMARY KEY ("ID")
 );
 
 -- CreateTable
 CREATE TABLE "registrodevacunas" (
     "RegistroID" SERIAL NOT NULL,
     "FechaVacunacion" DATE NOT NULL,
-    "ProximaFecha" DATE NOT NULL,
+    "ProximaFecha" DATE,
     "VacunaID" SMALLINT NOT NULL,
     "MascotaID" SMALLINT NOT NULL,
 
@@ -230,6 +237,7 @@ CREATE TABLE "servicio" (
     "TipoServicio" "servicio_TipoServicio" NOT NULL,
     "Estado" "servicio_Estado" DEFAULT 'En Proceso',
     "FechaHoraInicio" TIMESTAMP(0) NOT NULL,
+    "FechaHoraFin" TIMESTAMP(0),
     "ReservacionID" INTEGER,
     "MascotaID" SMALLINT NOT NULL,
     "PersonalID" SMALLINT NOT NULL,
@@ -365,22 +373,76 @@ CREATE INDEX "ClienteID" ON "usuario"("ClienteID");
 CREATE INDEX "PersonalID" ON "usuario"("PersonalID");
 
 -- AddForeignKey
+ALTER TABLE "analisisclinico" ADD CONSTRAINT "analisisclinico_InternacionID_fkey" FOREIGN KEY ("InternacionID") REFERENCES "internacion"("ID") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "analisisclinico" ADD CONSTRAINT "analisisclinico_ConsultaID_fkey" FOREIGN KEY ("ConsultaID") REFERENCES "consultamedica"("ID") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "bitacora" ADD CONSTRAINT "bitacora_UsuarioID_fkey" FOREIGN KEY ("UsuarioID") REFERENCES "usuario"("UsuarioID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "bitacora" ADD CONSTRAINT "bitacora_TipoAccionBitacoraID_fkey" FOREIGN KEY ("TipoAccionBitacoraID") REFERENCES "tipoaccionbitacora"("TipoAccionBitacoraID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "cirugia" ADD CONSTRAINT "cirugia_ServicioID_fkey" FOREIGN KEY ("ServicioID") REFERENCES "servicio"("ServicioID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "consultamedica" ADD CONSTRAINT "consultamedica_ServicioID_fkey" FOREIGN KEY ("ServicioID") REFERENCES "servicio"("ServicioID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "detallerecibo" ADD CONSTRAINT "detallerecibo_ReciboID_fkey" FOREIGN KEY ("ReciboID") REFERENCES "recibo"("ID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "detallerecibo" ADD CONSTRAINT "detallerecibo_ServicioID_fkey" FOREIGN KEY ("ServicioID") REFERENCES "servicio"("ServicioID") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "internacion" ADD CONSTRAINT "internacion_ServicioID_fkey" FOREIGN KEY ("ServicioID") REFERENCES "servicio"("ServicioID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "internacion" ADD CONSTRAINT "internacion_CirugiaID_fkey" FOREIGN KEY ("CirugiaID") REFERENCES "cirugia"("ID") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "internacion" ADD CONSTRAINT "internacion_ConsultaID_fkey" FOREIGN KEY ("ConsultaID") REFERENCES "consultamedica"("ID") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "mascota" ADD CONSTRAINT "mascota_ClienteID_fkey" FOREIGN KEY ("ClienteID") REFERENCES "cliente"("ClienteID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "mascota" ADD CONSTRAINT "mascota_RazaID_fkey" FOREIGN KEY ("RazaID") REFERENCES "raza"("RazaID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "peluqueria" ADD CONSTRAINT "peluqueria_ServicioID_fkey" FOREIGN KEY ("ServicioID") REFERENCES "servicio"("ServicioID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personal" ADD CONSTRAINT "personal_CargoID_fkey" FOREIGN KEY ("CargoID") REFERENCES "cargo"("CargoID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "personal" ADD CONSTRAINT "personal_ProfesionID_fkey" FOREIGN KEY ("ProfesionID") REFERENCES "profesion"("ProfesionID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "raza" ADD CONSTRAINT "raza_EspecieID_fkey" FOREIGN KEY ("EspecieID") REFERENCES "especie"("EspecieID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "receta" ADD CONSTRAINT "receta_InternacionID_fkey" FOREIGN KEY ("InternacionID") REFERENCES "internacion"("ID") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "receta" ADD CONSTRAINT "receta_ConsultaID_fkey" FOREIGN KEY ("ConsultaID") REFERENCES "consultamedica"("ID") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "registrodevacunas" ADD CONSTRAINT "registrodevacunas_VacunaID_fkey" FOREIGN KEY ("VacunaID") REFERENCES "vacuna"("VacunaID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "registrodevacunas" ADD CONSTRAINT "registrodevacunas_MascotaID_fkey" FOREIGN KEY ("MascotaID") REFERENCES "mascota"("MascotaID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "reservacion" ADD CONSTRAINT "reservacion_UsuarioID_fkey" FOREIGN KEY ("UsuarioID") REFERENCES "usuario"("UsuarioID") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "servicio" ADD CONSTRAINT "servicio_ReservacionID_fkey" FOREIGN KEY ("ReservacionID") REFERENCES "reservacion"("ReservacionID") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "servicio" ADD CONSTRAINT "servicio_MascotaID_fkey" FOREIGN KEY ("MascotaID") REFERENCES "mascota"("MascotaID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "servicio" ADD CONSTRAINT "servicio_PersonalID_fkey" FOREIGN KEY ("PersonalID") REFERENCES "personal"("PersonalID") ON DELETE RESTRICT ON UPDATE CASCADE;

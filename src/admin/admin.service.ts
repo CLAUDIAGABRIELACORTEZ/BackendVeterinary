@@ -2,19 +2,16 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as argon from 'argon2';
 import { parseISO } from 'date-fns';
 import { ConfigService } from '@nestjs/config';
+import { UpdateReservacionDto } from 'src/client/dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
-        UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, 
-        UpdateUsuarioDto} from './dto';
-        import { UpdateReservacionDto } from 'src/client/dto';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
+import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
+    UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, UpdateUsuarioDto, CreateRazaDto} from './dto';
 
 
 @Injectable()
 export class AdminService {
-    constructor(private prisma: PrismaService, 
-                private config: ConfigService) {}
-
+    constructor( private prisma: PrismaService, private config: ConfigService ) { }
 
     private async logAccion(userId: number, actionId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, actionId, ipDir);
@@ -55,6 +52,7 @@ export class AdminService {
                     NombreCompleto: dto.NombreCompleto,
                     Telefono: dto.Telefono,
                     Direccion: dto.Direccion,
+                    NumeroCI: dto.NumeroCI,
                     Email: dto.Email,
                     FechaContratacion: parseISO(dto.FechaContratacion.toString()),
                     CargoID: dto.CargoID,
@@ -88,6 +86,7 @@ export class AdminService {
                 data: {
                     NombreCompleto: dto.NombreCompleto,
                     Telefono: dto.Telefono,
+                    NumeroCI: dto.NumeroCI,
                     Direccion: dto.Direccion,
                     Email: dto.Email
                 }
@@ -109,9 +108,57 @@ export class AdminService {
         });
     }
 
+    async crearRaza(dto: CreateRazaDto, userId: number, ipDir: string) {
+        try {
+            const result = await this.prisma.$transaction(async (prisma) => {
+                const raza = await prisma.raza.create({
+                    data: {
+                        NombreRaza: dto.NombreRaza,
+                        EspecieID: dto.EspecieID
+                    },
+                });
+
+                await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRaza, ipDir);
+                return {
+                    Respuesta: "Raza registrada correctamente",
+                    RazaID: raza.RazaID
+                };
+            });
+            return result;
+        } catch (error) {
+            console.error('Error al registrar la raza:', error);
+            throw new Error('No se pudo registrar la raza. Las quejas con Rodrigo.');
+        }
+    }
+
+    async getEspecie(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRaza, ipDir);
+        return await this.prisma.$queryRaw`
+            SELECT 
+                especie."EspecieID",
+                especie."NombreEspecie"
+            FROM especie
+        `;
+    }
+
+    async getRazas(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRaza, ipDir);
+        return await this.prisma.$queryRaw`
+            SELECT 
+                raza."RazaID",
+                raza."NombreRaza",
+                especie."NombreEspecie"
+            FROM raza
+            JOIN especie ON raza."EspecieID" = especie."EspecieID";
+        `;
+    }
+
     async crearMascota(dto: CreateMascotaDto, userId: number, ipDir: string) {
         try {
             const result = await this.prisma.$transaction(async (prisma) => {
+                const cliente = await prisma.cliente.findFirst({
+                    where: { NumeroCI: dto.ClienteCI }
+                });
                 const mascota = await prisma.mascota.create({
                     data: {
                         Nombre: dto.Nombre,
@@ -119,7 +166,7 @@ export class AdminService {
                         FechaNacimiento: parseISO(dto.FechaDeNacimiento.toString()),
                         Observaciones: dto.Observaciones,
                         RazaID: dto.RazaID,
-                        ClienteID: dto.ClienteID
+                        ClienteID: cliente.ClienteID
                     },
                 });
       
@@ -147,8 +194,10 @@ export class AdminService {
         });
     }
 
+    // adolfomendozaribera400@gmail.com
+
     async getPersonal(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerPersonal, ipDir);
         return this.prisma.$queryRaw`
             SELECT
                 p."PersonalID" AS "ID",
@@ -168,11 +217,12 @@ export class AdminService {
     }
 
     async getClientes(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarClientes, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerCliente, ipDir);
         return await this.prisma.$queryRaw`
             SELECT
                 c."ClienteID" AS "ClienteID",
                 c."NombreCompleto" AS "NombreCompleto",
+                c."NumeroCI" AS "CI",
                 c."Telefono" AS "Telefono",
                 c."Direccion" AS "Direccion",
                 c."Email" AS "Email"
@@ -182,7 +232,7 @@ export class AdminService {
     }
 
     async getMascotas(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarMascotas, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerMascota, ipDir);
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID" AS "ID",
@@ -216,28 +266,6 @@ export class AdminService {
         `;
     }
 
-    // async updatePersonal(dto: UpdatePersonalDto, userId: number, ipDir: string) {
-    //     const dataActualizada = {};
-    //     if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
-    //     if (dto.Telefono !== undefined && dto.Telefono !== "") dataActualizada['Telefono'] = dto.Telefono;
-    //     if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
-    //     if (dto.CargoID !== undefined && dto.CargoID !== "") dataActualizada['CargoID'] = parseInt(dto.CargoID);
-    //     const personal = await this.prisma.personal.update({
-    //         where: { PersonalID: dto.ID },
-    //         data: dataActualizada
-    //     });
-    //     let usuario;
-    //     if (parseInt(dto.CargoID) === 2) {
-    //         usuario = await this.crearUsuario('Veterinario', personal.PersonalID, true);
-    //     }
-    //     await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
-    //     return {
-    //         Respuesta: "Personal actualizado con éxito",
-    //         PersonalID: personal.PersonalID,
-    //         ...(usuario && { UsuarioID: usuario.UsuarioID })
-    //     };
-    // }
-
     async updatePersonal(dto: UpdatePersonalDto, userId: number, ipDir: string) {
         const dataActualizada: any = {};
         if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
@@ -269,23 +297,6 @@ export class AdminService {
             };
         });
     }
-    
-
-    // async updateCliente(dto: UpdateClienteDto, userId: number, ipDir: string) {
-    //     const dataActualizada = {};
-    //     if (dto.NombreCompleto !== undefined && dto.NombreCompleto !== "") dataActualizada['NombreCompleto'] = dto.NombreCompleto;
-    //     if (dto.Telefono !== undefined && dto.Telefono !== "") dataActualizada['Telefono'] = dto.Telefono;
-    //     if (dto.Direccion !== undefined && dto.Direccion !== "") dataActualizada['Direccion'] = dto.Direccion;
-    //     const cliente = await this.prisma.cliente.update({
-    //         where: { ClienteID: dto.ClienteID },
-    //         data: dataActualizada
-    //     });
-    //     await this.logAccion(userId, BitacoraAccion.ActualizarCliente, ipDir);
-    //     return {
-    //         Respuesta: "Cliente actualizado con éxito",
-    //         ClienteID: cliente.ClienteID,
-    //     };
-    // }
 
     async updateCliente(dto: UpdateClienteDto, userId: number, ipDir: string) {
         const dataActualizada: any = {};
@@ -307,24 +318,6 @@ export class AdminService {
             };
         });
     }
-    
-
-    // async updateMascota(dto: UpdateMascotaDto, userId: number, ipDir: string) {
-    //     const dataActualizada = {};
-    //     if (dto.Nombre !== undefined && dto.Nombre !== "") dataActualizada['Nombre'] = dto.Nombre;
-    //     if (dto.Sexo !== undefined && dto.Sexo !== "") dataActualizada['Sexo'] = dto.Sexo;
-    //     if (dto.Observaciones !== undefined && dto.Observaciones !== "") dataActualizada['Observaciones'] = dto.Observaciones;
-    //     if (dto.ClienteID !== undefined && dto.ClienteID !== "") dataActualizada['ClienteID'] = parseInt(dto.ClienteID);
-    //     const mascota = await this.prisma.mascota.update({
-    //         where: { MascotaID: dto.ID },
-    //         data: dataActualizada,
-    //     });
-    //     await this.logAccion(userId, BitacoraAccion.ActualizarMascota, ipDir);
-    //     return {
-    //         Respuesta: "Mascota actualizada con éxito",
-    //         MascotaID: mascota.MascotaID,
-    //     };
-    // }
 
     async updateMascota(dto: UpdateMascotaDto, userId: number, ipDir: string) {
         const dataActualizada: any = {};
@@ -347,40 +340,53 @@ export class AdminService {
             };
         });
     }
-    
 
-    async getUsuarios(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarPersonal, ipDir);
+    async getUsuariosActivos(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerPersonal, ipDir);
         return this.prisma.$queryRaw`
-            SELECT
-                "UsuarioID",
-                "Rol",
-                "Estado"
-            FROM usuario
-            ORDER BY "UsuarioID" ASC;
+            SELECT 
+                u."UsuarioID",
+                u."Rol",
+                CASE 
+                    WHEN u."PersonalID" IS NOT NULL THEN p."NombreCompleto"
+                    WHEN u."ClienteID" IS NOT NULL THEN c."NombreCompleto"
+                END as "Nombre",
+                u."Estado"
+            FROM usuario u
+            LEFT JOIN personal p ON u."PersonalID" = p."PersonalID"
+            LEFT JOIN cliente c ON u."ClienteID" = c."ClienteID"
+            WHERE u."Estado" = 'Activo'
+            ORDER BY u."UsuarioID" ASC;
         `;
     }
 
-    // async updateUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
-    //     const usuario = await this.prisma.usuario.update({
-    //         where: { UsuarioID: dto.UsuarioID },
-    //         data: { Estado: 'Inactivo' }
-    //     });
-    //     await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
-    //     return {
-    //         Respuesta: "Usuario inactivado exitosamente",
-    //         UsuarioID: usuario.UsuarioID,
-    //     };
-    // }
+    async getUsuariosInactivos(userId: number, ipDir: string) {
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerPersonal, ipDir);
+        return this.prisma.$queryRaw`
+            SELECT 
+                u."UsuarioID",
+                u."Rol",
+                CASE 
+                    WHEN u."PersonalID" IS NOT NULL THEN p."NombreCompleto"
+                    WHEN u."ClienteID" IS NOT NULL THEN c."NombreCompleto"
+                END as "Nombre",
+                u."Estado"
+            FROM usuario u
+            LEFT JOIN personal p ON u."PersonalID" = p."PersonalID"
+            LEFT JOIN cliente c ON u."ClienteID" = c."ClienteID"
+            WHERE u."Estado" = 'Inactivo'
+            ORDER BY u."UsuarioID" ASC;
+        `;
+    }
 
-    async updateUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
+    async inhabilitarUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
         return await this.prisma.$transaction(async (prisma) => {
             const usuario = await prisma.usuario.update({
                 where: { UsuarioID: dto.UsuarioID },
                 data: { Estado: 'Inactivo' },
             });
     
-            await this.logAccion(userId, BitacoraAccion.ActualizarPersonal, ipDir);
+            await this.logAccion(userId, BitacoraAccion.DesactivarUsuario, ipDir);
     
             return {
                 Respuesta: "Usuario inactivado exitosamente",
@@ -388,10 +394,25 @@ export class AdminService {
             };
         });
     }
+
+    async habilitarUsuario(dto: UpdateUsuarioDto, userId: number, ipDir: string) {
+        return await this.prisma.$transaction(async (prisma) => {
+            const usuario = await prisma.usuario.update({
+                where: { UsuarioID: dto.UsuarioID },
+                data: { Estado: 'Activo' },
+            });
     
+            await this.logAccion(userId, BitacoraAccion.RehabilitarUsuario, ipDir);
+    
+            return {
+                Respuesta: "Usuario activado exitosamente",
+                UsuarioID: usuario.UsuarioID,
+            };
+        });
+    }
 
     async getReservacionesGral(userId: number, ipDir: string) {
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ListarReservacion, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReservacion, ipDir);
         return this.prisma.$queryRaw`
             SELECT
                 r."ReservacionID",
@@ -412,7 +433,7 @@ export class AdminService {
             where: { ReservacionID: dto.ReservacionID },
             data: { Estado: 'Cancelada' }
         });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.ActualizarReservacion, ipDir);
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CancelarReservacion, ipDir);
         return {
             Respuesta : "Reservación cancelada",
             ReservaID : reserva.ReservacionID
