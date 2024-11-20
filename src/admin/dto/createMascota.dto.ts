@@ -22,7 +22,7 @@ export class CreateMascotaDto {
 
     @IsNotEmpty()
     @IsNumber()
-    ClienteID: number;
+    ClienteCI: number;
 
     @IsNotEmpty()
     @IsNumber()

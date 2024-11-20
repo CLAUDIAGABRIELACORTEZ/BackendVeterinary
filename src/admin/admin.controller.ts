@@ -21,11 +21,10 @@ export class AdminController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Patch('reservacion')       // {{local}}/admin/reservacion
+    @Patch('reservacion')
     updateReservacion(
         @Body() dto: UpdateReservacionDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
-        // console.log({userId, ip});
         return this.admService.updateReservacion(dto, userId, ip);
     }
 
@@ -37,16 +36,15 @@ export class AdminController {
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
         const serviceMetodo = {
-            personal: this.admService.crearPersonal, // {{local}}/admin/personal
-            clientes: this.admService.crearCliente, // {{local}}/admin/clientes
-            mascotas: this.admService.crearMascota, // {{local}}/admin/mascotas
-            raza: this.admService.crearRaza, // {{local}}/admin/raza
+            personal: this.admService.crearPersonal,
+            clientes: this.admService.crearCliente,
+            mascotas: this.admService.crearMascota,
+            raza: this.admService.crearRaza,
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
             throw new BadRequestException(`Tipo de entidad inválido: ${tipoDeEntidad}`);
         }
-        console.log({dto});
         return await serviceMetodo.call(this.admService, dto, userId, ip);
     }
 
@@ -71,7 +69,6 @@ export class AdminController {
         if (!serviceMetodo) {
             throw new BadRequestException(`Tipo de entidad inválido: ${tipoDeEntidad}`);
         }
-        // console.log({userId, ip});
         return await serviceMetodo.call(this.admService, userId, ip);
     }
 
@@ -83,11 +80,11 @@ export class AdminController {
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
         const serviceMetodo = {
-            personal: this.admService.updatePersonal, // {{local}}/admin/personal
-            clientes: this.admService.updateCliente, // {{local}}/admin/clientes
-            mascotas: this.admService.updateMascota, // {{local}}/admin/mascotas
-            usuarios: this.admService.inhabilitarUsuario, // {{local}}/admin/usuarios
-            usuariosInactivos: this.admService.habilitarUsuario, // {{local}}/admin/usuariosInactivos
+            personal: this.admService.updatePersonal,
+            clientes: this.admService.updateCliente,
+            mascotas: this.admService.updateMascota,
+            usuarios: this.admService.inhabilitarUsuario,
+            usuariosInactivos: this.admService.habilitarUsuario,
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
