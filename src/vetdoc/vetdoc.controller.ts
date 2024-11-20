@@ -2,10 +2,9 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGua
 import { VetdocService } from './vetdoc.service';
 import { JwtGuard, RolesGuard } from 'src/auth/guard';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
-import { CreateReservacionDto } from 'src/client/dto';
 import { CreateAnalisisConsultaDto, CreateAnalisisInternacionDto, CreateCirugiaDto, CreateConsultaDto, CreateInternacionDto, 
     CreatePeluqueriaDto, CreateRecetaConsultaDto, CreateRecetaInternacionDto, CreateRegvacDto, CreateReservacionCirugiaDto, CreateVacunaDto, UpdateCirugiaDto, 
-    UpdateConsultaDto, UpdateInternacionDto, UpdateServicioDto } from './dto';
+    UpdateConsultaDto, UpdateInternacionDto, UpdatePeluqeriaDto } from './dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -182,7 +181,7 @@ export class VetdocController {
     @HttpCode(HttpStatus.OK)
     @Patch('servicios/peluqueria')
     updatePeluqueria(
-        @Body() dto: UpdateServicioDto,
+        @Body() dto: UpdatePeluqeriaDto,
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.vetdocService.updatePeluqueria(dto, userId, ip);
     }

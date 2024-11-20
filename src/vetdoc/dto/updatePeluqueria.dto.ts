@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsNumber } from "class-validator";
 
 
-export class UpdateServicioDto {
+export class UpdatePeluqeriaDto {
     @IsNumber()
     @IsNotEmpty()
     ServicioID: number;
