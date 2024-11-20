@@ -253,10 +253,13 @@ export class VetdocService {
         const cliente = await this.prisma.cliente.findFirst({
             where: { NumeroCI: dto.CI }
         });
-        const reserva = this.prisma.reservacion.create({
+        const usuario = await this.prisma.usuario.findFirst({
+            where: { ClienteID: cliente.ClienteID }
+        })
+        const reserva = await this.prisma.reservacion.create({
             data: {
                 Motivo: "Cirugía",
-                UsuarioID: cliente.ClienteID,
+                UsuarioID: usuario.UsuarioID,
                 FechaHoraReservada: dto.FechaHoraReservada
             }
         });

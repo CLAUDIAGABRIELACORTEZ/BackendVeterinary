@@ -110,6 +110,7 @@ export class VetdocController {
         @Body() dto: CreateReservacionCirugiaDto,
         @Usuario() { userId, ip }: { userId: number; ip: string }
     ) {
+        console.log({dto});
         return await this.vetdocService.createReservacionCirugia(dto, userId, ip);
     }
 
