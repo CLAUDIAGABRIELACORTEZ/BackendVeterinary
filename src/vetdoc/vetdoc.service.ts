@@ -256,7 +256,7 @@ export class VetdocService {
         })
         const reserva = await this.prisma.reservacion.create({
             data: {
-                Motivo: "Cirugía",
+                Motivo: "Cirugía Programada",
                 UsuarioID: usuario.UsuarioID,
                 FechaHoraReservada: dto.FechaHoraReservada
             }
@@ -543,12 +543,15 @@ export class VetdocService {
                 Notas: dto.Notas
             }
         });
+        const mascota = await this.prisma.mascota.findFirst({
+            where: { MascotaID: servicio.MascotaID }
+        });
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.FinalizarCirugia, ipDir);
         const nuevaInternacion = await this.prisma.servicio.create({
             data: {
                 TipoServicio: 'Internacion',
                 FechaHoraInicio: parseISO(new Date().toISOString()),
-                MascotaID: dto.MascotaID,
+                MascotaID: mascota.MascotaID,
                 PersonalID: userId,
             }
         });
