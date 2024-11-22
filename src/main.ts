@@ -9,7 +9,7 @@ async function bootstrap() {
     app.enableCors({
         origin: [
             'https://javiercabrerac.github.io',
-            'https://javiercabrerac.github.io/next-vet/',  // dominio en producción
+            'https://front-veterinary.vercel.app/',  // dominio en producción
             'http://localhost:3000'      //desarrollo local
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
