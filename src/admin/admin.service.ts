@@ -7,6 +7,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { BitacoraAccion, registrarEnBitacora } from 'src/utils/index.utils';
 import { CreatePersonalDto, CreateMascotaDto, CreateClienteDto, 
     UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, UpdateUsuarioDto, CreateRazaDto} from './dto';
+import { CreateServicioMedicoDto } from './dto/createServicio.dto';
+import { CreateEspecieDto } from './dto/createEspecie.dto';
+import { CreateHistorialMedicoDto } from './dto/createHistorial.dto';
 
 
 @Injectable()
@@ -80,6 +83,7 @@ export class AdminService {
     }
 
     async crearCliente(dto: CreateClienteDto, userId: number, ipDir: string) {
+        console.log(CreateClienteDto)
         return await this.prisma.$transaction(async (tx) => {
             await this.verificarEmail(dto.Email);
             const cliente = await tx.cliente.create({
@@ -108,8 +112,52 @@ export class AdminService {
         });
     }
 
+    async crearServicioMedico(dto: CreateServicioMedicoDto, userId: number, ipDir: string) {
+        try {
+            const result = await this.prisma.$transaction(async (prisma) => {
+                const servicioMedico = await prisma.servicio_medico.create({
+                    data: {
+                        Nombre: dto.nombre,
+                        Precio: dto.precio,
+                        Descripcion:dto.descripcion
+                    },
+                });
+
+                await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearServicioCirugia, ipDir);
+                return {
+                    Respuesta: "Servicio medico registrada correctamente",
+                    ServicioNombre: servicioMedico.Nombre,
+                    Precio: servicioMedico.Precio
+                };
+            });
+            return result;
+        } catch (error) {
+            throw new Error('No se pudo registrar el servicio.');
+        }
+    }
+
+    async getReservacionById(id: number, userId: number, ipDir: string) {
+        const reservacion = await this.prisma.reservacion.findUnique({
+            where: { ReservacionID: id },
+            include: {
+                cliente: true, // Incluye información del cliente relacionado
+                servicioMedico: true // Incluye información del servicio médico relacionado
+            }
+        });
+    
+        // if (!reservacion) {
+        //     throw new NotFoundException(`Reservación con ID ${id} no encontrada`);
+        // }
+    
+        // Registrar en la bitácora la acción de consulta de reservación
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerReservacion, ipDir);
+    
+        return reservacion;
+    }
     async crearRaza(dto: CreateRazaDto, userId: number, ipDir: string) {
         try {
+            
+        
             const result = await this.prisma.$transaction(async (prisma) => {
                 const raza = await prisma.raza.create({
                     data: {
@@ -121,7 +169,7 @@ export class AdminService {
                 await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRaza, ipDir);
                 return {
                     Respuesta: "Raza registrada correctamente",
-                    RazaID: raza.RazaID
+                    RazaID: raza
                 };
             });
             return result;
@@ -130,6 +178,30 @@ export class AdminService {
             throw new Error('No se pudo registrar la raza. Las quejas con Rodrigo.');
         }
     }
+
+    async crearEspecie(dto: CreateEspecieDto, userId: number, ipDir: string) {
+        try {
+            const result = await this.prisma.$transaction(async (prisma) => {
+                const especie = await prisma.especie.create({
+                    data: {
+                        NombreEspecie: dto.NombreEspecie,
+                    },
+                });
+
+                await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearRaza, ipDir);
+                return {
+                    Respuesta: "especie registrada correctamente",
+                    EspecieID: especie.EspecieID,
+                    NombreEspecie: especie.NombreEspecie
+                };
+            });
+            return result;
+        } catch (error) {
+            console.error('Error al registrar la raza:', error);
+            throw new Error('No se pudo registrar la raza. Las quejas con Rodrigo.');
+        }
+    }
+
 
     async getEspecie(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerRaza, ipDir);
@@ -369,6 +441,46 @@ export class AdminService {
             };
         });
     }
+    
+    async crearHistorialMedico(dto: CreateHistorialMedicoDto, userId: number, ipDir: string) {
+        return await this.prisma.$transaction(async (tx) => {
+          // Verificar si la reservación existe
+          const reservacion = await tx.reservacion.findUnique({
+            where: { ReservacionID: dto.ReservacionID },
+          });
+    
+          if (!reservacion) {
+            throw new ForbiddenException('La reservación no existe.');
+          }
+    
+          // Verificar si ya existe un historial para esta reservación
+        //   const historialExistente = await tx.historialmedico.findUnique({
+        //     where: { ReservacionID: dto.ReservacionID },
+        //   });
+    
+        //   if (historialExistente) {
+        //     throw new ForbiddenException('Ya existe un historial médico para esta reservación.');
+        //   }
+    
+          // Crear el historial médico con los nuevos campos
+          const historialMedico = await tx.historialmedico.create({
+            data: {
+              ReservacionID: dto.ReservacionID,
+              Diagnostico: dto.Diagnostico,
+              Tratamiento: dto.Tratamiento,
+              Notas: dto.Notas,
+            },
+          });
+    
+          // Registrar en bitácora
+          await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearDetalleRecibo, ipDir);
+    
+          return {
+            Respuesta: 'Historial médico creado con éxito',
+            HistorialID: historialMedico.HistorialID,
+          };
+        });
+    }
 
     async getUsuariosActivos(userId: number, ipDir: string) {
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerPersonal, ipDir);
@@ -448,14 +560,17 @@ export class AdminService {
                 TO_CHAR((r."FechaHoraReservada"), 'YYYY-MM-DD HH24:MI:SS') AS "Fecha_Hora",
                 u."UsuarioID",
                 c."NombreCompleto" AS "NombreCliente",
+                sm."Nombre" AS "NombreServicioMedico",
                 r."Estado"
             FROM reservacion r
             JOIN usuario u ON r."UsuarioID" = u."UsuarioID"
             JOIN cliente c ON u."ClienteID" = c."ClienteID"
+            JOIN servicio_medico sm ON r."ServicioMedicoID" = sm."ServicioMedicoID"
             WHERE r."Estado" = 'Pendiente'
             AND DATE(r."FechaHoraReservada") >= CURRENT_DATE;
         `;
     }
+    
 
     async updateReservacion(dto: UpdateReservacionDto, userId: number, ipDir: string) {
         const reserva = await this.prisma.reservacion.update({
@@ -468,4 +583,22 @@ export class AdminService {
             ReservaID : reserva.ReservacionID
         }
     }
+
+     
+    async getServicioMedico(userId: number, ipDir: string) {
+        // Registrar la acción en la bitácora
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioConsulta, ipDir);
+    
+        // Realizar la consulta SQL para obtener los servicios médicos
+        return this.prisma.$queryRaw`
+            SELECT 
+                sm."ServicioMedicoID" AS "ID",
+                sm."Nombre" AS "Nombre",
+                sm."Precio" AS "Precio",
+                sm."Descripcion" AS "Descripcion"
+            FROM servicio_medico sm
+            ORDER BY sm."Nombre" ASC;
+        `;
+    }
+    
 }

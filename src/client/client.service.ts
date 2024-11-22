@@ -9,21 +9,60 @@ export class ClientService {
     constructor(private prisma: PrismaService) {}
 
     async crearReservacion(dto: CreateReservacionDto, userId: number, ipDir: string) {
-        const reserva = this.prisma.reservacion.create({
+        // 1. Obtén el cliente relacionado con el usuario
+        const usuario = await this.prisma.usuario.findUnique({
+            where: { UsuarioID: userId },
+        });
+    
+        if (!usuario || !usuario.ClienteID) {
+            throw new Error('Usuario no tiene un cliente asociado.');
+        }
+    
+        const cliente = await this.prisma.cliente.findUnique({
+            where: { ClienteID: usuario.ClienteID },
+        });
+    
+        if (!cliente) {
+            throw new Error('Cliente no encontrado.');
+        }
+    
+        // 2. Valida que el servicio médico existe
+        const servicioMedico = await this.prisma.servicio_medico.findUnique({
+            where: { ServicioMedicoID: dto.ServicioMedicoID },
+        });
+    
+        if (!servicioMedico) {
+            throw new Error('El servicio médico no existe.');
+        }
+    
+        // 3. Crea la reservación
+        const reserva = await this.prisma.reservacion.create({
             data: {
                 Motivo: dto.Motivo,
-                UsuarioID: userId,
-                FechaHoraReservada: dto.FechaHoraReservada
-            }
+                FechaHoraReservada: dto.FechaHoraReservada,
+                Estado: 'Pendiente', // Estado por defecto
+                UsuarioID: userId, // Relación con el usuario que crea la reservación
+                ClienteID: cliente.ClienteID, // Relación con el cliente
+                ServicioMedicoID: dto.ServicioMedicoID, // Relación con el servicio médico
+                MascotaID: dto.MascotaID
+            },
         });
+    
+        // 4. Registra en la bitácora
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearReservacion, ipDir);
+    
+        // 5. Retorna el resultado
         return {
-            Mensaje: "Reservación registrada exitosamente.",
-            ReservaID: (await reserva).ReservacionID
-        }
+            Mensaje: 'Reservación registrada exitosamente.',
+            ReservaID: reserva.ReservacionID,
+        };
     }
+    
 
     async getMascotas(userId: number, ipDir: string) {
+        console.log(userId);
+        
+        // Obtener al usuario y al cliente relacionado
         const usuario = await this.prisma.usuario.findUnique({
             where: {
                 UsuarioID: userId
@@ -34,17 +73,25 @@ export class ClientService {
                 ClienteID: usuario.ClienteID
             }
         });
+    
+        // Registrar en la bitácora
         await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerMascota, ipDir);
+    
+        // Realizar la consulta SQL para obtener las mascotas junto con el cliente
         return this.prisma.$queryRaw`
             SELECT 
                 m."MascotaID" AS "ID",
-                m."Nombre",
+                m."Nombre" AS "Mascota_Nombre",
                 m."Sexo",
                 TO_CHAR(m."FechaNacimiento", 'YYYY-MM-DD') AS "Fecha_De_Nacimiento",
                 EXTRACT(YEAR FROM AGE(m."FechaNacimiento")) AS "Años",
                 EXTRACT(MONTH FROM AGE(m."FechaNacimiento")) AS "Meses",
                 e."NombreEspecie" AS "Especie",
-                r."NombreRaza" AS "Raza"
+                r."NombreRaza" AS "Raza",
+                c."ClienteID" AS "Cliente_ID",
+                c."NombreCompleto" AS "Cliente_Nombre",
+                c."Telefono" AS "Cliente_Telefono",
+                c."Email" AS "Cliente_Email"
             FROM mascota m
             JOIN raza r ON m."RazaID" = r."RazaID"
             JOIN especie e ON r."EspecieID" = e."EspecieID"
@@ -53,6 +100,7 @@ export class ClientService {
             ORDER BY m."MascotaID" ASC;
         `;
     }
+    
 
     async getReservacionesGral(userId: number, ipDir: string) {
         return this.prisma.$queryRaw`
@@ -88,5 +136,20 @@ export class ClientService {
             Respuesta : "Reservación cancelada",
             ReservaID : reserva.ReservacionID
         }
+    }
+    async getServicioMedico(userId: number, ipDir: string) {
+        // Registrar la acción en la bitácora
+        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.LeerServicioConsulta, ipDir);
+    
+        // Realizar la consulta SQL para obtener los servicios médicos
+        return this.prisma.$queryRaw`
+            SELECT 
+                sm."ServicioMedicoID" AS "ID",
+                sm."Nombre" AS "Nombre",
+                sm."Precio" AS "Precio",
+                sm."Descripcion" AS "Descripcion"
+            FROM servicio_medico sm
+            ORDER BY sm."Nombre" ASC;
+        `;
     }
 }

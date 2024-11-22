@@ -6,6 +6,7 @@ import { UpdateReservacionDto } from 'src/client/dto';
 import { Role, Roles, Usuario } from 'src/auth/decorator';
 import { CreatePersonalDto, CreateClienteDto, CreateRazaDto, CreateMascotaDto, 
     UpdatePersonalDto, UpdateClienteDto, UpdateMascotaDto, UpdateUsuarioDto } from './dto';
+import { CreateServicioMedicoDto } from './dto/createServicio.dto';
 
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -23,7 +24,7 @@ export class AdminController {
     @HttpCode(HttpStatus.OK)
     @Post(':tipoDeEntidad')
     async crearEntidad(
-        @Body() dto: CreatePersonalDto | CreateClienteDto | CreateMascotaDto | CreateRazaDto,
+        @Body() dto: CreatePersonalDto | CreateClienteDto | CreateMascotaDto | CreateRazaDto | CreateServicioMedicoDto,
         @Usuario() { userId, ip }: { userId: number; ip: string },
         @Param('tipoDeEntidad') tipoDeEntidad: string
     ) {
@@ -32,6 +33,9 @@ export class AdminController {
             clientes: this.admService.crearCliente,
             mascotas: this.admService.crearMascota,
             raza: this.admService.crearRaza,
+            servicio:this.admService.crearServicioMedico,
+            especie: this.admService.crearEspecie,
+            historial: this.admService.crearHistorialMedico
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
@@ -55,7 +59,8 @@ export class AdminController {
             usuarios: this.admService.getUsuariosActivos,
             usuariosInactivos: this.admService.getUsuariosInactivos,
             raza: this.admService.getRazas,
-            especie: this.admService.getEspecie
+            especie: this.admService.getEspecie,
+            servicioMedico:this.admService.getServicioMedico,
         }[tipoDeEntidad];
 
         if (!serviceMetodo) {
@@ -110,5 +115,14 @@ export class AdminController {
         }
         console.log({dto});
         return await serviceMetodo.call(this.admService, dto, userId, ip);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('reservacion/:id')
+    async getReservacionById(
+        @Param('id') id: number,
+        @Usuario() { userId, ip }: { userId: number; ip: string }
+    ) {
+        return await this.admService.getReservacionById(id, userId, ip);
     }
 }

@@ -43,4 +43,10 @@ export class ClientController {
         @Usuario() { userId, ip }: { userId: number, ip: string }) {
         return this.clientService.updateReservacion(dto, userId, ip);
     }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('serviciosMedicos')     // {{local}}/client/reservacion/cli
+    getServiciosMedicos(@Usuario() { userId, ip }: { userId: number, ip: string }) {
+        return this.clientService.getServicioMedico(userId, ip);
+    }
 }

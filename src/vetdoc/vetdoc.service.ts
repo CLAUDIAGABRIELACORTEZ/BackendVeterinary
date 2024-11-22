@@ -248,24 +248,24 @@ export class VetdocService {
     }
 
     async createReservacionCirugia(dto: CreateReservacionCirugiaDto, userId: number, ipDir: string) {
-        const cliente = await this.prisma.cliente.findFirst({
-            where: { NumeroCI: dto.CI }
-        });
-        const usuario = await this.prisma.usuario.findFirst({
-            where: { ClienteID: cliente.ClienteID }
-        })
-        const reserva = await this.prisma.reservacion.create({
-            data: {
-                Motivo: "Cirugía Programada",
-                UsuarioID: usuario.UsuarioID,
-                FechaHoraReservada: dto.FechaHoraReservada
-            }
-        });
-        await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearReservacion, ipDir);
-        return {
-            Mensaje: "Reservación registrada exitosamente.",
-            ReservaID: (await reserva).ReservacionID
-        }
+        // const cliente = await this.prisma.cliente.findFirst({
+        //     where: { NumeroCI: dto.CI }
+        // });
+        // const usuario = await this.prisma.usuario.findFirst({
+        //     where: { ClienteID: cliente.ClienteID }
+        // })
+        // const reserva = await this.prisma.reservacion.create({
+        //     data: {
+        //         Motivo: "Cirugía Programada",
+        //         UsuarioID: usuario.UsuarioID,
+        //         FechaHoraReservada: dto.FechaHoraReservada
+        //     }
+        // });
+        // await registrarEnBitacora(this.prisma, userId, BitacoraAccion.CrearReservacion, ipDir);
+        // return {
+        //     Mensaje: "Reservación registrada exitosamente.",
+        //     ReservaID: (await reserva).ReservacionID
+        // }
     }
 
     async getVacunas(userId: number, ipDir: string) {

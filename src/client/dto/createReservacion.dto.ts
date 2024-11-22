@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString, IsDate, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, MaxLength, IsNumber } from 'class-validator';
 
 
 export class CreateReservacionDto {
@@ -12,4 +12,12 @@ export class CreateReservacionDto {
     @Type(() => Date)
     @IsDate({ message: 'La fecha y hora debe ser válida' })
     FechaHoraReservada: Date;
+
+    @IsNotEmpty()
+    @IsNumber()
+    ServicioMedicoID: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    MascotaID: number;
 }

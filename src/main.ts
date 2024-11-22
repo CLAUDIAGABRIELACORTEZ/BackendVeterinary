@@ -20,6 +20,11 @@ async function bootstrap() {
         whitelist: true,
         transform: true
     }));
+
+    // Escuchar el puerto definido en process.env.PORT o usar 3000 como fallback
+    const port = process.env.PORT || 3000;
     await app.listen(process.env.PORT, '0.0.0.0');
+    // Imprimir el puerto en consola
+    console.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();

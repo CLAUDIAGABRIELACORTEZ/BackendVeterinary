@@ -40,7 +40,7 @@ export class AuthService {
             const usuario = await this.encontrarUsuario(dto.email);
             await this.verificarHash(usuario.PasswrdHash, dto.password);
             await registrarEnBitacora(this.prisma, usuario.UsuarioID, BitacoraAccion.Login, ipDir);
-            return this.signToken(usuario.UsuarioID, usuario.Rol);
+            return await this.signToken(usuario.UsuarioID, usuario.Rol);
         } catch (error) {
             console.error('Error en login:', error);
             throw error;
@@ -79,7 +79,7 @@ export class AuthService {
         }
     }
     
-    private async signToken(usuarioId: number, rol: string): Promise<{access_token: string, rol: string}> {
+    private async signToken(usuarioId: number, rol: string): Promise<{access_token: string, rol: string, userId: number}> {
         const payload = {
             sub: usuarioId,
             rol
@@ -90,6 +90,7 @@ export class AuthService {
             secret: secret,
         });
         return {
+            userId: usuarioId,
             access_token: token,
             rol: rol
         };
